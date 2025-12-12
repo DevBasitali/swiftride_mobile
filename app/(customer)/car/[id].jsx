@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, Alert, StatusBar, Platform } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-// Note the triple dot (../../..) to go back up to root
+import { LinearGradient } from 'expo-linear-gradient';
 import carService from '../../../services/carService';
-import Colors from '../../../constants/Colors';
+import { useAuth } from '../../../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
-export default function CarDetails() {
+export default function CustomerCarDetails() {
   const { id } = useLocalSearchParams();
+  const { user, kycStatus } = useAuth();
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -21,26 +22,46 @@ export default function CarDetails() {
   const fetchCarDetails = async () => {
     try {
       const response = await carService.getCarById(id);
-      setCar(response.data.car);
+      // Handle both response structures just in case
+      setCar(response.data?.car || response.car);
     } catch (error) {
-      console.log('Error fetching car details:', error);
-      alert('Could not load car details.');
+      Alert.alert('Error', 'Could not load car details.');
       router.back();
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBookPress = () => {
-    // Navigate to checkout (We will build this next)
-    // Notice the path keeps them inside the (customer) group
-    router.push(`/(customer)/car/checkout?carId=${id}`);
+  const handleBookNow = () => {
+    // 1. Check Login
+    if (!user) {
+      Alert.alert('Login Required', 'Please log in to book a car.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Login', onPress: () => router.push('/(auth)/login') }
+      ]);
+      return;
+    }
+
+    // 2. Check KYC
+    if (kycStatus !== 'approved') {
+      Alert.alert('Verification Required', 'You need a verified ID to rent cars.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Verify Now', onPress: () => router.push('/kyc') }
+      ]);
+      return;
+    }
+
+    // 3. Go to Booking Checkout Screen (We will build this next)
+    router.push({
+     pathname: '/(customer)/bookings/create',
+      params: { carId: car._id }
+    });
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#141E30" />
       </View>
     );
   }
@@ -49,12 +70,12 @@ export default function CarDetails() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="light-content" />
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         
-        {/* IMAGE CAROUSEL */}
+        {/* --- CAROUSEL --- */}
         <View style={styles.carouselContainer}>
           <ScrollView
             horizontal
@@ -76,121 +97,104 @@ export default function CarDetails() {
                 />
               ))
             ) : (
-              <Image
-                source={{ uri: 'https://via.placeholder.com/800x600.png?text=No+Image' }}
-                style={styles.carouselImage}
-                resizeMode="cover"
-              />
+              <Image source={{ uri: 'https://via.placeholder.com/800x600.png?text=No+Image' }} style={styles.carouselImage} />
             )}
           </ScrollView>
-
-          {/* Pagination Dots */}
-          {car.photos && car.photos.length > 1 && (
-            <View style={styles.pagination}>
-              {car.photos.map((_, index) => (
-                <View key={index} style={[styles.dot, index === activeSlide && styles.activeDot]} />
-              ))}
-            </View>
-          )}
-
-          {/* Back Button Overlay */}
+          
+          <LinearGradient colors={['rgba(0,0,0,0.6)', 'transparent', 'transparent']} style={styles.topGradient} />
+          
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <FontAwesome name="arrow-left" size={20} color="#fff" />
+            <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
+
+          {/* Dots Pagination */}
+          <View style={styles.pagination}>
+            {car.photos?.map((_, index) => (
+              <View key={index} style={[styles.dot, index === activeSlide && styles.activeDot]} />
+            ))}
+          </View>
         </View>
 
-        {/* DETAILS BODY */}
+        {/* --- CONTENT --- */}
         <View style={styles.contentContainer}>
           
-          {/* Title & Rating */}
+          {/* Header */}
           <View style={styles.headerRow}>
-            <View style={{ flex: 1 }}>
+            <View style={{flex: 1}}>
               <Text style={styles.brand}>{car.make}</Text>
               <Text style={styles.model}>{car.model} {car.year}</Text>
             </View>
-            <View style={styles.ratingBadge}>
-              <FontAwesome name="star" size={14} color="#FFD700" />
-              <Text style={styles.ratingText}>4.8 (24 trips)</Text>
+            <View style={styles.ratingBox}>
+              <FontAwesome name="star" size={16} color="#F5A623" />
+              <Text style={styles.ratingText}>5.0 (New)</Text>
             </View>
           </View>
 
-          {/* Specs Grid */}
+          {/* Location */}
+          <View style={styles.locationRow}>
+            <Ionicons name="location-outline" size={18} color="#666" />
+            <Text style={styles.locationText}>{car.location?.address || "Location available after booking"}</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Specs */}
+          <Text style={styles.sectionTitle}>Vehicle Specs</Text>
           <View style={styles.specsGrid}>
-            <SpecBox icon="speedometer" label="Fast" value="0-60 in 3s" />
-            <SpecBox icon="car-shift-pattern" label="Gearbox" value={car.transmission} />
-            <SpecBox icon="seat" label="Seats" value={`${car.seats} Seats`} />
-            <SpecBox icon="gas-station" label="Fuel" value={car.fuelType} />
+            <SpecItem icon="car-shift-pattern" label="Gearbox" value={car.transmission} />
+            <SpecItem icon="car-seat" label="Seats" value={`${car.seats} Seats`} />
+            <SpecItem icon="gas-station" label="Fuel" value={car.fuelType} />
+            <SpecItem icon="speedometer" label="Mileage" value="Unlimited" />
           </View>
 
           {/* Description */}
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>
-            {car.description || `Experience the thrill of driving this ${car.year} ${car.make} ${car.model}. Perfect for weekend getaways or business trips. Well maintained and ready to go.`}
+            {car.description || "This car is well maintained and perfect for city drives or long weekend trips. Instant booking available."}
           </Text>
-
-          {/* Features */}
-          <Text style={styles.sectionTitle}>Features</Text>
-          <View style={styles.featuresRow}>
-            {car.features && car.features.length > 0 ? (
-              car.features.map((feature, index) => (
-                <View key={index} style={styles.featureTag}>
-                  <Text style={styles.featureText}>{feature}</Text>
-                </View>
-              ))
-            ) : (
-               <Text style={{color:'#888'}}>No specific features listed.</Text>
-            )}
-          </View>
-
-          {/* Location */}
-          <Text style={styles.sectionTitle}>Car Location</Text>
-          <View style={styles.locationBox}>
-            <View style={styles.locIcon}>
-              <FontAwesome name="map-marker" size={24} color="#007AFF" />
-            </View>
-            <View>
-              <Text style={styles.locTitle}>Pick-up & Return</Text>
-              <Text style={styles.locAddress}>{car.location?.address || 'Address Hidden'}</Text>
-            </View>
-          </View>
-
+          
           {/* Host Info */}
           <Text style={styles.sectionTitle}>Hosted By</Text>
-          <View style={styles.hostContainer}>
-            <View style={styles.hostAvatar}>
-               <Text style={styles.hostInitials}>H</Text>
-            </View>
-            <View>
-              <Text style={styles.hostName}>Host/Showroom</Text>
-              <Text style={styles.hostSub}>Joined in 2024</Text>
-            </View>
-            <TouchableOpacity style={styles.chatBtn}>
-              <Ionicons name="chatbubble-ellipses-outline" size={24} color="#007AFF" />
-            </TouchableOpacity>
+          <View style={styles.hostCard}>
+             <View style={styles.hostAvatar}>
+                 <Text style={styles.hostInitials}>{car.owner?.fullName?.[0] || 'H'}</Text>
+             </View>
+             <View>
+                 <Text style={styles.hostName}>{car.owner?.fullName || 'Host'}</Text>
+                 <Text style={styles.hostSub}>Verified Host • Fast Responder</Text>
+             </View>
           </View>
 
         </View>
       </ScrollView>
 
-      {/* STICKY BOTTOM BAR */}
-      <View style={styles.bottomBar}>
+      {/* --- BOTTOM BAR --- */}
+      <View style={styles.footer}>
         <View>
-          <Text style={styles.pricePerDay}>${car.pricePerDay}</Text>
-          <Text style={styles.priceLabel}>/ day</Text>
+            <Text style={styles.footerPriceLabel}>Daily Rate</Text>
+            <View style={styles.footerPriceRow}>
+                <Text style={styles.footerCurrency}>$</Text>
+                <Text style={styles.footerPrice}>{car.pricePerDay}</Text>
+                <Text style={styles.footerPeriod}>/ day</Text>
+            </View>
         </View>
-        <TouchableOpacity style={styles.bookBtn} onPress={handleBookPress}>
-          <Text style={styles.bookBtnText}>Book Now</Text>
+        
+        <TouchableOpacity style={styles.bookBtn} onPress={handleBookNow}>
+            <LinearGradient colors={['#141E30', '#243B55']} style={styles.gradientBtn}>
+                <Text style={styles.bookBtnText}>Book Now</Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </LinearGradient>
         </TouchableOpacity>
       </View>
+
     </View>
   );
 }
 
-// Helper Component for Specs
-function SpecBox({ icon, label, value }) {
+function SpecItem({ icon, label, value }) {
   return (
     <View style={styles.specBox}>
-      <MaterialCommunityIcons name={icon} size={24} color="#666" />
+      <MaterialCommunityIcons name={icon} size={24} color="#141E30" />
       <Text style={styles.specLabel}>{label}</Text>
       <Text style={styles.specValue}>{value}</Text>
     </View>
@@ -201,53 +205,65 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   
+  // Carousel
   carouselContainer: { height: 300, position: 'relative' },
   carouselImage: { width: width, height: 300 },
-  pagination: { flexDirection: 'row', position: 'absolute', bottom: 20, width: '100%', justifyContent: 'center' },
+  topGradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 100 },
+  backBtn: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 40, left: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
+  pagination: { flexDirection: 'row', position: 'absolute', bottom: 30, width: '100%', justifyContent: 'center' },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.5)', marginHorizontal: 4 },
-  activeDot: { backgroundColor: '#fff', width: 10, height: 10 },
-  backBtn: { position: 'absolute', top: 50, left: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', zIndex: 10 },
+  activeDot: { backgroundColor: '#fff', width: 20 },
 
-  contentContainer: { padding: 20, borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -25, backgroundColor: '#fff' },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  brand: { fontSize: 16, color: '#666', fontWeight: '600' },
-  model: { fontSize: 28, fontWeight: 'bold', color: '#1a1a1a' },
-  ratingBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f9f9f9', padding: 8, borderRadius: 10 },
-  ratingText: { marginLeft: 5, fontSize: 12, fontWeight: '600' },
-
-  specsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 25 },
-  specBox: { width: '23%', backgroundColor: '#f8f9fa', padding: 10, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
-  specLabel: { fontSize: 10, color: '#999', marginTop: 5 },
-  specValue: { fontSize: 12, fontWeight: 'bold', color: '#333', textAlign: 'center' },
-
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#1a1a1a', marginBottom: 10, marginTop: 10 },
-  description: { fontSize: 15, color: '#666', lineHeight: 22, marginBottom: 20 },
-
-  featuresRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 },
-  featureTag: { backgroundColor: '#eef2f6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginRight: 8, marginBottom: 8 },
-  featureText: { fontSize: 12, color: '#444' },
-
-  locationBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8f9fa', padding: 15, borderRadius: 12, marginBottom: 20 },
-  locIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E3F2FD', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-  locTitle: { fontSize: 14, fontWeight: 'bold', color: '#333' },
-  locAddress: { fontSize: 13, color: '#666' },
-
-  hostContainer: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
-  hostAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#333', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-  hostInitials: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-  hostName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  hostSub: { fontSize: 12, color: '#888' },
-  chatBtn: { marginLeft: 'auto', padding: 10, backgroundColor: '#f0f9ff', borderRadius: 50 },
-
-  bottomBar: {
-    position: 'absolute', bottom: 0, width: '100%',
-    backgroundColor: '#fff', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 20, paddingBottom: 30,
-    borderTopWidth: 1, borderTopColor: '#f0f0f0',
-    shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 10
+  // Content
+  contentContainer: { 
+    flex: 1, 
+    backgroundColor: '#fff', 
+    marginTop: -20, 
+    borderTopLeftRadius: 30, 
+    borderTopRightRadius: 30, 
+    padding: 25,
   },
-  pricePerDay: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a' },
-  priceLabel: { fontSize: 14, color: '#888' },
-  bookBtn: { backgroundColor: '#007AFF', paddingVertical: 15, paddingHorizontal: 40, borderRadius: 14 },
-  bookBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  brand: { fontSize: 16, color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 },
+  model: { fontSize: 28, fontWeight: '800', color: '#141E30', marginTop: 2 },
+  ratingBox: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  ratingText: { fontSize: 14, fontWeight: '600', color: '#333' },
+
+  locationRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 5 },
+  locationText: { color: '#666', fontSize: 14 },
+
+  divider: { height: 1, backgroundColor: '#F0F2F5', marginVertical: 25 },
+
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#141E30', marginBottom: 15 },
+  specsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 25 },
+  specBox: { width: '23%', backgroundColor: '#F8FAFC', padding: 12, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: '#EDF2F7' },
+  specLabel: { fontSize: 10, color: '#94A3B8', marginTop: 8, fontWeight: '600' },
+  specValue: { fontSize: 12, fontWeight: 'bold', color: '#334155', marginTop: 2 },
+
+  description: { fontSize: 15, color: '#64748B', lineHeight: 24, marginBottom: 30 },
+
+  hostCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8FAFC', padding: 15, borderRadius: 16 },
+  hostAvatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#141E30', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+  hostInitials: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  hostName: { fontSize: 16, fontWeight: 'bold', color: '#141E30' },
+  hostSub: { fontSize: 12, color: '#888' },
+
+  // Footer
+  footer: { 
+    position: 'absolute', bottom: 0, left: 0, right: 0, 
+    backgroundColor: '#fff', 
+    padding: 20, paddingBottom: Platform.OS === 'ios' ? 30 : 20,
+    borderTopWidth: 1, borderTopColor: '#f0f0f0',
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, elevation: 10
+  },
+  footerPriceLabel: { fontSize: 12, color: '#888' },
+  footerPriceRow: { flexDirection: 'row', alignItems: 'baseline' },
+  footerCurrency: { fontSize: 16, fontWeight: '600', color: '#141E30' },
+  footerPrice: { fontSize: 28, fontWeight: '800', color: '#141E30' },
+  footerPeriod: { fontSize: 14, color: '#888', marginLeft: 2 },
+  
+  bookBtn: { width: 180, borderRadius: 14, overflow: 'hidden' },
+  gradientBtn: { paddingVertical: 16, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10 },
+  bookBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

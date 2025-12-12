@@ -1,166 +1,272 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
-// Adjust path to reach services (3 levels up from app/(host)/car/edit)
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, Alert, StatusBar, Platform } from 'react-native';
+import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import carService from '../../../services/carService';
 
-export default function EditCar() {
-  const { id } = useLocalSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  
-  const [form, setForm] = useState({
-    make: '', model: '', year: '', color: '', plateNumber: '',
-    pricePerDay: '', pricePerHour: '',
-    seats: '', transmission: '', fuelType: '',
-    address: '', description: ''
-  });
+const { width, height } = Dimensions.get('window');
 
-  // 1. Load Existing Data
+export default function HostCarDetails() {
+  const { id } = useLocalSearchParams();
+  const [car, setCar] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeSlide, setActiveSlide] = useState(0);
+
   useEffect(() => {
-    loadCarData();
+    fetchCarDetails();
   }, [id]);
 
-  const loadCarData = async () => {
+  const fetchCarDetails = async () => {
     try {
       const response = await carService.getCarById(id);
-      const car = response.data.car;
-      
-      setForm({
-        make: car.make,
-        model: car.model,
-        year: String(car.year),
-        color: car.color,
-        plateNumber: car.plateNumber,
-        pricePerDay: String(car.pricePerDay),
-        pricePerHour: String(car.pricePerHour),
-        seats: String(car.seats),
-        transmission: car.transmission,
-        fuelType: car.fuelType,
-        address: car.location?.address || '',
-        description: car.description || ''
-      });
+      setCar(response.data.car);
     } catch (error) {
-      Alert.alert('Error', 'Could not load car details');
+      Alert.alert('Error', 'Could not load car details.');
       router.back();
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async () => {
-    Keyboard.dismiss();
-    setSubmitting(true);
-
-    try {
-      // Create simple JSON object for update (assuming backend accepts JSON for PATCH)
-      // If your backend strictly needs FormData even for text updates, switch to FormData.
-      const payload = {
-        make: form.make,
-        model: form.model,
-        year: Number(form.year),
-        color: form.color,
-        plateNumber: form.plateNumber,
-        pricePerDay: Number(form.pricePerDay),
-        pricePerHour: Number(form.pricePerHour),
-        seats: Number(form.seats),
-        transmission: form.transmission,
-        fuelType: form.fuelType,
-        description: form.description,
-        location: {
-            address: form.address,
-            lat: 0, // Keep existing if not changing
-            lng: 0
-        }
-      };
-
-      await carService.updateCar(id, payload);
-      
-      Alert.alert('Success', 'Car updated successfully!', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
-      
-    } catch (error) {
-      console.log('Update Error:', error);
-      Alert.alert('Error', 'Failed to update car.');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleDelete = () => {
+    Alert.alert("Delete Car", "Are you sure? This action cannot be undone.", [
+      { text: "Cancel", style: "cancel" },
+      { 
+        text: "Delete", 
+        style: "destructive", 
+        onPress: async () => {
+          try {
+            setLoading(true);
+            await carService.deleteCar(id);
+            Alert.alert("Deleted", "Car removed from fleet.", [{ text: "OK", onPress: () => router.back() }]);
+          } catch (error) {
+            setLoading(false);
+            Alert.alert("Error", "Failed to delete.");
+          }
+        } 
+      }
+    ]);
   };
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#007AFF" /></View>;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#141E30" />
+      </View>
+    );
   }
 
+  if (!car) return null;
+
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-      <Stack.Screen options={{ title: 'Edit Car', headerBackTitle: 'Cancel' }} />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <Stack.Screen options={{ headerShown: false }} />
       
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 50 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         
-        <Text style={styles.sectionTitle}>Car Details</Text>
-        <Input label="Make" value={form.make} onChangeText={t => handleInputChange('make', t)} />
-        <Input label="Model" value={form.model} onChangeText={t => handleInputChange('model', t)} />
-        
-        <View style={styles.row}>
-            <Input flex label="Year" value={form.year} keyboardType="numeric" onChangeText={t => handleInputChange('year', t)} />
-            <View style={{ width: 15 }} />
-            <Input flex label="Color" value={form.color} onChangeText={t => handleInputChange('color', t)} />
+        {/* --- IMMERSIVE HEADER --- */}
+        <View style={styles.carouselContainer}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={({ nativeEvent }) => {
+              const slide = Math.ceil(nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width);
+              if (slide !== activeSlide) setActiveSlide(slide);
+            }}
+            scrollEventThrottle={16}
+          >
+            {car.photos && car.photos.length > 0 ? (
+              car.photos.map((photo, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: carService.getImageUrl(photo) }}
+                  style={styles.carouselImage}
+                  resizeMode="cover"
+                />
+              ))
+            ) : (
+              <Image source={{ uri: 'https://via.placeholder.com/800x600.png?text=No+Image' }} style={styles.carouselImage} />
+            )}
+          </ScrollView>
+          
+          {/* Gradient Overlay for Text Visibility */}
+          <LinearGradient colors={['rgba(0,0,0,0.6)', 'transparent', 'transparent', 'rgba(0,0,0,0.8)']} style={styles.imageOverlay} />
+
+          {/* Floating Back Button */}
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          {/* Image Counter */}
+          <View style={styles.imageCounter}>
+            <Text style={styles.counterText}>{activeSlide + 1} / {car.photos?.length || 1}</Text>
+          </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Pricing</Text>
-        <View style={styles.row}>
-          <Input flex label="Price/Day" value={form.pricePerDay} keyboardType="numeric" onChangeText={t => handleInputChange('pricePerDay', t)} />
-          <View style={{ width: 15 }} />
-          <Input flex label="Price/Hour" value={form.pricePerHour} keyboardType="numeric" onChangeText={t => handleInputChange('pricePerHour', t)} />
+        {/* --- PREMIUM CONTENT BODY --- */}
+        <View style={styles.contentContainer}>
+          
+          {/* Title Header */}
+          <View style={styles.headerRow}>
+            <View style={{flex: 1}}>
+              <Text style={styles.brand}>{car.make}</Text>
+              <Text style={styles.model}>{car.model} {car.year}</Text>
+            </View>
+            <View style={styles.ratingBox}>
+              <FontAwesome name="star" size={14} color="#F5A623" />
+              <Text style={styles.ratingText}>4.9 (12)</Text>
+            </View>
+          </View>
+
+          {/* Price & Status */}
+          <View style={styles.priceRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <Text style={styles.currency}>$</Text>
+                <Text style={styles.price}>{car.pricePerDay}</Text>
+                <Text style={styles.perDay}>/ day</Text>
+            </View>
+            <View style={[styles.statusBadge, car.isActive ? styles.stActive : styles.stHidden]}>
+                <View style={[styles.dot, car.isActive ? styles.dotActive : styles.dotHidden]} />
+                <Text style={[styles.statusText, car.isActive ? styles.textActive : styles.textHidden]}>
+                    {car.isActive ? 'LIVE' : 'HIDDEN'}
+                </Text>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Specs Grid */}
+          <Text style={styles.sectionTitle}>Vehicle Specs</Text>
+          <View style={styles.specsGrid}>
+            <SpecItem icon="car-shift-pattern" label="Gearbox" value={car.transmission} />
+            <SpecItem icon="car-seat" label="Seats" value={`${car.seats} Seats`} />
+            <SpecItem icon="gas-station" label="Fuel" value={car.fuelType} />
+            <SpecItem icon="speedometer" label="Mileage" value="Unlimited" />
+          </View>
+
+          {/* Description */}
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.description}>
+            {car.description || "No description provided. This vehicle is maintained to high standards and ready for your next trip."}
+          </Text>
+
+          {/* Location */}
+          <Text style={styles.sectionTitle}>Location</Text>
+          <View style={styles.locationCard}>
+            <View style={styles.locIconBox}>
+                <Ionicons name="location" size={24} color="#141E30" />
+            </View>
+            <View style={{flex: 1}}>
+                <Text style={styles.locLabel}>Pick-up & Return</Text>
+                <Text style={styles.locText}>{car.location?.address || "Address Hidden"}</Text>
+            </View>
+          </View>
+          
         </View>
-
-        <Text style={styles.sectionTitle}>Specs</Text>
-        <View style={styles.row}>
-           <Input flex label="Transmission" value={form.transmission} onChangeText={t => handleInputChange('transmission', t)} />
-           <View style={{ width: 15 }} />
-           <Input flex label="Fuel Type" value={form.fuelType} onChangeText={t => handleInputChange('fuelType', t)} />
-        </View>
-
-        <Input label="Description" value={form.description} onChangeText={t => handleInputChange('description', t)} multiline />
-
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={submitting}>
-          {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitText}>Save Changes</Text>}
-        </TouchableOpacity>
-
       </ScrollView>
-    </KeyboardAvoidingView>
+
+      {/* --- FLOATING ACTION FOOTER --- */}
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+            <Ionicons name="trash-outline" size={22} color="#FF4757" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.editBtn} onPress={() => router.push(`/(host)/car/edit/${id}`)}>
+            <LinearGradient colors={['#141E30', '#243B55']} style={styles.editGradient}>
+                <Text style={styles.editBtnText}>Edit Vehicle</Text>
+                <Ionicons name="create-outline" size={20} color="#fff" />
+            </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+    </View>
   );
 }
 
-function Input({ label, value, onChangeText, keyboardType, flex, multiline }) {
+// Helper Component
+function SpecItem({ icon, label, value }) {
   return (
-    <View style={[styles.inputContainer, flex && { flex: 1 }]}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput 
-        style={[styles.input, multiline && { height: 100, textAlignVertical: 'top' }]} 
-        value={value} 
-        onChangeText={onChangeText}
-        keyboardType={keyboardType}
-        multiline={multiline}
-      />
+    <View style={styles.specBox}>
+      <MaterialCommunityIcons name={icon} size={24} color="#141E30" />
+      <Text style={styles.specLabel}>{label}</Text>
+      <Text style={styles.specValue}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 20, marginBottom: 15, color: '#333' },
-  row: { flexDirection: 'row', justifyContent: 'space-between' },
-  inputContainer: { marginBottom: 15 },
-  label: { fontSize: 14, fontWeight: '600', color: '#666', marginBottom: 5 },
-  input: { backgroundColor: '#f9f9f9', borderWidth: 1, borderColor: '#eee', borderRadius: 8, padding: 12, fontSize: 16 },
-  submitBtn: { backgroundColor: '#1a1a1a', padding: 18, borderRadius: 12, alignItems: 'center', marginTop: 30, marginBottom: 50 },
-  submitText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  container: { flex: 1, backgroundColor: '#fff' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  
+  // Header / Carousel
+  carouselContainer: { height: 320, position: 'relative' },
+  carouselImage: { width: width, height: 320 },
+  imageOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  backBtn: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 40, left: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)' },
+  imageCounter: { position: 'absolute', bottom: 30, right: 20, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
+  counterText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+
+  // Content Body
+  contentContainer: { 
+    flex: 1, 
+    backgroundColor: '#fff', 
+    marginTop: -20, 
+    borderTopLeftRadius: 30, 
+    borderTopRightRadius: 30, 
+    padding: 25,
+    paddingBottom: 40
+  },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  brand: { fontSize: 16, color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 },
+  model: { fontSize: 28, fontWeight: '800', color: '#141E30', marginTop: 2 },
+  ratingBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF9C4', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  ratingText: { fontSize: 12, fontWeight: '700', color: '#F57F17', marginLeft: 5 },
+
+  // Price & Status
+  priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 15 },
+  currency: { fontSize: 20, fontWeight: '600', color: '#141E30', marginTop: 6 },
+  price: { fontSize: 32, fontWeight: '800', color: '#141E30' },
+  perDay: { fontSize: 14, color: '#888', marginLeft: 4, fontWeight: '500' },
+  
+  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  stActive: { backgroundColor: '#E8F5E9', borderColor: '#C8E6C9' },
+  stHidden: { backgroundColor: '#F5F5F5', borderColor: '#E0E0E0' },
+  dot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
+  dotActive: { backgroundColor: '#2E7D32' },
+  dotHidden: { backgroundColor: '#9E9E9E' },
+  statusText: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5 },
+  textActive: { color: '#2E7D32' },
+  textHidden: { color: '#757575' },
+
+  divider: { height: 1, backgroundColor: '#F0F2F5', marginVertical: 25 },
+
+  // Specs
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#141E30', marginBottom: 15 },
+  specsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 25 },
+  specBox: { width: '23%', backgroundColor: '#F8FAFC', padding: 12, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: '#EDF2F7' },
+  specLabel: { fontSize: 10, color: '#94A3B8', marginTop: 8, fontWeight: '600' },
+  specValue: { fontSize: 12, fontWeight: 'bold', color: '#334155', marginTop: 2 },
+
+  description: { fontSize: 15, color: '#64748B', lineHeight: 24, marginBottom: 30 },
+
+  locationCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8FAFC', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: '#EDF2F7', marginBottom: 20 },
+  locIconBox: { width: 40, height: 40, backgroundColor: '#E2E8F0', borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+  locLabel: { fontSize: 12, color: '#64748B', fontWeight: '600', marginBottom: 2 },
+  locText: { fontSize: 15, color: '#141E30', fontWeight: '600' },
+
+  // Footer Actions
+  footer: { 
+    position: 'absolute', bottom: 0, left: 0, right: 0, 
+    backgroundColor: '#fff', 
+    paddingHorizontal: 25, paddingVertical: 20, paddingBottom: Platform.OS === 'ios' ? 30 : 20,
+    borderTopWidth: 1, borderTopColor: '#f0f0f0',
+    flexDirection: 'row', alignItems: 'center', gap: 15
+  },
+  deleteBtn: { width: 56, height: 56, borderRadius: 16, backgroundColor: '#FFF5F5', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#FFEBEE' },
+  editBtn: { flex: 1, height: 56, borderRadius: 16, overflow: 'hidden' },
+  editGradient: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10 },
+  editBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

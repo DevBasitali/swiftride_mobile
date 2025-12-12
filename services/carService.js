@@ -2,11 +2,24 @@ import api from './api';
 import Config from '../constants/Config';
 
 // Helper for Images
+// Helper for Images
 const getImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x300.png?text=No+Image';
+  
+  // 1. If it's already a full URL (Cloudinary/S3), return it
   if (imagePath.startsWith('http')) return imagePath;
-  const cleanPath = imagePath.replace(/\\/g, '/');
-  return `${Config.API_URL.replace('/api', '')}/${cleanPath}`;
+
+  // 2. Clean up slashes (Windows saves as '\', Web needs '/')
+  let cleanPath = imagePath.replace(/\\/g, '/');
+
+  // 3. Remove leading slash to prevent double slashes (e.g. ...5000//uploads)
+  if (cleanPath.startsWith('/')) cleanPath = cleanPath.substring(1);
+
+  // 4. Get Base URL (Remove '/api' from the end)
+  // e.g., http://192.168.1.5:5000/api -> http://192.168.1.5:5000
+  const baseUrl = Config.API_URL.replace(/\/api\/?$/, ''); 
+
+  return `${baseUrl}/${cleanPath}`;
 };
 
 // 1. PUBLIC: Search/List Cars (GET /)

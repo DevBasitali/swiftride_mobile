@@ -1,23 +1,24 @@
-import { Stack } from 'expo-router';
+import { Stack } from "expo-router";
 
 export default function HostLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
-      
-      {/* Create Modal */}
-      <Stack.Screen 
-        name="car/create" 
-        options={{ presentation: 'modal', title: 'List a Car' }} 
+      <Stack.Screen
+        name="car/create"
+        options={{ presentation: "modal", title: "List a Car" }}
       />
-      
-      {/* Details Screen */}
       <Stack.Screen name="car/[id]" />
-
-      {/* ✅ NEW: Edit Screen */}
-      <Stack.Screen 
-        name="car/edit/[id]" 
-        options={{ title: 'Edit Car', headerShown: false }} 
+      <Stack.Screen name="car/edit/[id]" />
+      <Stack.Screen
+        name="car/location-picker"
+        options={{ presentation: "fullScreenModal", headerShown: false }}
+      />
+      <Stack.Screen name="kyc/index" />
+      // ✅ Correct (Plural)
+      <Stack.Screen
+        name="bookings/index"
+        options={{ title: "Bookings", headerShown: false }}
       />
     </Stack>
   );

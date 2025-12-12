@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [kycStatus, setKycStatus] = useState(null); 
   const [isLoading, setIsLoading] = useState(true);
   const segments = useSegments();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkUserLoggedIn();
@@ -105,8 +106,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      // Calls your backend to get fresh user details
+      // Ensure your backend has a GET /auth/me or GET /users/me endpoint
+      const response = await api.get('/auth/me'); 
+      
+      if (response.data && response.data.user) {
+        const freshUser = response.data.user;
+        setUser(freshUser);
+        setKycStatus(freshUser.kycStatus || 'pending');
+        
+        // Optional: Update storage
+        await AsyncStorage.setItem('user', JSON.stringify(freshUser));
+      }
+    } catch (error) {
+      console.log('Failed to refresh user profile:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, kycStatus, isLoading, login, register, logout, refreshKycStatus, redirectByRole }}>
+    <AuthContext.Provider value={{ user, kycStatus, isLoading, login, register, logout, refreshKycStatus, redirectByRole, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
