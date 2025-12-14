@@ -1,47 +1,110 @@
+// app/(host)/car/create.jsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Image, ActivityIndicator, KeyboardAvoidingView, Platform, Keyboard, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  StatusBar,
+  Dimensions,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import carService from '../../../services/carService';
+import carService, { DAYS_OF_WEEK } from '../../../services/carService';
+
+const { width } = Dimensions.get('window');
+
+// ============================================
+// 🎨 INLINE THEME COLORS
+// ============================================
+const COLORS = {
+  navy: {
+    900: '#0A1628',
+    800: '#0F2137',
+    700: '#152A46',
+    600: '#1E3A5F',
+  },
+  gold: {
+    600: '#D99413',
+    500: '#F59E0B',
+    400: '#FBBF24',
+  },
+  emerald: {
+    500: '#10B981',
+    400: '#34D399',
+  },
+  gray: {
+    600: '#4B5563',
+    500: '#6B7280',
+    400: '#9CA3AF',
+  },
+  white: '#FFFFFF',
+  red: {
+    500: '#EF4444',
+  },
+};
 
 export default function CreateCar() {
-  const params = useLocalSearchParams(); 
+  // ============================================
+  // 🔒 STATE
+  // ============================================
+  const params = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
-  
+
   const [form, setForm] = useState({
-    make: '', model: '', year: '', color: '', plateNumber: '',
-    pricePerDay: '', pricePerHour: '',
-    seats: '', transmission: 'Automatic', fuelType: 'Petrol',
-    address: '', description: '',
+    make: '',
+    model: '',
+    year: '',
+    color: '',
+    plateNumber: '',
+    pricePerDay: '',
+    pricePerHour: '',
+    seats: '',
+    transmission: 'Automatic',
+    fuelType: 'Petrol',
+    address: '',
+    description: '',
     lat: 0,
-    lng: 0
+    lng: 0,
+    availability: {
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      startTime: '00:00',
+      endTime: '23:59',
+      isAvailable: true,
+    },
   });
 
-  // ✅ FIXED: Infinite Loop Prevention
-  // We only update if params exist AND they are DIFFERENT from current state
   useEffect(() => {
     if (params.address && params.address !== form.address) {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         address: params.address,
         lat: parseFloat(params.lat),
-        lng: parseFloat(params.lng)
+        lng: parseFloat(params.lng),
       }));
     }
-  }, [params.address, params.lat, params.lng]); // Depend on specific values, not the whole object
+  }, [params.address, params.lat, params.lng]);
 
   const handleInputChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const pickImages = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsMultipleSelection: true,
         selectionLimit: 5,
         quality: 0.7,
@@ -55,11 +118,24 @@ export default function CreateCar() {
     }
   };
 
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async () => {
     Keyboard.dismiss();
 
-    if (!form.make || !form.model || !form.pricePerDay || !form.address || images.length === 0) {
-      Alert.alert('Missing Fields', 'Please fill in all required fields and add at least one photo.');
+    if (
+      !form.make ||
+      !form.model ||
+      !form.pricePerDay ||
+      !form.address ||
+      images.length === 0
+    ) {
+      Alert.alert(
+        'Missing Fields',
+        'Please fill in all required fields and add at least one photo.'
+      );
       return;
     }
 
@@ -75,14 +151,22 @@ export default function CreateCar() {
       formData.append('plateNumber', form.plateNumber.trim());
       formData.append('pricePerDay', form.pricePerDay.trim());
       formData.append('pricePerHour', form.pricePerHour.trim());
-      formData.append('seats', form.seats.toString().trim()); 
+      formData.append('seats', form.seats.toString().trim());
       formData.append('transmission', form.transmission);
       formData.append('fuelType', form.fuelType);
-      formData.append('description', form.description.trim());
 
-      formData.append('location[address]', form.address.trim());
-      formData.append('location[lat]', form.lat.toString());
-      formData.append('location[lng]', form.lng.toString());
+      formData.append('locationAddress', form.address.trim());
+      formData.append('locationLat', form.lat.toString());
+      formData.append('locationLng', form.lng.toString());
+
+      formData.append('availabilityStartTime', form.availability.startTime);
+      formData.append('availabilityEndTime', form.availability.endTime);
+      formData.append('availabilityIsAvailable', form.availability.isAvailable.toString());
+      formData.append('availabilityDaysOfWeek', JSON.stringify(form.availability.daysOfWeek));
+
+      if (form.description && form.description.trim()) {
+        formData.append('description', form.description.trim());
+      }
 
       images.forEach((img, index) => {
         const uriParts = img.uri.split('.');
@@ -95,131 +179,495 @@ export default function CreateCar() {
       });
 
       await carService.createCar(formData);
-      
+
       Alert.alert('Success', 'Car Listed Successfully!', [
-        { text: 'OK', onPress: () => router.back() }
+        { text: 'OK', onPress: () => router.back() },
       ]);
-      
     } catch (error) {
       console.log('Create Error:', error);
-      Alert.alert('Error', 'Failed to create listing.');
+      Alert.alert('Error', error?.response?.data?.message || 'Failed to create listing.');
     } finally {
       setLoading(false);
     }
   };
 
+  const requiredFields = [
+    form.make,
+    form.model,
+    form.year,
+    form.color,
+    form.plateNumber,
+    form.pricePerDay,
+    form.pricePerHour,
+    form.seats,
+    form.address,
+    images.length > 0,
+  ];
+  const completedFields = requiredFields.filter(Boolean).length;
+  const progress = (completedFields / requiredFields.length) * 100;
+
   return (
     <View style={styles.mainContainer}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.navy[900]} />
 
-      {/* HEADER */}
-      <LinearGradient colors={['#141E30', '#243B55']} style={styles.header}>
+      {/* Header */}
+      <LinearGradient
+        colors={[COLORS.navy[900], COLORS.navy[800]]}
+        style={styles.header}
+      >
         <SafeAreaView edges={['top', 'left', 'right']} style={styles.headerContent}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="close" size={24} color="#fff" />
+            <Ionicons name="close" size={24} color={COLORS.white} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>List Your Car</Text>
-          <View style={{ width: 40 }} /> 
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>List Your Car</Text>
+            <Text style={styles.headerSubtitle}>Fill in the details below</Text>
+          </View>
+          <View style={{ width: 40 }} />
         </SafeAreaView>
+
+        {/* Progress Bar */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBarBg}>
+            <LinearGradient
+              colors={[COLORS.gold[500], COLORS.gold[400]]}
+              style={[styles.progressBarFill, { width: `${progress}%` }]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          </View>
+          <Text style={styles.progressText}>{Math.round(progress)}% Complete</Text>
+        </View>
       </LinearGradient>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }}>
-          
-          {/* PHOTOS SECTION */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Photos Section */}
           <View style={styles.formCard}>
-            <Text style={styles.sectionTitle}>Car Photos</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoRow}>
-                <TouchableOpacity style={styles.addPhotoBtn} onPress={pickImages}>
-                    <LinearGradient colors={['#F0F9FF', '#E1F5FE']} style={styles.addPhotoGradient}>
-                        <Ionicons name="camera" size={24} color="#007AFF" />
-                        <Text style={styles.addPhotoText}>Add Photos</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-                {images.map((img, index) => (
-                    <Image key={index} source={{ uri: img.uri }} style={styles.thumb} />
-                ))}
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={[COLORS.gold[500], COLORS.gold[600]]}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="images" size={20} color={COLORS.navy[900]} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Car Photos</Text>
+                <Text style={styles.sectionSubtitle}>
+                  {images.length}/5 photos added
+                </Text>
+              </View>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.photoRow}
+            >
+              <TouchableOpacity style={styles.addPhotoBtn} onPress={pickImages}>
+                <LinearGradient
+                  colors={[COLORS.navy[700], COLORS.navy[600]]}
+                  style={styles.addPhotoGradient}
+                >
+                  <Ionicons name="camera" size={32} color={COLORS.gold[500]} />
+                  <Text style={styles.addPhotoText}>Add Photos</Text>
+                  <Text style={styles.addPhotoSubtext}>Up to 5 images</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+
+              {images.map((img, index) => (
+                <View key={index} style={styles.thumbContainer}>
+                  <Image source={{ uri: img.uri }} style={styles.thumb} />
+                  <TouchableOpacity
+                    style={styles.removeBtn}
+                    onPress={() => removeImage(index)}
+                  >
+                    <Ionicons name="close-circle" size={24} color={COLORS.red[500]} />
+                  </TouchableOpacity>
+                  {index === 0 && (
+                    <View style={styles.primaryBadge}>
+                      <Text style={styles.primaryBadgeText}>Primary</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
             </ScrollView>
           </View>
 
-          {/* BASIC INFO */}
+          {/* Basic Info */}
           <View style={styles.formCard}>
-            <Text style={styles.sectionTitle}>Basic Info</Text>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={['#3B82F6', '#2563EB']}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="car-sport" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Basic Information</Text>
+                <Text style={styles.sectionSubtitle}>Vehicle details</Text>
+              </View>
+            </View>
+
             <View style={styles.row}>
-              <Input flex label="Make" placeholder="e.g. Toyota" value={form.make} onChangeText={t => handleInputChange('make', t)} />
+              <Input
+                flex
+                label="Make"
+                placeholder="e.g. Toyota"
+                value={form.make}
+                onChangeText={(t) => handleInputChange('make', t)}
+                icon="car-outline"
+              />
               <View style={{ width: 15 }} />
-              <Input flex label="Model" placeholder="e.g. Camry" value={form.model} onChangeText={t => handleInputChange('model', t)} />
+              <Input
+                flex
+                label="Model"
+                placeholder="e.g. Camry"
+                value={form.model}
+                onChangeText={(t) => handleInputChange('model', t)}
+                icon="car-sport-outline"
+              />
             </View>
+
             <View style={styles.row}>
-                <Input flex label="Year" placeholder="2024" keyboardType="numeric" value={form.year} onChangeText={t => handleInputChange('year', t)} />
-                <View style={{ width: 15 }} />
-                <Input flex label="Color" placeholder="Silver" value={form.color} onChangeText={t => handleInputChange('color', t)} />
+              <Input
+                flex
+                label="Year"
+                placeholder="2024"
+                keyboardType="numeric"
+                value={form.year}
+                onChangeText={(t) => handleInputChange('year', t)}
+                icon="calendar-outline"
+              />
+              <View style={{ width: 15 }} />
+              <Input
+                flex
+                label="Color"
+                placeholder="Silver"
+                value={form.color}
+                onChangeText={(t) => handleInputChange('color', t)}
+                icon="color-palette-outline"
+              />
             </View>
-            <Input label="Plate Number" placeholder="ABC-123" value={form.plateNumber} onChangeText={t => handleInputChange('plateNumber', t)} />
+
+            <Input
+              label="Plate Number"
+              placeholder="ABC-123"
+              value={form.plateNumber}
+              onChangeText={(t) => handleInputChange('plateNumber', t)}
+              icon="card-outline"
+            />
           </View>
 
-          {/* PRICING */}
+          {/* Pricing */}
           <View style={styles.formCard}>
-            <Text style={styles.sectionTitle}>Pricing (USD)</Text>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={[COLORS.emerald[500], '#059669']}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="cash" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Pricing</Text>
+                <Text style={styles.sectionSubtitle}>Set your rates</Text>
+              </View>
+            </View>
+
             <View style={styles.row}>
-              <Input flex label="Price Per Day" placeholder="50" keyboardType="numeric" value={form.pricePerDay} onChangeText={t => handleInputChange('pricePerDay', t)} icon="$" />
+              <Input
+                flex
+                label="Price Per Day"
+                placeholder="50"
+                keyboardType="numeric"
+                value={form.pricePerDay}
+                onChangeText={(t) => handleInputChange('pricePerDay', t)}
+                prefix="$"
+              />
               <View style={{ width: 15 }} />
-              <Input flex label="Price Per Hour" placeholder="5" keyboardType="numeric" value={form.pricePerHour} onChangeText={t => handleInputChange('pricePerHour', t)} icon="$" />
+              <Input
+                flex
+                label="Price Per Hour"
+                placeholder="5"
+                keyboardType="numeric"
+                value={form.pricePerHour}
+                onChangeText={(t) => handleInputChange('pricePerHour', t)}
+                prefix="$"
+              />
             </View>
           </View>
 
-          {/* SPECS */}
+          {/* Specifications */}
           <View style={styles.formCard}>
-            <Text style={styles.sectionTitle}>Specifications</Text>
-            <View style={styles.row}>
-               <SelectButton label="Automatic" selected={form.transmission === 'Automatic'} onPress={() => handleInputChange('transmission', 'Automatic')} />
-               <View style={{ width: 10 }} />
-               <SelectButton label="Manual" selected={form.transmission === 'Manual'} onPress={() => handleInputChange('transmission', 'Manual')} />
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={['#8B5CF6', '#7C3AED']}
+                  style={styles.sectionIconGradient}
+                >
+                  <MaterialCommunityIcons
+                    name="car-info"
+                    size={20}
+                    color={COLORS.white}
+                  />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Specifications</Text>
+                <Text style={styles.sectionSubtitle}>Technical details</Text>
+              </View>
             </View>
+
+            <Text style={styles.label}>Transmission</Text>
+            <View style={styles.row}>
+              <SelectButton
+                label="Automatic"
+                icon="car-shift-pattern"
+                selected={form.transmission === 'Automatic'}
+                onPress={() => handleInputChange('transmission', 'Automatic')}
+              />
+              <View style={{ width: 10 }} />
+              <SelectButton
+                label="Manual"
+                icon="car-clutch"
+                selected={form.transmission === 'Manual'}
+                onPress={() => handleInputChange('transmission', 'Manual')}
+              />
+            </View>
+
             <View style={{ height: 15 }} />
+
             <View style={styles.row}>
-              <Input flex label="Fuel Type" placeholder="Petrol" value={form.fuelType} onChangeText={t => handleInputChange('fuelType', t)} />
+              <Input
+                flex
+                label="Fuel Type"
+                placeholder="Petrol"
+                value={form.fuelType}
+                onChangeText={(t) => handleInputChange('fuelType', t)}
+                icon="water-outline"
+              />
               <View style={{ width: 15 }} />
-              <Input flex label="Seats" placeholder="4" keyboardType="numeric" value={form.seats} onChangeText={t => handleInputChange('seats', t)} />
+              <Input
+                flex
+                label="Seats"
+                placeholder="4"
+                keyboardType="numeric"
+                value={form.seats}
+                onChangeText={(t) => handleInputChange('seats', t)}
+                icon="people-outline"
+              />
             </View>
           </View>
-          
-          {/* LOCATION & DESC */}
+
+          {/* Availability */}
           <View style={styles.formCard}>
-            <Text style={styles.sectionTitle}>Details</Text>
-            
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={[COLORS.emerald[500], '#059669']}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="time" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Availability</Text>
+                <Text style={styles.sectionSubtitle}>Set booking hours</Text>
+              </View>
+            </View>
+
+            {/* Available Toggle */}
+            <View style={styles.availabilityToggleContainer}>
+              <View>
+                <Text style={styles.availabilityToggleLabel}>Accept Bookings</Text>
+                <Text style={styles.availabilityToggleSubtext}>
+                  {form.availability.isAvailable ? 'Car is available for rent' : 'Car is not available'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.toggleSwitch,
+                  form.availability.isAvailable && styles.toggleSwitchActive,
+                ]}
+                onPress={() =>
+                  handleInputChange('availability', {
+                    ...form.availability,
+                    isAvailable: !form.availability.isAvailable,
+                  })
+                }
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.toggleThumb,
+                    form.availability.isAvailable && styles.toggleThumbActive,
+                  ]}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Time Slots */}
+            <View style={styles.row}>
+              <Input
+                flex
+                label="Start Time"
+                placeholder="09:00"
+                value={form.availability.startTime}
+                onChangeText={(t) =>
+                  handleInputChange('availability', {
+                    ...form.availability,
+                    startTime: t,
+                  })
+                }
+                icon="time-outline"
+              />
+              <View style={{ width: 15 }} />
+              <Input
+                flex
+                label="End Time"
+                placeholder="17:00"
+                value={form.availability.endTime}
+                onChangeText={(t) =>
+                  handleInputChange('availability', {
+                    ...form.availability,
+                    endTime: t,
+                  })
+                }
+                icon="time-outline"
+              />
+            </View>
+
+            {/* Days of Week */}
+            <Text style={styles.label}>Available Days</Text>
+            <View style={styles.daysContainer}>
+              {DAYS_OF_WEEK.map((day) => (
+                <TouchableOpacity
+                  key={day.value}
+                  style={[
+                    styles.dayButton,
+                    form.availability.daysOfWeek.includes(day.value) && styles.dayButtonActive,
+                  ]}
+                  onPress={() => {
+                    const currentDays = form.availability.daysOfWeek || [];
+                    const newDays = currentDays.includes(day.value)
+                      ? currentDays.filter((d) => d !== day.value)
+                      : [...currentDays, day.value];
+                    
+                    handleInputChange('availability', {
+                      ...form.availability,
+                      daysOfWeek: newDays,
+                    });
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.dayButtonText,
+                      form.availability.daysOfWeek.includes(day.value) && styles.dayButtonTextActive,
+                    ]}
+                  >
+                    {day.label.substring(0, 3)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Location & Description */}
+          <View style={styles.formCard}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={['#F97316', '#EA580C']}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="location" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Location & Details</Text>
+                <Text style={styles.sectionSubtitle}>Pickup location</Text>
+              </View>
+            </View>
+
             <Text style={styles.label}>Location</Text>
-            <TouchableOpacity 
-                style={styles.locationBtn} 
-                onPress={() => router.push('/(host)/car/location-picker')}
+            <TouchableOpacity
+              style={styles.locationBtn}
+              onPress={() => router.push('/(host)/car/location-picker')}
+              activeOpacity={0.7}
             >
-                <View style={{flex: 1}}>
-                    <Text style={form.address ? styles.locText : styles.locPlaceholder}>
-                        {form.address || "Tap to pick location on map"}
-                    </Text>
-                    {form.lat !== 0 && (
-                        <Text style={styles.coordText}>
-                            GPS: {form.lat.toFixed(4)}, {form.lng.toFixed(4)}
-                        </Text>
-                    )}
-                </View>
-                <View style={styles.mapIconBox}>
-                    <FontAwesome name="map-marker" size={20} color="#fff" />
-                </View>
+              <View style={{ flex: 1 }}>
+                <Text style={form.address ? styles.locText : styles.locPlaceholder}>
+                  {form.address || 'Tap to set pickup location'}
+                </Text>
+                {form.lat !== 0 && (
+                  <Text style={styles.coordText}>
+                    📍 {form.lat.toFixed(4)}, {form.lng.toFixed(4)}
+                  </Text>
+                )}
+              </View>
+              <View style={styles.mapIconBox}>
+                <LinearGradient
+                  colors={[COLORS.gold[500], COLORS.gold[600]]}
+                  style={styles.mapIconGradient}
+                >
+                  <Ionicons name="navigate" size={20} color={COLORS.navy[900]} />
+                </LinearGradient>
+              </View>
             </TouchableOpacity>
 
-            <View style={{height: 15}} />
-            <Input label="Description" placeholder="Describe your car..." value={form.description} onChangeText={t => handleInputChange('description', t)} multiline />
+            <View style={{ height: 15 }} />
+            <Input
+              label="Description (Optional)"
+              placeholder="Describe your car..."
+              value={form.description}
+              onChangeText={(t) => handleInputChange('description', t)}
+              multiline
+              icon="document-text-outline"
+            />
           </View>
-
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* FLOATING SUBMIT BUTTON */}
+      {/* Floating Submit Button */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
-          <LinearGradient colors={['#141E30', '#243B55']} style={styles.gradientBtn}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitText}>List Car Now</Text>}
+        <TouchableOpacity
+          style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
+          onPress={handleSubmit}
+          disabled={loading}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={
+              loading
+                ? [COLORS.gray[600], COLORS.gray[600]]
+                : [COLORS.gold[500], COLORS.gold[600]]
+            }
+            style={styles.submitGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            {loading ? (
+              <ActivityIndicator color={COLORS.navy[900]} />
+            ) : (
+              <>
+                <Text style={styles.submitText}>List Car Now</Text>
+                <Ionicons name="checkmark-circle" size={22} color={COLORS.navy[900]} />
+              </>
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -227,18 +675,47 @@ export default function CreateCar() {
   );
 }
 
-// Helper Components
-function Input({ label, placeholder, value, onChangeText, keyboardType, flex, multiline, icon }) {
+// ============================================
+// 📦 HELPER COMPONENTS
+// ============================================
+
+function Input({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  keyboardType,
+  flex,
+  multiline,
+  icon,
+  prefix,
+}) {
   return (
     <View style={[styles.inputContainer, flex && { flex: 1 }]}>
       <Text style={styles.label}>{label}</Text>
-      <View style={[styles.inputWrapper, multiline && { height: 100, alignItems: 'flex-start' }]}>
-        {icon && <Text style={styles.inputIcon}>{icon}</Text>}
-        <TextInput 
-          style={[styles.input, multiline && { height: 90, textAlignVertical: 'top', paddingTop: 10 }]} 
+      <View
+        style={[
+          styles.inputWrapper,
+          multiline && { height: 100, alignItems: 'flex-start' },
+        ]}
+      >
+        {icon && (
+          <Ionicons
+            name={icon}
+            size={18}
+            color={COLORS.gray[500]}
+            style={styles.inputIconLeft}
+          />
+        )}
+        {prefix && <Text style={styles.inputPrefix}>{prefix}</Text>}
+        <TextInput
+          style={[
+            styles.input,
+            multiline && { height: 90, textAlignVertical: 'top', paddingTop: 10 },
+          ]}
           placeholder={placeholder}
-          placeholderTextColor="#ccc"
-          value={value} 
+          placeholderTextColor={COLORS.gray[400]}
+          value={value}
           onChangeText={onChangeText}
           keyboardType={keyboardType}
           multiline={multiline}
@@ -248,62 +725,438 @@ function Input({ label, placeholder, value, onChangeText, keyboardType, flex, mu
   );
 }
 
-function SelectButton({ label, selected, onPress }) {
-    return (
-        <TouchableOpacity 
-            style={[styles.selectBtn, selected && styles.selectBtnActive]} 
-            onPress={onPress}
+function SelectButton({ label, icon, selected, onPress }) {
+  return (
+    <TouchableOpacity
+      style={[styles.selectBtn, selected && styles.selectBtnActive]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      {selected ? (
+        <LinearGradient
+          colors={[COLORS.gold[500], COLORS.gold[600]]}
+          style={styles.selectBtnGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
         >
-            <Text style={[styles.selectText, selected && styles.selectTextActive]}>{label}</Text>
-        </TouchableOpacity>
-    );
+          <MaterialCommunityIcons name={icon} size={20} color={COLORS.navy[900]} />
+          <Text style={styles.selectTextActive}>{label}</Text>
+        </LinearGradient>
+      ) : (
+        <>
+          <MaterialCommunityIcons name={icon} size={20} color={COLORS.gray[500]} />
+          <Text style={styles.selectText}>{label}</Text>
+        </>
+      )}
+    </TouchableOpacity>
+  );
 }
 
+// ============================================
+// 💅 STYLES
+// ============================================
+
 const styles = StyleSheet.create({
-  mainContainer: { flex: 1, backgroundColor: '#F5F7FA' },
-  
-  header: { paddingBottom: 20, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
-  headerContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 10 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-  backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
-
-  container: { flex: 1, padding: 20 },
-  
-  formCard: { backgroundColor: '#fff', borderRadius: 16, padding: 20, marginBottom: 20, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#141E30', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 0.5 },
-  
-  photoRow: { flexDirection: 'row', marginBottom: 5 },
-  addPhotoBtn: { width: 90, height: 90, borderRadius: 12, marginRight: 10, overflow: 'hidden' },
-  addPhotoGradient: { flex: 1, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#B3E5FC', borderStyle: 'dashed', borderRadius: 12 },
-  addPhotoText: { fontSize: 10, color: '#007AFF', marginTop: 5, fontWeight: 'bold' },
-  thumb: { width: 90, height: 90, borderRadius: 12, marginRight: 10, backgroundColor: '#eee' },
-
-  row: { flexDirection: 'row', justifyContent: 'space-between' },
-  inputContainer: { marginBottom: 15 },
-  label: { fontSize: 12, fontWeight: '600', color: '#888', marginBottom: 6 },
-  
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#EDF2F7', borderRadius: 10, paddingHorizontal: 12 },
-  inputIcon: { fontSize: 16, color: '#666', marginRight: 5, fontWeight: 'bold' },
-  input: { flex: 1, paddingVertical: 12, fontSize: 15, color: '#141E30', fontWeight: '500' },
-
-  selectBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: '#EDF2F7', alignItems: 'center', backgroundColor: '#F8FAFC' },
-  selectBtnActive: { backgroundColor: '#141E30', borderColor: '#141E30' },
-  selectText: { color: '#666', fontWeight: '600' },
-  selectTextActive: { color: '#fff' },
-
-  locationBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#EDF2F7', borderRadius: 10, padding: 10 },
-  locText: { fontSize: 14, color: '#141E30', fontWeight: '500' },
-  locPlaceholder: { fontSize: 14, color: '#ccc' },
-  coordText: { fontSize: 11, color: '#4CAF50', marginTop: 4, fontWeight: 'bold' },
-  mapIconBox: { width: 36, height: 36, borderRadius: 8, backgroundColor: '#FF4757', justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
-
-  footer: { 
-    position: 'absolute', bottom: 0, left: 0, right: 0, 
-    backgroundColor: '#fff', 
-    padding: 20, paddingBottom: Platform.OS === 'ios' ? 30 : 20,
-    borderTopWidth: 1, borderTopColor: '#f0f0f0' 
+  mainContainer: {
+    flex: 1,
+    backgroundColor: COLORS.navy[900],
   },
-  submitBtn: { borderRadius: 12, overflow: 'hidden' },
-  gradientBtn: { padding: 16, alignItems: 'center', justifyContent: 'center' },
-  submitText: { color: '#fff', fontSize: 16, fontWeight: 'bold', letterSpacing: 0.5 },
+
+  // Header
+  header: {
+    paddingBottom: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  headerTextContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: COLORS.gray[400],
+    marginTop: 2,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.navy[700],
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+  },
+
+  // Progress Bar
+  progressContainer: {
+    paddingHorizontal: 20,
+    marginTop: 16,
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: COLORS.navy[700],
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 11,
+    color: COLORS.gold[500],
+    fontWeight: '700',
+    textAlign: 'right',
+    marginTop: 6,
+  },
+
+  // Content
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.navy[900],
+    padding: 20,
+  },
+
+  // Form Card
+  formCard: {
+    backgroundColor: COLORS.navy[800],
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: COLORS.navy[700],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionIconContainer: {
+    marginRight: 14,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  sectionIconGradient: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: COLORS.gray[400],
+    marginTop: 2,
+  },
+
+  // Photos
+  photoRow: {
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  addPhotoBtn: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    marginRight: 12,
+    overflow: 'hidden',
+  },
+  addPhotoGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.navy[600],
+    borderStyle: 'dashed',
+    borderRadius: 16,
+  },
+  addPhotoText: {
+    fontSize: 13,
+    color: COLORS.gold[500],
+    marginTop: 8,
+    fontWeight: '700',
+  },
+  addPhotoSubtext: {
+    fontSize: 10,
+    color: COLORS.gray[500],
+    marginTop: 2,
+  },
+  thumbContainer: {
+    position: 'relative',
+    marginRight: 12,
+  },
+  thumb: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    backgroundColor: COLORS.navy[700],
+  },
+  removeBtn: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+  },
+  primaryBadge: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    backgroundColor: COLORS.gold[500],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  primaryBadgeText: {
+    fontSize: 10,
+    color: COLORS.navy[900],
+    fontWeight: '700',
+  },
+
+  // Inputs
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputContainer: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.gray[400],
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.navy[700],
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+    borderRadius: 12,
+    paddingHorizontal: 14,
+  },
+  inputIconLeft: {
+    marginRight: 10,
+  },
+  inputPrefix: {
+    fontSize: 16,
+    color: COLORS.gray[400],
+    marginRight: 6,
+    fontWeight: '700',
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: COLORS.white,
+    fontWeight: '500',
+  },
+
+  // Select Button
+  selectBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.navy[600],
+    alignItems: 'center',
+    backgroundColor: COLORS.navy[700],
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  selectBtnActive: {
+    borderColor: COLORS.gold[500],
+    backgroundColor: 'transparent',
+  },
+  selectBtnGradient: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 12,
+  },
+  selectText: {
+    color: COLORS.gray[400],
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  selectTextActive: {
+    color: COLORS.navy[900],
+    fontWeight: '700',
+    fontSize: 14,
+  },
+
+  // Availability Toggle
+  availabilityToggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: COLORS.navy[700],
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+  },
+  availabilityToggleLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.white,
+    marginBottom: 4,
+  },
+  availabilityToggleSubtext: {
+    fontSize: 12,
+    color: COLORS.gray[400],
+  },
+  toggleSwitch: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.navy[600],
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  toggleSwitchActive: {
+    backgroundColor: COLORS.emerald[500],
+  },
+  toggleThumb: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: COLORS.white,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  toggleThumbActive: {
+    alignSelf: 'flex-end',
+  },
+
+  // Days of Week
+  daysContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  dayButton: {
+    flex: 1,
+    minWidth: 45,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: COLORS.navy[700],
+    borderWidth: 1.5,
+    borderColor: COLORS.navy[600],
+    alignItems: 'center',
+  },
+  dayButtonActive: {
+    backgroundColor: COLORS.gold[500] + '20',
+    borderColor: COLORS.gold[500],
+  },
+  dayButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.gray[400],
+  },
+  dayButtonTextActive: {
+    color: COLORS.gold[500],
+    fontWeight: '700',
+  },
+
+  // Location Button
+  locationBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.navy[700],
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+    borderRadius: 12,
+    padding: 14,
+  },
+  locText: {
+    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: '600',
+  },
+  locPlaceholder: {
+    fontSize: 14,
+    color: COLORS.gray[500],
+  },
+  coordText: {
+    fontSize: 11,
+    color: COLORS.emerald[500],
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  mapIconBox: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginLeft: 12,
+  },
+  mapIconGradient: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Footer
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.navy[900],
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.navy[700],
+  },
+  submitBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  submitBtnDisabled: {
+    opacity: 0.7,
+  },
+  submitGradient: {
+    flexDirection: 'row',
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  submitText: {
+    color: COLORS.navy[900],
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });

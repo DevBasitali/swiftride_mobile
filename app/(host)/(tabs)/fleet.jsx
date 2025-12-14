@@ -1,3 +1,4 @@
+// app/(host)/(tabs)/fleet.jsx
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -10,14 +11,10 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  Platform,
+  StatusBar,
 } from "react-native";
 import { useFocusEffect, router } from "expo-router";
-import {
-  FontAwesome,
-  MaterialCommunityIcons,
-  Ionicons,
-} from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import carService from "../../../services/carService";
@@ -25,7 +22,41 @@ import { useAuth } from "../../../context/AuthContext";
 
 const { width } = Dimensions.get("window");
 
+// ============================================
+// 🎨 INLINE THEME COLORS
+// ============================================
+const COLORS = {
+  navy: {
+    900: '#0A1628',
+    800: '#0F2137',
+    700: '#152A46',
+    600: '#1E3A5F',
+    500: '#2A4A73',
+  },
+  gold: {
+    600: '#D99413',
+    500: '#F59E0B',
+    400: '#FBBF24',
+  },
+  emerald: {
+    500: '#10B981',
+    400: '#34D399',
+  },
+  red: {
+    500: '#EF4444',
+  },
+  gray: {
+    600: '#4B5563',
+    500: '#6B7280',
+    400: '#9CA3AF',
+  },
+  white: '#FFFFFF',
+};
+
 export default function HostFleet() {
+  // ============================================
+  // 🔒 ORIGINAL LOGIC - COMPLETELY UNTOUCHED
+  // ============================================
   const { kycStatus } = useAuth();
   const [myCars, setMyCars] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,15 +90,18 @@ export default function HostFleet() {
     }
     router.push("/(host)/car/create");
   };
+  // ============================================
+  // END ORIGINAL LOGIC
+  // ============================================
 
   const renderCarItem = ({ item }) => (
     <TouchableOpacity
-      activeOpacity={0.95}
+      activeOpacity={0.9}
       onPress={() => router.push(`/(host)/car/${item._id}`)}
       style={styles.cardContainer}
     >
       <View style={styles.card}>
-        {/* --- MAGIC IMAGE SECTION --- */}
+        {/* Image Section */}
         <View style={styles.imageWrapper}>
           <Image
             source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
@@ -75,40 +109,56 @@ export default function HostFleet() {
             resizeMode="cover"
           />
 
-          {/* Gradient Overlay for Text Readability */}
+          {/* Gradient Overlay */}
           <LinearGradient
-            colors={["transparent", "rgba(0,0,0,0.8)"]}
+            colors={["transparent", "rgba(10, 22, 40, 0.95)"]}
             style={styles.gradientOverlay}
           />
 
-          {/* Floating Price Tag (Glass Effect) */}
-          <View style={styles.priceGlass}>
-            <Text style={styles.priceSymbol}>$</Text>
-            <Text style={styles.priceValue}>{item.pricePerDay}</Text>
-            <Text style={styles.priceUnit}>/day</Text>
+          {/* Price Tag */}
+          <View style={styles.priceContainer}>
+            <LinearGradient
+              colors={[COLORS.gold[500], COLORS.gold[600]]}
+              style={styles.priceGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.priceSymbol}>$</Text>
+              <Text style={styles.priceValue}>{item.pricePerDay}</Text>
+              <Text style={styles.priceUnit}>/day</Text>
+            </LinearGradient>
           </View>
 
-          {/* Floating Status Badge */}
-          <View
-            style={[
-              styles.statusBadge,
-              item.isActive ? styles.statusActive : styles.statusInactive,
-            ]}
-          >
-            <View style={styles.statusDot} />
-            <Text style={styles.statusText}>
-              {item.isActive ? "LIVE" : "HIDDEN"}
-            </Text>
+          {/* Status Badge */}
+          <View style={styles.statusBadgeContainer}>
+            {item.isActive ? (
+              <LinearGradient
+                colors={[COLORS.emerald[400], COLORS.emerald[500]]}
+                style={styles.statusBadge}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <View style={styles.statusDot} />
+                <Text style={styles.statusText}>LIVE</Text>
+              </LinearGradient>
+            ) : (
+              <View style={[styles.statusBadge, styles.statusInactive]}>
+                <View style={[styles.statusDot, styles.statusDotInactive]} />
+                <Text style={styles.statusText}>HIDDEN</Text>
+              </View>
+            )}
           </View>
         </View>
 
-        {/* --- DETAILS SECTION --- */}
+        {/* Details Section */}
         <View style={styles.cardBottom}>
           <View style={styles.titleRow}>
-            <Text style={styles.carTitle} numberOfLines={1}>
-              {item.make} {item.model}
-            </Text>
-            <Text style={styles.carYear}>{item.year}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.carTitle} numberOfLines={1}>
+                {item.make} {item.model}
+              </Text>
+              <Text style={styles.carYear}>{item.year}</Text>
+            </View>
           </View>
 
           {/* Specs Row */}
@@ -116,8 +166,8 @@ export default function HostFleet() {
             <View style={styles.specItem}>
               <MaterialCommunityIcons
                 name="car-shift-pattern"
-                size={14}
-                color="#666"
+                size={16}
+                color={COLORS.gray[400]}
               />
               <Text style={styles.specText}>{item.transmission || "Auto"}</Text>
             </View>
@@ -125,25 +175,32 @@ export default function HostFleet() {
             <View style={styles.specItem}>
               <MaterialCommunityIcons
                 name="gas-station"
-                size={14}
-                color="#666"
+                size={16}
+                color={COLORS.gray[400]}
               />
               <Text style={styles.specText}>{item.fuelType || "Petrol"}</Text>
             </View>
             <View style={styles.specDivider} />
             <View style={styles.specItem}>
-              <MaterialCommunityIcons name="car-seat" size={14} color="#666" />
-              <Text style={styles.specText}>{item.seats || 4} Seats</Text>
+              <MaterialCommunityIcons
+                name="car-seat"
+                size={16}
+                color={COLORS.gray[400]}
+              />
+              <Text style={styles.specText}>{item.seats || 4}</Text>
             </View>
           </View>
 
-          <View style={styles.plateRow}>
+          {/* Footer Row */}
+          <View style={styles.footerRow}>
             <View style={styles.plateBox}>
+              <Ionicons name="car" size={12} color={COLORS.gray[400]} />
               <Text style={styles.plateText}>{item.plateNumber}</Text>
             </View>
-            <View style={styles.actionArrow}>
+
+            <View style={styles.actionContainer}>
               <Text style={styles.manageText}>Manage</Text>
-              <Ionicons name="arrow-forward-circle" size={24} color="#141E30" />
+              <Ionicons name="arrow-forward-circle" size={24} color={COLORS.gold[500]} />
             </View>
           </View>
         </View>
@@ -153,39 +210,47 @@ export default function HostFleet() {
 
   return (
     <View style={styles.container}>
-      {/* PROFESSIONAL HEADER */}
-      <LinearGradient colors={["#141E30", "#243B55"]} style={styles.header}>
-        <SafeAreaView
-          edges={["top", "left", "right"]}
-          style={styles.headerContent}
-        >
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.navy[900]} />
+
+      {/* Header */}
+      <LinearGradient
+        colors={[COLORS.navy[900], COLORS.navy[800]]}
+        style={styles.header}
+      >
+        <SafeAreaView edges={["top", "left", "right"]} style={styles.headerContent}>
           <View>
             <Text style={styles.headerTitle}>My Fleet</Text>
-            <Text style={styles.headerSubtitle}>
-              {myCars.length} vehicles listed
-            </Text>
+            <View style={styles.headerSubtitleContainer}>
+              <Ionicons name="car-sport" size={16} color={COLORS.gold[500]} />
+              <Text style={styles.headerSubtitle}>
+                {myCars.length} {myCars.length === 1 ? 'vehicle' : 'vehicles'} listed
+              </Text>
+            </View>
           </View>
+
           <TouchableOpacity
             style={styles.addBtn}
             onPress={handleAddNew}
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={["#fff", "#f0f0f0"]}
+              colors={[COLORS.gold[500], COLORS.gold[600]]}
               style={styles.addBtnGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
             >
-              <Ionicons name="add" size={20} color="#141E30" />
+              <Ionicons name="add" size={20} color={COLORS.navy[900]} />
               <Text style={styles.addBtnText}>Add Car</Text>
             </LinearGradient>
           </TouchableOpacity>
         </SafeAreaView>
       </LinearGradient>
 
-      {/* BODY */}
+      {/* Body */}
       <View style={styles.body}>
         {loading ? (
           <ActivityIndicator
-            color="#141E30"
+            color={COLORS.gold[500]}
             size="large"
             style={{ marginTop: 50 }}
           />
@@ -195,6 +260,7 @@ export default function HostFleet() {
             keyExtractor={(item) => item._id}
             renderItem={renderCarItem}
             contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -202,20 +268,42 @@ export default function HostFleet() {
                   setRefreshing(true);
                   fetchMyCars();
                 }}
+                tintColor={COLORS.gold[500]}
               />
             }
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <Image
-                  source={{
-                    uri: "https://cdn-icons-png.flaticon.com/512/7486/7486747.png",
-                  }}
-                  style={{ width: 100, height: 100, opacity: 0.5 }}
-                />
-                <Text style={styles.emptyText}>Your showroom is empty.</Text>
+                <View style={styles.emptyIconContainer}>
+                  <LinearGradient
+                    colors={[COLORS.navy[700], COLORS.navy[600]]}
+                    style={styles.emptyIconGradient}
+                  >
+                    <MaterialCommunityIcons
+                      name="garage-variant"
+                      size={60}
+                      color={COLORS.gray[500]}
+                    />
+                  </LinearGradient>
+                </View>
+                <Text style={styles.emptyText}>Your Garage is Empty</Text>
                 <Text style={styles.emptySub}>
-                  Add your first car to start earning.
+                  Add your first car to start earning money
                 </Text>
+                <TouchableOpacity
+                  style={styles.emptyButton}
+                  onPress={handleAddNew}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={[COLORS.gold[500], COLORS.gold[600]]}
+                    style={styles.emptyButtonGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    <Ionicons name="add-circle-outline" size={22} color={COLORS.navy[900]} />
+                    <Text style={styles.emptyButtonText}>Add Your First Car</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
             }
           />
@@ -225,18 +313,20 @@ export default function HostFleet() {
   );
 }
 
+// ============================================
+// 💅 STYLES
+// ============================================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F2F4F8" }, // Light gray-blue background
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.navy[900],
+  },
 
   // Header
   header: {
     paddingBottom: 25,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
   },
   headerContent: {
     flexDirection: "row",
@@ -248,120 +338,163 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#fff",
-    letterSpacing: 0.5,
+    color: COLORS.white,
+    marginBottom: 6,
   },
-  headerSubtitle: { fontSize: 13, color: "#ffffff80", marginTop: 2 },
+  headerSubtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: COLORS.gray[400],
+    fontWeight: '500',
+  },
 
+  // Add Button
   addBtn: {
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 5,
   },
   addBtnGradient: {
     flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
     alignItems: "center",
+    gap: 6,
   },
   addBtnText: {
-    color: "#141E30",
+    color: COLORS.navy[900],
     fontWeight: "700",
-    marginLeft: 5,
-    fontSize: 13,
+    fontSize: 14,
   },
 
-  body: { flex: 1 },
-  listContent: { padding: 20, paddingBottom: 100 },
+  // Body
+  body: {
+    flex: 1,
+    backgroundColor: COLORS.navy[900],
+  },
+  listContent: {
+    padding: 20,
+    paddingBottom: 100,
+  },
 
   // Card Design
-  cardContainer: { marginBottom: 25 },
+  cardContainer: {
+    marginBottom: 20,
+  },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 24,
+    backgroundColor: COLORS.navy[800],
+    borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#141E30",
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
+    borderWidth: 1,
+    borderColor: COLORS.navy[700],
+    shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 8 },
-    elevation: 8, // Deep shadow for "floating" effect
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
 
   // Image Section
-  imageWrapper: { height: 200, position: "relative", backgroundColor: "#eee" },
-  carImage: { width: "100%", height: "100%" },
+  imageWrapper: {
+    height: 200,
+    position: "relative",
+    backgroundColor: COLORS.navy[700],
+  },
+  carImage: {
+    width: "100%",
+    height: "100%",
+  },
   gradientOverlay: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-    height: 120,
+    height: 100,
   },
 
-  // Glass Price Tag
-  priceGlass: {
-    position: "absolute",
-    bottom: 15,
-    left: 15,
+  // Price Tag
+  priceContainer: {
+    position: 'absolute',
+    bottom: 14,
+    left: 14,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  priceGradient: {
     flexDirection: "row",
     alignItems: "baseline",
-    // No blur on Android, relying on text shadow
+    paddingHorizontal: 14,
+    paddingVertical: 8,
   },
   priceSymbol: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowRadius: 5,
+    color: COLORS.navy[900],
+    fontSize: 14,
+    fontWeight: "700",
   },
   priceValue: {
-    color: "#fff",
-    fontSize: 28,
+    color: COLORS.navy[900],
+    fontSize: 24,
     fontWeight: "800",
     marginLeft: 2,
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowRadius: 5,
   },
   priceUnit: {
-    color: "#ffffff90",
-    fontSize: 13,
-    marginLeft: 3,
-    fontWeight: "500",
+    color: COLORS.navy[900],
+    fontSize: 12,
+    marginLeft: 4,
+    fontWeight: "600",
+    opacity: 0.8,
   },
 
   // Status Badge
+  statusBadgeContainer: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+  },
   statusBadge: {
-    position: "absolute",
-    top: 15,
-    right: 15,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    gap: 6,
   },
-  statusActive: { backgroundColor: "rgba(46, 204, 113, 0.9)" },
-  statusInactive: { backgroundColor: "rgba(52, 73, 94, 0.9)" },
+  statusInactive: {
+    backgroundColor: COLORS.navy[600],
+  },
   statusDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#fff",
-    marginRight: 6,
+    backgroundColor: COLORS.white,
+  },
+  statusDotInactive: {
+    backgroundColor: COLORS.gray[400],
   },
   statusText: {
-    color: "#fff",
-    fontSize: 10,
+    color: COLORS.white,
+    fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1,
   },
 
   // Bottom Content
-  cardBottom: { padding: 18 },
+  cardBottom: {
+    padding: 16,
+  },
   titleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -371,63 +504,128 @@ const styles = StyleSheet.create({
   carTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#141E30",
-    flex: 1,
-    marginRight: 10,
+    color: COLORS.white,
+    marginBottom: 4,
   },
   carYear: {
-    fontSize: 14,
-    color: "#888",
+    fontSize: 13,
+    color: COLORS.gray[400],
     fontWeight: "600",
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
   },
 
-  specsRow: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
-  specItem: { flexDirection: "row", alignItems: "center" },
-  specText: { fontSize: 12, color: "#555", marginLeft: 5, fontWeight: "500" },
+  // Specs Row
+  specsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.navy[700],
+    borderRadius: 12,
+  },
+  specItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  specText: {
+    fontSize: 13,
+    color: COLORS.gray[400],
+    fontWeight: "600",
+  },
   specDivider: {
     width: 1,
-    height: 12,
-    backgroundColor: "#ddd",
-    marginHorizontal: 10,
+    height: 14,
+    backgroundColor: COLORS.navy[600],
+    marginHorizontal: 12,
   },
 
-  plateRow: {
+  // Footer Row
+  footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 15,
+    paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: "#f5f5f5",
+    borderTopColor: COLORS.navy[700],
   },
   plateBox: {
-    backgroundColor: "#F8FAFC",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.navy[700],
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
   plateText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
-    color: "#64748B",
+    color: COLORS.gray[400],
     letterSpacing: 1,
     textTransform: "uppercase",
   },
 
-  actionArrow: { flexDirection: "row", alignItems: "center" },
+  actionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   manageText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#141E30",
-    marginRight: 5,
+    fontSize: 13,
+    fontWeight: "700",
+    color: COLORS.gold[500],
   },
 
-  emptyState: { alignItems: "center", marginTop: 80 },
-  emptyText: { fontSize: 18, fontWeight: "bold", color: "#333", marginTop: 20 },
-  emptySub: { fontSize: 14, color: "#888", marginTop: 5 },
+  // Empty State
+  emptyState: {
+    alignItems: "center",
+    paddingTop: 80,
+    paddingHorizontal: 20,
+  },
+  emptyIconContainer: {
+    marginBottom: 24,
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  emptyIconGradient: {
+    width: 120,
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: COLORS.white,
+    marginBottom: 8,
+  },
+  emptySub: {
+    fontSize: 15,
+    color: COLORS.gray[400],
+    marginBottom: 28,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  emptyButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  emptyButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+  },
+  emptyButtonText: {
+    color: COLORS.navy[900],
+    fontSize: 15,
+    fontWeight: '700',
+  },
 });

@@ -1,3 +1,4 @@
+// app/(host)/_layout.jsx
 import { Stack } from "expo-router";
 
 export default function HostLayout() {
@@ -14,8 +15,6 @@ export default function HostLayout() {
         name="car/location-picker"
         options={{ presentation: "fullScreenModal", headerShown: false }}
       />
-      <Stack.Screen name="kyc/index" />
-      // ✅ Correct (Plural)
       <Stack.Screen
         name="bookings/index"
         options={{ title: "Bookings", headerShown: false }}

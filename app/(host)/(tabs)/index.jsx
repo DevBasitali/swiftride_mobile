@@ -1,3 +1,4 @@
+// app/(host)/(tabs)/index.jsx
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -8,52 +9,81 @@ import {
   Dimensions,
   ActivityIndicator,
   RefreshControl,
+  StatusBar,
 } from "react-native";
-import { router, useFocusEffect } from 'expo-router'; // ✅ Ensure router is imported
+import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
-
-// Import Services
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import carService from "../../../services/carService";
 import { useAuth } from "../../../context/AuthContext";
-// Import booking service to get real count
-import bookingService from "../../../services/bookingService"; 
+import bookingService from "../../../services/bookingService";
 
 const { width } = Dimensions.get("window");
 
+// ============================================
+// 🎨 INLINE THEME COLORS
+// ============================================
+const COLORS = {
+  navy: {
+    900: '#0A1628',
+    800: '#0F2137',
+    700: '#152A46',
+    600: '#1E3A5F',
+    500: '#2A4A73',
+  },
+  gold: {
+    600: '#D99413',
+    500: '#F59E0B',
+    400: '#FBBF24',
+  },
+  emerald: {
+    500: '#10B981',
+    400: '#34D399',
+  },
+  blue: {
+    500: '#3B82F6',
+  },
+  orange: {
+    500: '#F97316',
+  },
+  gray: {
+    500: '#6B7280',
+    400: '#9CA3AF',
+  },
+  white: '#FFFFFF',
+};
+
 export default function HostDashboard() {
+  // ============================================
+  // 🔒 ORIGINAL LOGIC - COMPLETELY UNTOUCHED
+  // ============================================
   const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
 
-  // Real-Time Stats State
   const [stats, setStats] = useState({
     totalCars: 0,
     activeCars: 0,
-    totalBookings: 0, 
+    totalBookings: 0,
     totalEarnings: 0,
-    pendingRequests: 0, // ✅ We will fetch this now
+    pendingRequests: 0,
     rating: 5.0,
   });
 
-  // Fetch Data every time screen is focused
   useFocusEffect(
     useCallback(() => {
-      refreshUser(); 
+      refreshUser();
       fetchDashboardData();
     }, [])
   );
 
   const fetchDashboardData = async () => {
     try {
-      // 1. Fetch Real Car Data
       const carResponse = await carService.getMyCars();
       const cars = carResponse.data.cars || [];
       const activeCount = cars.filter((c) => c.isActive).length;
 
-      // 2. Fetch Real Bookings for Counts
       let bookingCount = 0;
       let pendingCount = 0;
       let earnings = 0;
@@ -62,15 +92,13 @@ export default function HostDashboard() {
         const bookingResponse = await bookingService.getHostBookings();
         const allBookings = bookingResponse.items || [];
         bookingCount = allBookings.length;
-        pendingCount = allBookings.filter(b => b.status === 'pending').length;
-        
-        // Calculate earnings (completed bookings)
+        pendingCount = allBookings.filter((b) => b.status === 'pending').length;
+
         earnings = allBookings
-          .filter(b => b.status === 'completed')
+          .filter((b) => b.status === 'completed')
           .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-          
       } catch (err) {
-        console.log("Booking fetch failed (API might not be ready)", err);
+        console.log("Booking fetch failed", err);
       }
 
       setStats({
@@ -94,16 +122,20 @@ export default function HostDashboard() {
     fetchDashboardData();
   };
 
-  // ✅ Navigate to Booking Manager
   const goToBookings = () => {
     router.push('/(host)/bookings');
   };
+  // ============================================
+  // END ORIGINAL LOGIC
+  // ============================================
 
   return (
     <View style={styles.container}>
-      {/* 1. HEADER WITH REAL USER DATA */}
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.navy[900]} />
+
+      {/* Header Section */}
       <LinearGradient
-        colors={["#141E30", "#243B55"]}
+        colors={[COLORS.navy[900], COLORS.navy[800]]}
         style={styles.headerGradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -114,34 +146,50 @@ export default function HostDashboard() {
               <Text style={styles.welcomeText}>Welcome back,</Text>
               <Text style={styles.userName}>{user?.fullName || "Host"}</Text>
             </View>
-            
-            {/* ✅ NOTIFICATION BELL LINKED */}
+
             <TouchableOpacity style={styles.bellBtn} onPress={goToBookings}>
-              <Ionicons name="notifications-outline" size={24} color="#fff" />
-              {stats.pendingRequests > 0 && <View style={styles.dot} />}
+              <View style={styles.bellIconContainer}>
+                <Ionicons name="notifications-outline" size={24} color={COLORS.white} />
+                {stats.pendingRequests > 0 && (
+                  <View style={styles.notificationBadge}>
+                    <Text style={styles.notificationBadgeText}>{stats.pendingRequests}</Text>
+                  </View>
+                )}
+              </View>
             </TouchableOpacity>
           </View>
 
-          {/* REAL EARNINGS CARD */}
-          <View style={styles.earningsCard}>
-            <View>
-              <Text style={styles.earningsLabel}>Total Earnings</Text>
-              <Text style={styles.earningsValue}>
-                $
-                {stats.totalEarnings.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                })}
-              </Text>
-            </View>
-            <View style={styles.profitBadge}>
-              <FontAwesome name="arrow-up" size={12} color="#4CAF50" />
-              <Text style={styles.profitText}>0%</Text>
-            </View>
+          {/* Earnings Card */}
+          <View style={styles.earningsCardContainer}>
+            <LinearGradient
+              colors={[COLORS.gold[500], COLORS.gold[600]]}
+              style={styles.earningsCard}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <View style={styles.earningsLeft}>
+                <View style={styles.earningsIconContainer}>
+                  <MaterialCommunityIcons name="cash-multiple" size={28} color={COLORS.navy[900]} />
+                </View>
+                <View>
+                  <Text style={styles.earningsLabel}>Total Earnings</Text>
+                  <Text style={styles.earningsValue}>
+                    ${stats.totalEarnings.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.profitBadge}>
+                <Ionicons name="trending-up" size={14} color={COLORS.emerald[500]} />
+                <Text style={styles.profitText}>0%</Text>
+              </View>
+            </LinearGradient>
           </View>
         </SafeAreaView>
       </LinearGradient>
 
-      {/* 2. REAL STATS GRID */}
+      {/* Content Section */}
       <ScrollView
         style={styles.content}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -150,82 +198,101 @@ export default function HostDashboard() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#141E30"
+            tintColor={COLORS.gold[500]}
           />
         }
       >
-        <Text style={styles.sectionTitle}>Overview</Text>
+        {/* Section Title */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Overview</Text>
+          <Text style={styles.sectionSubtitle}>Your business at a glance</Text>
+        </View>
 
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="#141E30"
-            style={{ marginTop: 20 }}
-          />
+          <ActivityIndicator size="large" color={COLORS.gold[500]} style={{ marginTop: 20 }} />
         ) : (
           <View style={styles.statsGrid}>
             <StatBox
               icon="car-sport"
               label="Total Cars"
               value={stats.totalCars.toString()}
-              color="#4A90E2"
+              gradient={[COLORS.blue[500], '#2563EB']}
             />
             <StatBox
               icon="checkmark-circle"
               label="Active Listings"
               value={stats.activeCars.toString()}
-              color="#50E3C2"
+              gradient={[COLORS.emerald[500], COLORS.emerald[400]]}
             />
-            
-            {/* ✅ CLICKABLE BOOKING STAT */}
-            <TouchableOpacity 
-                style={{width: (width - 55) / 2}} 
-                onPress={goToBookings}
+            <TouchableOpacity
+              style={{ width: (width - 55) / 2 }}
+              onPress={goToBookings}
+              activeOpacity={0.8}
             >
-                <StatBox
+              <StatBox
                 icon="calendar"
                 label="Bookings"
                 value={stats.totalBookings.toString()}
-                color="#F5A623"
-                isClickable={true} 
-                />
+                gradient={[COLORS.orange[500], '#FB923C']}
+                isClickable={true}
+              />
             </TouchableOpacity>
-
             <StatBox
               icon="star"
               label="Rating"
               value={stats.rating.toFixed(1)}
-              color="#F8E71C"
+              gradient={[COLORS.gold[500], COLORS.gold[400]]}
             />
           </View>
         )}
 
-        {/* RECENT ACTIVITY */}
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        {/* Recent Activity */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <TouchableOpacity>
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
+        </View>
+
         {stats.totalCars === 0 ? (
           <View style={styles.emptyActivity}>
-            <Text style={styles.emptyText}>No activity yet.</Text>
-            <Text style={styles.emptySub}>
-              List your first car to get started.
-            </Text>
+            <View style={styles.emptyIconContainer}>
+              <MaterialCommunityIcons name="garage" size={50} color={COLORS.gray[400]} />
+            </View>
+            <Text style={styles.emptyText}>No activity yet</Text>
+            <Text style={styles.emptySub}>List your first car to get started</Text>
+            <TouchableOpacity
+              style={styles.addCarButton}
+              onPress={() => router.push('/(host)/car/create')}
+            >
+              <LinearGradient
+                colors={[COLORS.gold[500], COLORS.gold[600]]}
+                style={styles.addCarButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Ionicons name="add-circle-outline" size={20} color={COLORS.navy[900]} />
+                <Text style={styles.addCarButtonText}>Add Your First Car</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.activityList}>
             <ActivityItem
               title="System Ready"
-              sub="Your fleet is live and visible to customers."
+              sub="Your fleet is live and visible to customers"
               time="Now"
-              icon="server-outline"
-              color="#4A90E2"
+              icon="shield-checkmark"
+              gradient={[COLORS.emerald[500], COLORS.emerald[400]]}
             />
             {stats.pendingRequests > 0 && (
-                 <ActivityItem
-                 title="New Request"
-                 sub={`You have ${stats.pendingRequests} pending booking(s)`}
-                 time="Action Required"
-                 icon="alert-circle-outline"
-                 color="#F5A623"
-               />
+              <ActivityItem
+                title="New Booking Request"
+                sub={`You have ${stats.pendingRequests} pending booking(s)`}
+                time="Action Required"
+                icon="alert-circle"
+                gradient={[COLORS.orange[500], '#FB923C']}
+              />
             )}
           </View>
         )}
@@ -234,30 +301,41 @@ export default function HostDashboard() {
   );
 }
 
-// Helper Components
-function StatBox({ icon, label, value, color, isClickable }) {
-  // If inside TouchableOpacity, we remove the fixed width style from here
-  const containerStyle = isClickable 
-    ? styles.statBoxInner 
-    : styles.statBox;
+// ============================================
+// 📦 HELPER COMPONENTS
+// ============================================
+function StatBox({ icon, label, value, gradient, isClickable }) {
+  const containerStyle = isClickable ? styles.statBoxInner : styles.statBox;
 
   return (
     <View style={containerStyle}>
-      <View style={[styles.iconCircle, { backgroundColor: `${color}20` }]}>
-        <Ionicons name={icon} size={24} color={color} />
-      </View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <LinearGradient
+        colors={gradient}
+        style={styles.statBoxGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={styles.statIconContainer}>
+          <Ionicons name={icon} size={28} color={COLORS.white} />
+        </View>
+        <Text style={styles.statValue}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
+      </LinearGradient>
     </View>
   );
 }
 
-function ActivityItem({ title, sub, time, icon, color }) {
+function ActivityItem({ title, sub, time, icon, gradient }) {
   return (
     <View style={styles.activityItem}>
-      <View style={[styles.activityIcon, { backgroundColor: `${color}15` }]}>
-        <Ionicons name={icon} size={18} color={color} />
-      </View>
+      <LinearGradient
+        colors={gradient}
+        style={styles.activityIconGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <Ionicons name={icon} size={20} color={COLORS.white} />
+      </LinearGradient>
       <View style={{ flex: 1 }}>
         <Text style={styles.actTitle}>{title}</Text>
         <Text style={styles.actSub}>{sub}</Text>
@@ -267,8 +345,14 @@ function ActivityItem({ title, sub, time, icon, color }) {
   );
 }
 
+// ============================================
+// 💅 STYLES
+// ============================================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.navy[900],
+  },
   headerGradient: {
     paddingBottom: 30,
     paddingHorizontal: 20,
@@ -282,69 +366,138 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 25,
   },
-  welcomeText: { color: "#ffffff80", fontSize: 14, fontWeight: "600" },
-  userName: { color: "#fff", fontSize: 24, fontWeight: "bold" },
+  welcomeText: {
+    color: COLORS.gray[400],
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  userName: {
+    color: COLORS.white,
+    fontSize: 28,
+    fontWeight: "700",
+    marginTop: 4,
+  },
   bellBtn: {
-    width: 40,
-    height: 40,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 20,
+    position: 'relative',
+  },
+  bellIconContainer: {
+    width: 48,
+    height: 48,
+    backgroundColor: COLORS.navy[700],
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-  },
-  dot: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    backgroundColor: "#FF4757",
-    borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#141E30",
+    borderColor: COLORS.navy[600],
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: COLORS.orange[500],
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.navy[800],
+    paddingHorizontal: 6,
+  },
+  notificationBadgeText: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: '700',
   },
 
+  // Earnings Card
+  earningsCardContainer: {
+    marginTop: 8,
+  },
   earningsCard: {
-    backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 20,
     padding: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  earningsLabel: { color: "#ffffff90", fontSize: 14, marginBottom: 5 },
+  earningsLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  earningsIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: 'rgba(10, 22, 40, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  earningsLabel: {
+    color: COLORS.navy[900],
+    fontSize: 13,
+    marginBottom: 6,
+    fontWeight: '600',
+    opacity: 0.8,
+  },
   earningsValue: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    color: COLORS.navy[900],
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.5,
   },
   profitBadge: {
-    backgroundColor: "rgba(76, 175, 80, 0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: "rgba(16, 185, 129, 0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
+    gap: 4,
   },
   profitText: {
-    color: "#4CAF50",
-    fontWeight: "bold",
-    marginLeft: 5,
-    fontSize: 12,
+    color: COLORS.emerald[500],
+    fontWeight: "700",
+    fontSize: 13,
   },
 
-  content: { marginTop: -20, paddingHorizontal: 20 },
+  // Content
+  content: {
+    flex: 1,
+    backgroundColor: COLORS.navy[900],
+    marginTop: -20,
+    paddingHorizontal: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 28,
+  },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#141E30",
-    marginBottom: 15,
-    marginTop: 25,
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.white,
+  },
+  sectionSubtitle: {
+    fontSize: 13,
+    color: COLORS.gray[400],
+    marginTop: 4,
+  },
+  viewAllText: {
+    color: COLORS.gold[500],
+    fontSize: 14,
+    fontWeight: '600',
   },
 
+  // Stats Grid
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -352,74 +505,139 @@ const styles = StyleSheet.create({
   },
   statBox: {
     width: (width - 55) / 2,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 15,
     marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   statBoxInner: {
-    width: '100%', // Fills the TouchableOpacity
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 15,
+    width: '100%',
     marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  statValue: { fontSize: 22, fontWeight: "bold", color: "#141E30" },
-  statLabel: { fontSize: 12, color: "#888", fontWeight: "600" },
-
-  activityList: {
-    backgroundColor: "#fff",
     borderRadius: 16,
-    padding: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  statBoxGradient: {
+    padding: 18,
+  },
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  statValue: {
+    fontSize: 26,
+    fontWeight: "800",
+    color: COLORS.white,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: COLORS.white,
+    fontWeight: "600",
+    opacity: 0.9,
+  },
+
+  // Activity List
+  activityList: {
+    backgroundColor: COLORS.navy[800],
+    borderRadius: 16,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: COLORS.navy[700],
   },
   activityItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    paddingHorizontal: 10,
+    borderBottomColor: COLORS.navy[700],
   },
-  activityIcon: {
-    width: 36,
-    height: 36,
+  activityIconGradient: {
+    width: 44,
+    height: 44,
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
+    marginRight: 14,
   },
-  actTitle: { fontSize: 14, fontWeight: "bold", color: "#333" },
-  actSub: { fontSize: 12, color: "#999", marginTop: 2 },
-  actTime: { fontSize: 11, color: "#bbb" },
+  actTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: COLORS.white,
+    marginBottom: 4,
+  },
+  actSub: {
+    fontSize: 13,
+    color: COLORS.gray[400],
+  },
+  actTime: {
+    fontSize: 11,
+    color: COLORS.gray[500],
+    fontWeight: '500',
+  },
 
+  // Empty State
   emptyActivity: {
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#fff",
+    padding: 32,
+    backgroundColor: COLORS.navy[800],
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.navy[700],
   },
-  emptyText: { color: "#333", fontWeight: "bold" },
-  emptySub: { color: "#888", fontSize: 12, marginTop: 5 },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    backgroundColor: COLORS.navy[700],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  emptyText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 18,
+    marginBottom: 6,
+  },
+  emptySub: {
+    color: COLORS.gray[400],
+    fontSize: 14,
+    marginBottom: 20,
+  },
+  addCarButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  addCarButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  addCarButtonText: {
+    color: COLORS.navy[900],
+    fontSize: 14,
+    fontWeight: '700',
+  },
 });

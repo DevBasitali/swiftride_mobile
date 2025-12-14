@@ -1,11 +1,60 @@
+// app/(host)/(tabs)/profile.jsx
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  StatusBar,
+} from 'react-native';
 import { useAuth } from '../../../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router'; // ✅ Import router
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+// ============================================
+// 🎨 INLINE THEME COLORS
+// ============================================
+const COLORS = {
+  navy: {
+    900: '#0A1628',
+    800: '#0F2137',
+    700: '#152A46',
+    600: '#1E3A5F',
+  },
+  gold: {
+    500: '#F59E0B',
+    400: '#FBBF24',
+  },
+  emerald: {
+    500: '#10B981',
+  },
+  blue: {
+    500: '#3B82F6',
+  },
+  purple: {
+    500: '#8B5CF6',
+  },
+  orange: {
+    500: '#F97316',
+  },
+  red: {
+    500: '#EF4444',
+  },
+  gray: {
+    500: '#6B7280',
+    400: '#9CA3AF',
+  },
+  white: '#FFFFFF',
+};
 
 export default function HostProfile() {
+  // ============================================
+  // 🔒 ORIGINAL LOGIC - COMPLETELY UNTOUCHED
+  // ============================================
   const { user, logout, kycStatus } = useAuth();
 
   const handleLogout = () => {
@@ -14,101 +63,382 @@ export default function HostProfile() {
       { text: "Log Out", style: "destructive", onPress: logout }
     ]);
   };
+  // ============================================
+  // END ORIGINAL LOGIC
+  // ============================================
+
+  const getKycStatusColor = () => {
+    switch (kycStatus) {
+      case 'approved': return COLORS.emerald[500];
+      case 'pending': return COLORS.orange[500];
+      default: return COLORS.gray[500];
+    }
+  };
+
+  const getKycStatusText = () => {
+    switch (kycStatus) {
+      case 'approved': return 'Verified';
+      case 'pending': return 'Pending';
+      default: return 'Unverified';
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 50 }}>
-        
-        {/* HEADER */}
-        <View style={styles.headerContainer}>
-            <LinearGradient colors={['#141E30', '#243B55']} style={styles.gradientHeader} />
-            <View style={styles.profileContent}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.navy[900]} />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        {/* Header */}
+        <LinearGradient
+          colors={[COLORS.navy[900], COLORS.navy[800]]}
+          style={styles.gradientHeader}
+        >
+          <SafeAreaView edges={["top", "left", "right"]}>
+            <View style={styles.headerContent}>
+              {/* Avatar */}
+              <View style={styles.avatarSection}>
                 <View style={styles.avatarContainer}>
-                    <Text style={styles.avatarText}>{user?.fullName?.[0] || 'H'}</Text>
-                    {kycStatus === 'approved' && (
-                        <View style={styles.verifiedBadge}><Ionicons name="checkmark" size={12} color="#fff" /></View>
-                    )}
+                  <LinearGradient
+                    colors={[COLORS.gold[400], COLORS.gold[500]]}
+                    style={styles.avatarGradient}
+                  >
+                    <Text style={styles.avatarText}>
+                      {user?.fullName?.[0]?.toUpperCase() || 'H'}
+                    </Text>
+                  </LinearGradient>
+                  {kycStatus === 'approved' && (
+                    <View style={styles.verifiedBadge}>
+                      <Ionicons name="checkmark-circle" size={28} color={COLORS.emerald[500]} />
+                    </View>
+                  )}
                 </View>
-                <Text style={styles.name}>{user?.fullName}</Text>
-                <Text style={styles.email}>{user?.email}</Text>
-                <View style={styles.tag}><Text style={styles.tagText}>SUPERHOST</Text></View>
+
+                <Text style={styles.name}>{user?.fullName || 'Host User'}</Text>
+                <Text style={styles.email}>{user?.email || 'email@example.com'}</Text>
+
+                {/* Role Badge */}
+                <View style={styles.roleBadgeContainer}>
+                  <LinearGradient
+                    colors={[COLORS.gold[500], COLORS.gold[400]]}
+                    style={styles.roleBadge}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                  >
+                    <MaterialCommunityIcons name="crown" size={14} color={COLORS.navy[900]} />
+                    <Text style={styles.roleBadgeText}>SUPERHOST</Text>
+                  </LinearGradient>
+                </View>
+              </View>
             </View>
-        </View>
+          </SafeAreaView>
+        </LinearGradient>
 
-        {/* MENU */}
+        {/* Menu Sections */}
         <View style={styles.menuWrapper}>
-            <Text style={styles.menuHeader}>Business Tools</Text>
-            <MenuItem icon="wallet-outline" label="Payout Settings" color="#4A90E2" onPress={() => {}} />
-            <MenuItem icon="bar-chart-outline" label="Performance" color="#50E3C2" onPress={() => {}} />
-            
-            <Text style={styles.menuHeader}>Security</Text>
-            {/* ✅ KYC NAVIGATION ADDED HERE */}
-            <MenuItem 
-              icon="shield-checkmark-outline" 
-              label="Identity Verification" 
-              status={kycStatus} 
-              color="#9013FE" 
-              onPress={() => router.push('/kyc')} 
-            />
-            <MenuItem icon="lock-closed-outline" label="Change Password" color="#F5A623" onPress={() => {}} />
-            
-            <Text style={styles.menuHeader}>Support</Text>
-            <MenuItem icon="chatbubbles-outline" label="Help Center" color="#FF5A5F" onPress={() => {}} />
+          {/* Business Tools */}
+          <Text style={styles.menuHeader}>Business Tools</Text>
+          <MenuItem
+            icon="wallet-outline"
+            label="Payout Settings"
+            gradient={[COLORS.blue[500], '#2563EB']}
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="bar-chart-outline"
+            label="Performance Analytics"
+            gradient={[COLORS.emerald[500], '#059669']}
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="receipt-outline"
+            label="Earnings Report"
+            gradient={[COLORS.purple[500], '#7C3AED']}
+            onPress={() => {}}
+          />
+
+          {/* Security */}
+          <Text style={styles.menuHeader}>Security & Verification</Text>
+          <MenuItem
+            icon="shield-checkmark-outline"
+            label="Identity Verification"
+            status={getKycStatusText()}
+            statusColor={getKycStatusColor()}
+            gradient={[COLORS.purple[500], '#7C3AED']}
+            onPress={() => router.push('/kyc')}
+          />
+          <MenuItem
+            icon="lock-closed-outline"
+            label="Change Password"
+            gradient={[COLORS.orange[500], '#EA580C']}
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="finger-print-outline"
+            label="Privacy Settings"
+            gradient={[COLORS.blue[500], '#2563EB']}
+            onPress={() => {}}
+          />
+
+          {/* Support */}
+          <Text style={styles.menuHeader}>Support & Legal</Text>
+          <MenuItem
+            icon="chatbubbles-outline"
+            label="Help Center"
+            gradient={[COLORS.emerald[500], '#059669']}
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="document-text-outline"
+            label="Terms & Conditions"
+            gradient={[COLORS.gray[500], '#4B5563']}
+            onPress={() => {}}
+          />
+          <MenuItem
+            icon="information-circle-outline"
+            label="About App"
+            gradient={[COLORS.blue[500], '#2563EB']}
+            onPress={() => {}}
+          />
         </View>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        {/* Logout Button */}
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
+          <View style={styles.logoutBtnInner}>
+            <Ionicons name="log-out-outline" size={22} color={COLORS.red[500]} />
             <Text style={styles.logoutText}>Log Out</Text>
+          </View>
         </TouchableOpacity>
 
+        {/* App Version */}
+        <Text style={styles.versionText}>Version 1.0.0</Text>
       </ScrollView>
     </View>
   );
 }
 
-// ✅ Updated to accept onPress
-function MenuItem({ icon, label, status, color, onPress }) {
+// ============================================
+// 📦 MENU ITEM COMPONENT
+// ============================================
+function MenuItem({ icon, label, status, statusColor, gradient, onPress }) {
   return (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+    <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.menuLeft}>
-        <View style={[styles.iconBox, { backgroundColor: `${color}15` }]}>
-          <Ionicons name={icon} size={20} color={color} />
+        <View style={styles.iconBoxContainer}>
+          <LinearGradient
+            colors={gradient}
+            style={styles.iconBox}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name={icon} size={22} color={COLORS.white} />
+          </LinearGradient>
         </View>
         <Text style={styles.menuLabel}>{label}</Text>
       </View>
+
       <View style={styles.menuRight}>
-        {status && <Text style={[styles.status, status === 'approved' ? styles.stGreen : styles.stOrange]}>{status}</Text>}
-        <Ionicons name="chevron-forward" size={18} color="#ccc" />
+        {status && (
+          <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
+            <Text style={[styles.statusText, { color: statusColor }]}>
+              {status}
+            </Text>
+          </View>
+        )}
+        <Ionicons name="chevron-forward" size={20} color={COLORS.gray[500]} />
       </View>
     </TouchableOpacity>
   );
 }
 
+// ============================================
+// 💅 STYLES
+// ============================================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
-  headerContainer: { alignItems: 'center', marginBottom: 20 },
-  gradientHeader: { width: '100%', height: 150, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
-  profileContent: { marginTop: -60, alignItems: 'center' },
-  avatarContainer: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.1, elevation: 5, marginBottom: 10 },
-  avatarText: { fontSize: 40, fontWeight: 'bold', color: '#141E30' },
-  verifiedBadge: { position: 'absolute', bottom: 5, right: 5, backgroundColor: '#4CAF50', width: 26, height: 26, borderRadius: 13, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#fff' },
-  
-  name: { fontSize: 24, fontWeight: 'bold', color: '#141E30' },
-  email: { fontSize: 14, color: '#888', marginBottom: 8 },
-  tag: { backgroundColor: '#141E30', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-  tagText: { color: '#fff', fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.navy[900],
+  },
 
-  menuWrapper: { paddingHorizontal: 20 },
-  menuHeader: { fontSize: 14, fontWeight: '700', color: '#aaa', marginBottom: 10, marginTop: 10, textTransform: 'uppercase' },
-  menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, backgroundColor: '#fff', paddingHorizontal: 15, borderRadius: 12, marginBottom: 10, shadowColor: '#000', shadowOpacity: 0.03, elevation: 1 },
-  menuLeft: { flexDirection: 'row', alignItems: 'center' },
-  iconBox: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-  menuLabel: { fontSize: 16, color: '#333', fontWeight: '500' },
-  menuRight: { flexDirection: 'row', alignItems: 'center' },
-  
-  status: { fontSize: 12, marginRight: 8, textTransform: 'capitalize' },
-  stGreen: { color: 'green' },
-  stOrange: { color: 'orange' },
+  // Header
+  gradientHeader: {
+    paddingBottom: 40,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerContent: {
+    paddingTop: 20,
+  },
+  avatarSection: {
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  avatarGradient: {
+    width: 110,
+    height: 110,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  avatarText: {
+    fontSize: 48,
+    fontWeight: '800',
+    color: COLORS.navy[900],
+  },
+  verifiedBadge: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    backgroundColor: COLORS.navy[900],
+    borderRadius: 20,
+    padding: 2,
+    borderWidth: 3,
+    borderColor: COLORS.navy[800],
+  },
 
-  logoutBtn: { marginHorizontal: 20, marginTop: 20, padding: 16, alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#ffebee' },
-  logoutText: { color: '#D32F2F', fontSize: 16, fontWeight: 'bold' }
+  name: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: COLORS.white,
+    marginBottom: 4,
+  },
+  email: {
+    fontSize: 14,
+    color: COLORS.gray[400],
+    marginBottom: 14,
+  },
+
+  roleBadgeContainer: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: COLORS.gold[500],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
+  roleBadgeText: {
+    color: COLORS.navy[900],
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+
+  // Menu
+  menuWrapper: {
+    paddingHorizontal: 20,
+    marginTop: -10,
+  },
+  menuHeader: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.gray[500],
+    marginBottom: 12,
+    marginTop: 28,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.navy[800],
+    borderRadius: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.navy[700],
+  },
+  menuLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconBoxContainer: {
+    marginRight: 14,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  iconBox: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuLabel: {
+    fontSize: 15,
+    color: COLORS.white,
+    fontWeight: '600',
+    flex: 1,
+  },
+  menuRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
+
+  // Logout Button
+  logoutBtn: {
+    marginHorizontal: 20,
+    marginTop: 28,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: COLORS.navy[800],
+    borderWidth: 1,
+    borderColor: COLORS.red[500] + '40',
+  },
+  logoutBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 16,
+  },
+  logoutText: {
+    color: COLORS.red[500],
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  // Version
+  versionText: {
+    textAlign: 'center',
+    color: COLORS.gray[500],
+    fontSize: 12,
+    marginTop: 24,
+    fontWeight: '500',
+  },
 });
