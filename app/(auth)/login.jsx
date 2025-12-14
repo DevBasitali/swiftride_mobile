@@ -142,7 +142,7 @@ export default function Login() {
                 <Ionicons name="car-sport" size={40} color={COLORS.navy[900]} />
               </LinearGradient>
             </View>
-            <Text style={styles.brandName}>RentWheels</Text>
+            <Text style={styles.brandName}>Swift Ride</Text>
           </View>
 
           {/* Header */}

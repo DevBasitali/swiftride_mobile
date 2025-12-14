@@ -7,19 +7,20 @@ export default function Index() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0A1628' }}>
+        <ActivityIndicator size="large" color="#F59E0B" />
       </View>
     );
   }
 
-  // If logged in, go to correct area
+  // ✅ 1. If Logged In: Go to Dashboard
   if (user) {
     return user.role === 'host' || user.role === 'showroom' 
       ? <Redirect href="/(host)/(tabs)" /> 
       : <Redirect href="/(customer)/(tabs)" />;
   }
 
-  // Otherwise, go to login
-  return <Redirect href="/(auth)/login" />;
+  // ✅ 2. If Not Logged In: Start the App Flow (Splash -> Onboarding)
+  // OLD: return <Redirect href="/(auth)/login" />;
+  return <Redirect href="/splash" />;
 }

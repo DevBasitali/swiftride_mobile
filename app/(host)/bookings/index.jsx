@@ -1,19 +1,43 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator, Alert, RefreshControl, StatusBar } from 'react-native';
-import { useFocusEffect, router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  StatusBar,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { router, useFocusEffect } from 'expo-router';
 import bookingService from '../../../services/bookingService';
-import carService from '../../../services/carService'; 
+
+// Premium Theme
+const COLORS = {
+  navy: { 900: '#0A1628', 800: '#0F2137', 700: '#152A46' },
+  gold: { 500: '#F59E0B' },
+  emerald: { 500: '#10B981' },
+  orange: { 500: '#F97316' },
+  red: { 500: '#EF4444' },
+  blue: { 500: '#3B82F6' },
+  gray: { 400: '#9CA3AF', 500: '#6B7280' },
+  white: '#FFFFFF',
+};
+
+const TABS = [
+  { id: 'pending', label: 'Requests' },
+  { id: 'confirmed', label: 'Upcoming' },
+  { id: 'history', label: 'History' },
+];
 
 export default function HostBookings() {
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState('requests'); 
-  
-  const [requests, setRequests] = useState([]);
-  const [history, setHistory] = useState([]);
+  const [activeTab, setActiveTab] = useState('pending');
 
   useFocusEffect(
     useCallback(() => {
@@ -21,142 +45,176 @@ export default function HostBookings() {
     }, [])
   );
 
-  const fetchBookings = async () => {
+   const fetchBookings = async () => {
     try {
       const response = await bookingService.getHostBookings();
-      const allBookings = response.items || [];
+      
+      // console.log("DEBUG HOST BOOKINGS:", JSON.stringify(response, null, 2));
 
-      // Filter pending vs others
-      const pending = allBookings.filter(b => b.status === 'pending');
-      const others = allBookings.filter(b => b.status !== 'pending');
+      // ✅ FIX: Access the nested 'data.items'
+      let items = [];
+      
+      // Case 1: Standard API Response { success: true, data: { items: [...] } }
+      if (response.data && response.data.items && Array.isArray(response.data.items)) {
+        items = response.data.items;
+      }
+      // Case 2: Direct array (unlikely based on logs)
+      else if (Array.isArray(response)) {
+        items = response;
+      }
+      // Case 3: Items at root (unlikely)
+      else if (response.items && Array.isArray(response.items)) {
+        items = response.items;
+      }
 
-      setRequests(pending);
-      setHistory(others);
+      // console.log("Parsed Items Length:", items.length);
+
+      setBookings(items || []); // Ensure it's always an array
     } catch (error) {
       console.log('Error fetching bookings:', error);
+      setBookings([]); // Set empty array on error
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const handleStatusUpdate = async (bookingId, newStatus) => {
-    const originalRequests = [...requests];
-    setRequests(prev => prev.filter(b => b.id !== bookingId)); // Optimistic update
-
-    try {
-      await bookingService.updateBookingStatus(bookingId, newStatus);
-      Alert.alert('Success', `Booking ${newStatus === 'confirmed' ? 'Accepted' : 'Rejected'}`);
-      fetchBookings(); 
-    } catch (error) {
-      setRequests(originalRequests); 
-      Alert.alert('Error', 'Failed to update booking status.');
+  const getFilteredBookings = () => {
+    switch (activeTab) {
+      case 'pending':
+        return bookings.filter(b => b.status === 'pending');
+      case 'confirmed':
+        return bookings.filter(b => ['confirmed', 'ongoing'].includes(b.status));
+      case 'history':
+        return bookings.filter(b => ['completed', 'cancelled'].includes(b.status));
+      default:
+        return bookings;
     }
   };
 
-  const confirmAction = (id, status) => {
-    Alert.alert(
-      status === 'confirmed' ? 'Accept Booking' : 'Reject Booking',
-      `Are you sure you want to ${status === 'confirmed' ? 'accept' : 'reject'} this request?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Confirm', style: status === 'confirmed' ? 'default' : 'destructive', onPress: () => handleStatusUpdate(id, status) }
-      ]
-    );
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'confirmed': return COLORS.emerald[500];
+      case 'pending': return COLORS.orange[500];
+      case 'ongoing': return COLORS.blue[500];
+      case 'completed': return COLORS.gray[400];
+      case 'cancelled': return COLORS.red[500];
+      default: return COLORS.gray[500];
+    }
   };
 
   const renderItem = ({ item }) => {
-    const isPending = item.status === 'pending';
-    
+    const statusColor = getStatusColor(item.status);
+    const startDate = new Date(item.startDateTime).toLocaleDateString();
+    const endDate = new Date(item.endDateTime).toLocaleDateString();
+
     return (
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-            <View style={styles.dateBox}>
-                <Ionicons name="calendar-outline" size={14} color="#666" />
-                <Text style={styles.dateText}>
-                    {new Date(item.startDateTime).toLocaleDateString()} - {new Date(item.endDateTime).toLocaleDateString()}
-                </Text>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => router.push(`/(host)/bookings/${item.id || item._id}`)}
+        style={styles.card}
+      >
+        <View style={[styles.statusStrip, { backgroundColor: statusColor }]} />
+        
+        <View style={styles.cardContent}>
+          {/* Header */}
+          <View style={styles.cardHeader}>
+            <View style={styles.dateBadge}>
+              <Text style={styles.dateText}>{startDate}</Text>
             </View>
-            <View style={[styles.badge, styles[`badge_${item.status}`]]}>
-                <Text style={[styles.badgeText, styles[`text_${item.status}`]]}>{item.status}</Text>
+            <View style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}>
+              <Text style={[styles.statusText, { color: statusColor }]}>{item.status}</Text>
             </View>
-        </View>
+          </View>
 
-        <View style={styles.cardBody}>
-            <Image 
-                source={{ uri: carService.getImageUrl(item.car?.primaryPhoto || item.car?.photos?.[0]) }} 
-                style={styles.carImage} 
-            />
-            <View style={styles.infoCol}>
-                <Text style={styles.carName}>{item.car?.make} {item.car?.model} {item.car?.year}</Text>
-                <Text style={styles.customerName}>Customer: {item.customer?.name || 'User'}</Text>
-                <Text style={styles.price}>${item.totalPrice} <Text style={styles.duration}>({item.durationHours} hrs)</Text></Text>
-            </View>
-        </View>
+          {/* Car Info */}
+          <Text style={styles.carName}>
+            {item.car?.make} {item.car?.model} {item.car?.year}
+          </Text>
 
-        {isPending && (
+          {/* Renter Info */}
+          <View style={styles.renterRow}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{item.customer?.name?.[0] || 'G'}</Text>
+            </View>
+            <View>
+              <Text style={styles.renterName}>{item.customer?.name || 'Guest'}</Text>
+              <Text style={styles.durationText}>{item.durationHours} Hours Trip</Text>
+            </View>
+            <View style={styles.priceContainer}>
+              <Text style={styles.price}>${item.totalPrice}</Text>
+            </View>
+          </View>
+
+          {/* Action Hint */}
+          {item.status === 'pending' && (
             <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.rejectBtn} onPress={() => confirmAction(item.id, 'cancelled')}>
-                    <Text style={styles.rejectText}>Reject</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.acceptBtn} onPress={() => confirmAction(item.id, 'confirmed')}>
-                    <LinearGradient colors={['#141E30', '#243B55']} style={styles.gradientBtn}>
-                        <Text style={styles.acceptText}>Accept Request</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
+              <Text style={styles.actionHint}>Review Request</Text>
+              <Ionicons name="arrow-forward" size={16} color={COLORS.gold[500]} />
             </View>
-        )}
-      </View>
+          )}
+        </View>
+      </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <LinearGradient colors={['#141E30', '#243B55']} style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.navy[900]} />
+      
+      {/* Header */}
+      <LinearGradient colors={[COLORS.navy[900], COLORS.navy[800]]} style={styles.header}>
         <SafeAreaView edges={['top', 'left', 'right']} style={styles.headerContent}>
+          <View style={styles.titleRow}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                <Ionicons name="arrow-back" size={24} color="#fff" />
+              <Ionicons name="arrow-back" size={24} color={COLORS.white} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Booking Manager</Text>
-            <View style={{width: 40}} />
-        </SafeAreaView>
+            <Text style={styles.title}>Bookings</Text>
+            <View style={{ width: 40 }} />
+          </View>
 
-        <View style={styles.tabContainer}>
-            <TouchableOpacity 
-                style={[styles.tab, activeTab === 'requests' && styles.activeTab]} 
-                onPress={() => setActiveTab('requests')}
-            >
-                <Text style={[styles.tabText, activeTab === 'requests' && styles.activeTabText]}>Requests ({requests.length})</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-                style={[styles.tab, activeTab === 'history' && styles.activeTab]} 
-                onPress={() => setActiveTab('history')}
-            >
-                <Text style={[styles.tabText, activeTab === 'history' && styles.activeTabText]}>History</Text>
-            </TouchableOpacity>
-        </View>
+          {/* Tabs */}
+          <View style={styles.tabContainer}>
+            {TABS.map((tab) => (
+              <TouchableOpacity
+                key={tab.id}
+                style={[styles.tab, activeTab === tab.id && styles.activeTab]}
+                onPress={() => setActiveTab(tab.id)}
+              >
+                <Text style={[styles.tabText, activeTab === tab.id && styles.activeTabText]}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </SafeAreaView>
       </LinearGradient>
 
-      <View style={styles.content}>
+      {/* List */}
+      <View style={styles.body}>
         {loading ? (
-            <ActivityIndicator size="large" color="#141E30" style={{marginTop: 50}} />
+          <ActivityIndicator size="large" color={COLORS.gold[500]} style={{ marginTop: 50 }} />
         ) : (
-            <FlatList
-                data={activeTab === 'requests' ? requests : history}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                contentContainerStyle={{ padding: 20, paddingBottom: 50 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchBookings(); }} />}
-                ListEmptyComponent={
-                    <View style={styles.emptyState}>
-                        <FontAwesome name={activeTab === 'requests' ? "inbox" : "history"} size={50} color="#ddd" />
-                        <Text style={styles.emptyText}>
-                            {activeTab === 'requests' ? "No new requests." : "No booking history."}
-                        </Text>
-                    </View>
-                }
-            />
+          <FlatList
+            data={getFilteredBookings()}
+            keyExtractor={(item) => item.id || item._id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => { setRefreshing(true); fetchBookings(); }}
+                tintColor={COLORS.gold[500]}
+              />
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyState}>
+                <MaterialCommunityIcons name="calendar-remove" size={60} color={COLORS.gray[500]} />
+                <Text style={styles.emptyText}>No bookings found</Text>
+                <Text style={styles.emptySub}>When you get bookings, they'll appear here.</Text>
+              </View>
+            }
+          />
         )}
       </View>
     </View>
@@ -164,44 +222,48 @@ export default function HostBookings() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
-  header: { paddingBottom: 15, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
-  headerContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 10, marginBottom: 15 },
-  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-  backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
-  tabContainer: { flexDirection: 'row', paddingHorizontal: 20, gap: 15 },
-  tab: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)' },
-  activeTab: { backgroundColor: '#fff' },
-  tabText: { color: '#ffffff80', fontWeight: '600' },
-  activeTabText: { color: '#141E30', fontWeight: 'bold' },
-  content: { flex: 1 },
-  card: { backgroundColor: '#fff', borderRadius: 16, padding: 15, marginBottom: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5, elevation: 2 },
+  container: { flex: 1, backgroundColor: COLORS.navy[900] },
+  
+  header: { paddingBottom: 15, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  headerContent: { paddingHorizontal: 20, paddingTop: 10 },
+  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.navy[700], borderRadius: 12 },
+  title: { fontSize: 20, fontWeight: '700', color: COLORS.white },
+
+  tabContainer: { flexDirection: 'row', backgroundColor: COLORS.navy[700], borderRadius: 12, padding: 4 },
+  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
+  activeTab: { backgroundColor: COLORS.navy[900] },
+  tabText: { color: COLORS.gray[400], fontWeight: '600', fontSize: 13 },
+  activeTabText: { color: COLORS.gold[500], fontWeight: '700' },
+
+  body: { flex: 1 },
+  listContent: { padding: 20, paddingBottom: 50 },
+
+  card: { backgroundColor: COLORS.navy[800], borderRadius: 16, marginBottom: 16, overflow: 'hidden', flexDirection: 'row', borderWidth: 1, borderColor: COLORS.navy[700] },
+  statusStrip: { width: 6, height: '100%' },
+  cardContent: { flex: 1, padding: 16 },
+
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  dateBox: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#F8FAFC', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  dateText: { fontSize: 12, color: '#666', fontWeight: '500' },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badge_pending: { backgroundColor: '#FFF3E0' },
-  badge_confirmed: { backgroundColor: '#E8F5E9' },
-  badge_cancelled: { backgroundColor: '#FFEBEE' },
-  badge_completed: { backgroundColor: '#E3F2FD' },
-  badgeText: { fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase' },
-  text_pending: { color: '#FF9800' },
-  text_confirmed: { color: '#4CAF50' },
-  text_cancelled: { color: '#F44336' },
-  text_completed: { color: '#2196F3' },
-  cardBody: { flexDirection: 'row', gap: 15 },
-  carImage: { width: 70, height: 70, borderRadius: 10, backgroundColor: '#eee' },
-  infoCol: { flex: 1, justifyContent: 'center' },
-  carName: { fontSize: 16, fontWeight: 'bold', color: '#141E30' },
-  customerName: { fontSize: 13, color: '#888', marginTop: 2 },
-  price: { fontSize: 16, fontWeight: 'bold', color: '#141E30', marginTop: 6 },
-  duration: { fontSize: 12, color: '#888', fontWeight: '400' },
-  actionRow: { flexDirection: 'row', marginTop: 15, gap: 10 },
-  rejectBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: '#FFEBEE', alignItems: 'center', backgroundColor: '#FFF5F5' },
-  rejectText: { color: '#D32F2F', fontWeight: 'bold' },
-  acceptBtn: { flex: 1, borderRadius: 10, overflow: 'hidden' },
-  gradientBtn: { paddingVertical: 13, alignItems: 'center' },
-  acceptText: { color: '#fff', fontWeight: 'bold' },
+  dateBadge: { backgroundColor: COLORS.navy[700], paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  dateText: { color: COLORS.gray[400], fontSize: 12, fontWeight: '600' },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  statusText: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
+
+  carName: { fontSize: 16, fontWeight: '700', color: COLORS.white, marginBottom: 12 },
+
+  renterRow: { flexDirection: 'row', alignItems: 'center' },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.navy[700], justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  avatarText: { color: COLORS.white, fontWeight: '700', fontSize: 16 },
+  renterName: { fontSize: 14, fontWeight: '600', color: COLORS.white },
+  durationText: { fontSize: 12, color: COLORS.gray[400] },
+  
+  priceContainer: { flex: 1, alignItems: 'flex-end' },
+  price: { fontSize: 16, fontWeight: '700', color: COLORS.gold[500] },
+
+  actionRow: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 12, gap: 4 },
+  actionHint: { fontSize: 12, color: COLORS.gold[500], fontWeight: '600' },
+
   emptyState: { alignItems: 'center', marginTop: 80 },
-  emptyText: { marginTop: 15, color: '#888', fontSize: 16 }
+  emptyText: { fontSize: 18, fontWeight: '700', color: COLORS.white, marginTop: 16 },
+  emptySub: { fontSize: 14, color: COLORS.gray[400], marginTop: 8 },
 });

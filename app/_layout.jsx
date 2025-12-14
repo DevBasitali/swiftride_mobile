@@ -25,14 +25,21 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <Stack screenOptions={{ headerShown: false }}>
+        {/* Entry Flow */}
         <Stack.Screen name="index" />
+        <Stack.Screen name="splash" />
+        <Stack.Screen name="(onboarding)" />
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="role-select" />
+
+        {/* Auth Modules */}
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(customer)" />
         <Stack.Screen name="(host)" />
-        <Stack.Screen 
-  name="kyc/index" 
-  options={{ headerShown: false }} 
-/>
+        
+        {/* Specific Screens */}
+        <Stack.Screen name="kyc/index" />
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </AuthProvider>
   );
