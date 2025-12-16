@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Swift Ride",
-    "slug": "A P2P Car Renting Service",
+    "slug": "swift-ride",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,11 +15,13 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.swiftride.app",
       "config": {
         "googleMapsApiKey": "AIzaSyCaEPPHig-6whefFn6_wSLffBIMReWs5gg"
       }
     },
     "android": {
+      "package": "com.swiftride.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -39,7 +41,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true

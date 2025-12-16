@@ -1,15 +1,15 @@
 // services/api.js
-import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import Config from '../constants/Config';
-import { router } from 'expo-router';
-import { Alert } from 'react-native';
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+import Config from "../constants/Config";
+import { router } from "expo-router";
+import { Alert } from "react-native";
 
 // Create Axios Instance
 const api = axios.create({
   baseURL: Config.API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true, // Included since your backend uses cookie-parser
 });
@@ -19,12 +19,12 @@ api.interceptors.request.use(
   async (config) => {
     try {
       // We assume you will save the token as 'accessToken' on login
-      const token = await SecureStore.getItemAsync('accessToken');
+      const token = await SecureStore.getItemAsync("accessToken");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
-      console.error('Error fetching token:', error);
+      console.error("Error fetching token:", error);
     }
     return config;
   },
@@ -44,11 +44,11 @@ api.interceptors.response.use(
       // Prevent infinite loops
       if (!originalRequest._retry) {
         originalRequest._retry = true;
-        
+
         // Clear token and redirect to login
-        await SecureStore.deleteItemAsync('accessToken');
-        Alert.alert('Session Expired', 'Please login again.');
-        router.replace('/(auth)/login');
+        await SecureStore.deleteItemAsync("accessToken");
+        Alert.alert("Session Expired", "Please login again.");
+        router.replace("/(auth)/login");
       }
     }
 
