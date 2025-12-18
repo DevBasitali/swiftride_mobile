@@ -1,25 +1,30 @@
 // services/bookingService.js
-import api from './api';
+import api from "./api";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import { Alert } from "react-native";
 
 export const createBooking = async (bookingData) => {
-  const response = await api.post('/bookings', bookingData);
+  const response = await api.post("/bookings", bookingData);
   return response.data;
 };
 
-
 export const getMyBookings = async () => {
-  const response = await api.get('/bookings/me');
+  const response = await api.get("/bookings/me");
   return response.data;
 };
 
 export const getHostBookings = async () => {
-  const response = await api.get('/bookings/owner'); // ✅ Check this endpoint
-  return response.data; 
+  const response = await api.get("/bookings/owner"); // ✅ Check this endpoint
+  return response.data;
 };
 
-export const updateBookingStatus = async (bookingId, status, note = '') => {
+export const updateBookingStatus = async (bookingId, status, note = "") => {
   // ✅ Ensure URL is correct
-  const response = await api.patch(`/bookings/${bookingId}/status`, { status, note });
+  const response = await api.patch(`/bookings/${bookingId}/status`, {
+    status,
+    note,
+  });
   return response.data;
 };
 
@@ -28,10 +33,52 @@ export const getBookingDetails = async (bookingId) => {
   return response.data;
 };
 
+export const downloadInvoice = async (bookingId) => {
+  try {
+    // Get the base URL from your api config
+    const baseURL = api.defaults.baseURL || "http://your-api-url.com";
+    const invoiceUrl = `${baseURL}/bookings/invoice/${bookingId}`;
+
+    // Get auth token
+    const token = api.defaults.headers.common["Authorization"];
+
+    // Download file to local storage
+    const fileUri = FileSystem.documentDirectory + `invoice_${bookingId}.pdf`;
+
+    const downloadResult = await FileSystem.downloadAsync(invoiceUrl, fileUri, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    if (downloadResult.status === 200) {
+      // Check if sharing is available
+      const isAvailable = await Sharing.isAvailableAsync();
+
+      if (isAvailable) {
+        await Sharing.shareAsync(downloadResult.uri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Download Invoice",
+        });
+        return { success: true };
+      } else {
+        Alert.alert("Success", "Invoice saved to: " + downloadResult.uri);
+        return { success: true, path: downloadResult.uri };
+      }
+    } else {
+      throw new Error("Download failed");
+    }
+  } catch (error) {
+    console.error("Invoice download error:", error);
+    throw error;
+  }
+};
+
 export default {
   createBooking,
   getMyBookings,
   getHostBookings,
   updateBookingStatus,
-  getBookingDetails
+  getBookingDetails,
+  downloadInvoice,
 };

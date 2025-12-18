@@ -74,8 +74,6 @@ export default function CustomerHome() {
 
       const response = await carService.getAllCars(filters);
 
-      console.log("2. API Response Body:", JSON.stringify(response, null, 2));
-
       let allCars = [];
       if (Array.isArray(response)) {
         allCars = response;

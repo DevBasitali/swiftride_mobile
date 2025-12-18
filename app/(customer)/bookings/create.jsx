@@ -133,6 +133,47 @@ export default function CreateBooking() {
     }
   };
 
+  //   const handleConfirm = async () => {
+  //   if (endDate <= startDate) {
+  //     Alert.alert('Invalid Dates', 'End time must be after start time.');
+  //     return;
+  //   }
+
+  //   setSubmitting(true);
+  //   try {
+  //     const payload = {
+  //       carId: car._id,
+  //       startDateTime: startDate.toISOString(),
+  //       endDateTime: endDate.toISOString()
+  //     };
+
+  //     console.log("Sending Booking Payload:", payload);
+
+  //     const response = await bookingService.createBooking(payload);
+
+  //     // ✅ Extract booking data
+  //     const bookingData = response.data?.booking || response.booking;
+  //     const totalPrice = calculateTotal();
+
+  //     // ✅ Navigate to payment screen
+  //     router.push({
+  //       pathname: '/(customer)/bookings/payment',
+  //       params: {
+  //         bookingId: bookingData._id || bookingData.id,
+  //         amount: totalPrice,
+  //         carName: `${car.make} ${car.model}`
+  //       }
+  //     });
+
+  //   } catch (error) {
+  //     console.log("Booking Error:", error);
+  //     const errMsg = error.response?.data?.message || error.message || 'Something went wrong.';
+  //     Alert.alert('Booking Failed', errMsg);
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
   if (loading)
     return (
       <View style={styles.center}>
