@@ -135,7 +135,7 @@ export default function PaymentScreen() {
         </TouchableOpacity>
 
         {/* JazzCash */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             styles.methodCard,
             selectedMethod === "jazzcash" && styles.methodActive,
@@ -160,7 +160,7 @@ export default function PaymentScreen() {
               <View style={styles.radioInner} />
             )}
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Payment Details Form */}
         {selectedMethod && (

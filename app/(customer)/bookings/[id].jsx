@@ -187,10 +187,10 @@ export default function CustomerBookingDetail() {
   const handleContactHost = () => {
     Alert.alert("Contact Host", "How would you like to contact the host?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Call", onPress: () => Linking.openURL("tel:+923001234567") },
+      { text: "Call", onPress: () => Linking.openURL("tel:+923111553572") },
       {
         text: "WhatsApp",
-        onPress: () => Linking.openURL("https://wa.me/923001234567"),
+        onPress: () => Linking.openURL("https://api.whatsapp.com/send?phone=923111553572"),
       },
     ]);
   };

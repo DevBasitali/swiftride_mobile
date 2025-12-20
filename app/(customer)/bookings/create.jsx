@@ -95,84 +95,84 @@ export default function CreateBooking() {
     return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60)));
   };
 
-  const handleConfirm = async () => {
-    if (endDate <= startDate) {
-      Alert.alert("Invalid Dates", "End time must be after start time.");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      // ✅ FIXED: Keys now match backend service expectations
-      const payload = {
-        carId: car._id,
-        startDateTime: startDate.toISOString(), // ✅ Changed from startDate
-        endDateTime: endDate.toISOString(), // ✅ Changed from endDate
-      };
-
-      console.log("Sending Booking Payload:", payload);
-
-      await bookingService.createBooking(payload);
-
-      Alert.alert("Success!", "Booking request sent successfully.", [
-        {
-          text: "View Bookings",
-          onPress: () => router.replace("/(customer)/(tabs)/bookings"),
-        },
-        { text: "Home", onPress: () => router.push("/(customer)/(tabs)") },
-      ]);
-    } catch (error) {
-      console.log("Booking Error:", error);
-      const errMsg =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong.";
-      Alert.alert("Booking Failed", errMsg);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  //   const handleConfirm = async () => {
+  // const handleConfirm = async () => {
   //   if (endDate <= startDate) {
-  //     Alert.alert('Invalid Dates', 'End time must be after start time.');
+  //     Alert.alert("Invalid Dates", "End time must be after start time.");
   //     return;
   //   }
 
   //   setSubmitting(true);
   //   try {
+  //     // ✅ FIXED: Keys now match backend service expectations
   //     const payload = {
   //       carId: car._id,
-  //       startDateTime: startDate.toISOString(),
-  //       endDateTime: endDate.toISOString()
+  //       startDateTime: startDate.toISOString(), // ✅ Changed from startDate
+  //       endDateTime: endDate.toISOString(), // ✅ Changed from endDate
   //     };
 
   //     console.log("Sending Booking Payload:", payload);
 
-  //     const response = await bookingService.createBooking(payload);
+  //     await bookingService.createBooking(payload);
 
-  //     // ✅ Extract booking data
-  //     const bookingData = response.data?.booking || response.booking;
-  //     const totalPrice = calculateTotal();
-
-  //     // ✅ Navigate to payment screen
-  //     router.push({
-  //       pathname: '/(customer)/bookings/payment',
-  //       params: {
-  //         bookingId: bookingData._id || bookingData.id,
-  //         amount: totalPrice,
-  //         carName: `${car.make} ${car.model}`
-  //       }
-  //     });
-
+  //     Alert.alert("Success!", "Booking request sent successfully.", [
+  //       {
+  //         text: "View Bookings",
+  //         onPress: () => router.replace("/(customer)/(tabs)/bookings"),
+  //       },
+  //       { text: "Home", onPress: () => router.push("/(customer)/(tabs)") },
+  //     ]);
   //   } catch (error) {
   //     console.log("Booking Error:", error);
-  //     const errMsg = error.response?.data?.message || error.message || 'Something went wrong.';
-  //     Alert.alert('Booking Failed', errMsg);
+  //     const errMsg =
+  //       error.response?.data?.message ||
+  //       error.message ||
+  //       "Something went wrong.";
+  //     Alert.alert("Booking Failed", errMsg);
   //   } finally {
   //     setSubmitting(false);
   //   }
   // };
+
+    const handleConfirm = async () => {
+    if (endDate <= startDate) {
+      Alert.alert('Invalid Dates', 'End time must be after start time.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        carId: car._id,
+        startDateTime: startDate.toISOString(),
+        endDateTime: endDate.toISOString()
+      };
+
+      console.log("Sending Booking Payload:", payload);
+
+      const response = await bookingService.createBooking(payload);
+
+      // ✅ Extract booking data
+      const bookingData = response.data?.booking || response.booking;
+      const totalPrice = calculateTotal();
+
+      // ✅ Navigate to payment screen
+      router.push({
+        pathname: '/(customer)/bookings/payment',
+        params: {
+          bookingId: bookingData._id || bookingData.id,
+          amount: totalPrice,
+          carName: `${car.make} ${car.model}`
+        }
+      });
+
+    } catch (error) {
+      console.log("Booking Error:", error);
+      const errMsg = error.response?.data?.message || error.message || 'Something went wrong.';
+      Alert.alert('Booking Failed', errMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading)
     return (
