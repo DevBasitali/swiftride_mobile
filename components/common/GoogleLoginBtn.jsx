@@ -47,7 +47,7 @@ const GoogleLoginBtn = ({ role = "customer" }) => {
 
         // 1. Send token to backend
         const response = await googleLoginRequest(idToken, role);
-        console.log("Backend Response:", JSON.stringify(response, null, 2));
+        // console.log("Backend Response:", JSON.stringify(response, null, 2));
 
         // ✅ 2. ROBUST EXTRACTION (The Fix)
         // Check both 'response.data.token' (your current backend) AND 'response.token'

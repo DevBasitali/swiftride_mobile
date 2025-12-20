@@ -87,7 +87,21 @@ export default function CreateCar() {
   });
 
   useEffect(() => {
-    if (params.address && params.address !== form.address) {
+    // Restore form state if coming back from location picker
+    if (params.formState) {
+      try {
+        const restoredForm = JSON.parse(params.formState);
+        setForm({
+          ...restoredForm,
+          address: params.address || restoredForm.address,
+          lat: params.lat ? parseFloat(params.lat) : restoredForm.lat,
+          lng: params.lng ? parseFloat(params.lng) : restoredForm.lng,
+        });
+      } catch (e) {
+        console.log('Error restoring form state:', e);
+      }
+    } else if (params.address && params.address !== form.address) {
+      // Fallback for direct address params
       setForm((prev) => ({
         ...prev,
         address: params.address,
@@ -95,7 +109,17 @@ export default function CreateCar() {
         lng: parseFloat(params.lng),
       }));
     }
-  }, [params.address, params.lat, params.lng]);
+    
+    // Restore images if coming back from location picker
+    if (params.imageUris) {
+      try {
+        const uris = JSON.parse(params.imageUris);
+        setImages(uris.map(uri => ({ uri })));
+      } catch (e) {
+        console.log('Error restoring images:', e);
+      }
+    }
+  }, [params.formState, params.address, params.lat, params.lng, params.imageUris]);
 
   const handleInputChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -606,7 +630,16 @@ export default function CreateCar() {
             <Text style={styles.label}>Location</Text>
             <TouchableOpacity
               style={styles.locationBtn}
-              onPress={() => router.push('/(host)/car/location-picker')}
+              onPress={() => {
+                // Pass current form state and images to location picker
+                router.push({
+                  pathname: '/(host)/car/location-picker',
+                  params: {
+                    formState: JSON.stringify(form),
+                    imageUris: JSON.stringify(images.map(img => img.uri)),
+                  },
+                });
+              }}
               activeOpacity={0.7}
             >
               <View style={{ flex: 1 }}>
