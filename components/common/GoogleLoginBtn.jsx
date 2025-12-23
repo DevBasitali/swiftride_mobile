@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   View,
-  Alert,
 } from "react-native";
 import {
   GoogleSignin,
@@ -14,6 +13,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { googleLoginRequest } from "../../services/authService";
 import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "expo-router";
+import { useAlert } from "../../context/AlertContext";
 
 GoogleSignin.configure({
   webClientId:
@@ -22,57 +23,76 @@ GoogleSignin.configure({
   scopes: ["profile", "email"],
 });
 
-const GoogleLoginBtn = ({ role = "customer" }) => {
+const GoogleLoginBtn = ({ role }) => { // Removed default
   const { handleGoogleLogin } = useAuth();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { showAlert } = useAlert();
 
   const signIn = async () => {
     try {
       setLoading(true);
       await GoogleSignin.hasPlayServices();
 
-      // Force sign out to ensure account picker appears
       try {
         await GoogleSignin.signOut();
       } catch (error) {
-        // Ignore if already signed out
+        // Ignore
       }
 
-      // Open Google Picker
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.data?.idToken;
 
       if (idToken) {
-        console.log(`Authenticating as ${role}...`);
+        console.log(`Authenticating with role: ${role || "none"}...`);
 
-        // 1. Send token to backend
-        const response = await googleLoginRequest(idToken, role);
-        // console.log("Backend Response:", JSON.stringify(response, null, 2));
+        try {
+          const response = await googleLoginRequest(idToken, role);
+          const data = response.data || response;
 
-        // ✅ 2. ROBUST EXTRACTION (The Fix)
-        // Check both 'response.data.token' (your current backend) AND 'response.token'
-        const data = response.data || response;
-        const token = data.token || data.accessToken || response.token;
-        const user = data.user || response.user;
+          if (data.requiresSignup) {
+            showAlert({
+              title: "Account Not Found",
+              message: "Please select an account type to register.",
+              type: "info",
+              buttons: [
+                { text: "Cancel", style: "cancel" },
+                { text: "Select Role", onPress: () => router.push("/role-select") }
+              ]
+            });
+            return;
+          }
 
-        console.log("🔹 EXTRACTED:", {
-          token: token ? "Found" : "Missing",
-          user: user ? "Found" : "Missing",
-        });
+          const token = data.token || data.accessToken || response.token;
+          const user = data.user || response.user;
 
-        // 3. Hand off to context
-        if (token && user) {
-          await handleGoogleLogin(token, user);
-        } else {
-          Alert.alert("Login Error", "Server returned an invalid response structure.");
+          if (token && user) {
+            await handleGoogleLogin(token, user);
+          } else {
+            showAlert({ title: "Login Error", message: "Invalid response.", type: "error" });
+          }
+
+        } catch (apiError) {
+          if (apiError.response?.status === 404 && apiError.response.data?.requiresSignup) {
+             showAlert({
+              title: "Account Not Found",
+              message: "Please select an account type to register.",
+              type: "info",
+              buttons: [
+                { text: "Cancel", style: "cancel" },
+                { text: "Select Role", onPress: () => router.push("/role-select") }
+              ]
+            });
+            return;
+          }
+          throw apiError;
         }
       }
     } catch (error) {
-      console.log("Google Error:", error);
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log("User cancelled login");
       } else {
-        Alert.alert("Google Login Error", error.message || "Unknown error");
+        showAlert({ title: "Google Login Error", message: error.message, type: "error" });
       }
     } finally {
       setLoading(false);

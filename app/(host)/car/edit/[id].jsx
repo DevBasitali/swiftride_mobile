@@ -288,7 +288,7 @@ export default function EditCar() {
                 value={form.pricePerDay}
                 keyboardType="numeric"
                 onChangeText={(t) => handleInputChange('pricePerDay', t)}
-                prefix="$"
+                prefix="Rs"
               />
               <View style={{ width: 15 }} />
               <Input
@@ -297,7 +297,7 @@ export default function EditCar() {
                 value={form.pricePerHour}
                 keyboardType="numeric"
                 onChangeText={(t) => handleInputChange('pricePerHour', t)}
-                prefix="$"
+                prefix="Rs"
               />
             </View>
           </View>

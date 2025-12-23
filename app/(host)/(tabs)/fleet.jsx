@@ -123,7 +123,7 @@ export default function HostFleet() {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.priceSymbol}>$</Text>
+              <Text style={styles.priceSymbol}>Rs.</Text>
               <Text style={styles.priceValue}>{item.pricePerDay}</Text>
               <Text style={styles.priceUnit}>/day</Text>
             </LinearGradient>

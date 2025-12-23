@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { AuthProvider } from '../context/AuthContext';
+import { AlertProvider } from '../context/AlertContext';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
@@ -24,23 +25,25 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* Entry Flow */}
-        <Stack.Screen name="index" />
-        <Stack.Screen name="splash" />
-        <Stack.Screen name="(onboarding)" />
-        <Stack.Screen name="welcome" />
-        <Stack.Screen name="role-select" />
+      <AlertProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* Entry Flow */}
+          <Stack.Screen name="index" />
+          <Stack.Screen name="splash" />
+          <Stack.Screen name="(onboarding)" />
+          <Stack.Screen name="welcome" />
+          <Stack.Screen name="role-select" />
 
-        {/* Auth Modules */}
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(customer)" />
-        <Stack.Screen name="(host)" />
+          {/* Auth Modules */}
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(customer)" />
+          <Stack.Screen name="(host)" />
 
-        {/* Specific Screens */}
-        <Stack.Screen name="kyc/index" />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
+          {/* Specific Screens */}
+          <Stack.Screen name="kyc/index" />
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        </Stack>
+      </AlertProvider>
     </AuthProvider>
   );
 }

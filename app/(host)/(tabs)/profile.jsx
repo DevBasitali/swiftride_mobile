@@ -10,6 +10,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useAuth } from '../../../context/AuthContext';
+import { useAlert } from '../../../context/AlertContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
@@ -65,11 +66,19 @@ export default function HostProfile() {
     }, [])
   );
 
+  // Custom Alert
+  const { showAlert } = useAlert();
+
   const handleLogout = () => {
-    Alert.alert("Log Out", "Are you sure?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Log Out", style: "destructive", onPress: logout }
-    ]);
+    showAlert({
+      title: "Log Out",
+      message: "Are you sure you want to log out?",
+      type: "warning",
+      buttons: [
+        { text: "Cancel", style: "cancel" },
+        { text: "Log Out", onPress: logout }
+      ]
+    });
   };
   // ============================================
   // END ORIGINAL LOGIC

@@ -19,9 +19,11 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import carService, { DAYS_OF_WEEK } from '../../../services/carService';
+import { useAlert } from '../../../context/AlertContext';
 
 const { width } = Dimensions.get('window');
 
@@ -62,6 +64,7 @@ export default function CreateCar() {
   const params = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
+  const { showAlert } = useAlert();
 
   const [form, setForm] = useState({
     make: '',
@@ -142,16 +145,17 @@ export default function CreateCar() {
         });
 
         if (validImages.length < result.assets.length) {
-          Alert.alert(
-            'File Too Large',
-            'Some images were skipped because they exceed the 5MB limit.'
-          );
+          showAlert({
+            title: "File Too Large",
+            message: "Some images were skipped because they exceed the 5MB limit.",
+            type: "warning"
+          });
         }
 
         setImages([...images, ...validImages]);
       }
     } catch (error) {
-      Alert.alert('Error', 'Could not open gallery.');
+           showAlert({ title: "Error", message: "Could not open gallery.", type: "error" });
     }
   };
 
@@ -169,10 +173,11 @@ export default function CreateCar() {
       !form.address ||
       images.length === 0
     ) {
-      Alert.alert(
-        'Missing Fields',
-        'Please fill in all required fields and add at least one photo.'
-      );
+      showAlert({
+        title: "Missing Fields",
+        message: "Please fill in all required fields and add at least one photo.",
+        type: "warning"
+      });
       return;
     }
 
@@ -217,12 +222,19 @@ export default function CreateCar() {
 
       await carService.createCar(formData);
 
-      Alert.alert('Success', 'Car Listed Successfully!', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      showAlert({
+        title: "Success",
+        message: "Car Listed Successfully!",
+        type: "success",
+        buttons: [{ text: "OK", onPress: () => router.back() }]
+      });
     } catch (error) {
       console.log('Create Error:', error);
-      Alert.alert('Error', error?.response?.data?.message || 'Failed to create listing.');
+       showAlert({
+        title: "Error",
+        message: error?.response?.data?.message || "Failed to create listing.",
+        type: "error"
+      });
     } finally {
       setLoading(false);
     }
@@ -361,7 +373,7 @@ export default function CreateCar() {
               <Input
                 flex
                 label="Make"
-                placeholder="e.g. Toyota"
+                placeholder="Toyota"
                 value={form.make}
                 onChangeText={(t) => handleInputChange('make', t)}
                 icon="car-outline"
@@ -370,7 +382,7 @@ export default function CreateCar() {
               <Input
                 flex
                 label="Model"
-                placeholder="e.g. Camry"
+                placeholder="Camry"
                 value={form.model}
                 onChangeText={(t) => handleInputChange('model', t)}
                 icon="car-sport-outline"
@@ -428,21 +440,21 @@ export default function CreateCar() {
               <Input
                 flex
                 label="Price Per Day"
-                placeholder="50"
+                placeholder="15000"
                 keyboardType="numeric"
                 value={form.pricePerDay}
                 onChangeText={(t) => handleInputChange('pricePerDay', t)}
-                prefix="$"
+                prefix="Rs"
               />
               <View style={{ width: 15 }} />
               <Input
                 flex
                 label="Price Per Hour"
-                placeholder="5"
+                placeholder="2000"
                 keyboardType="numeric"
                 value={form.pricePerHour}
                 onChangeText={(t) => handleInputChange('pricePerHour', t)}
-                prefix="$"
+                prefix="Rs"
               />
             </View>
           </View>
@@ -641,39 +653,94 @@ export default function CreateCar() {
             </View>
 
             <Text style={styles.label}>Location</Text>
-            <TouchableOpacity
-              style={styles.locationBtn}
-              onPress={() => {
-                // Pass current form state and images to location picker
-                router.push({
-                  pathname: '/(host)/car/location-picker',
-                  params: {
-                    formState: JSON.stringify(form),
-                    imageUris: JSON.stringify(images.map(img => img.uri)),
-                  },
-                });
-              }}
-              activeOpacity={0.7}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={form.address ? styles.locText : styles.locPlaceholder}>
-                  {form.address || 'Tap to set pickup location'}
-                </Text>
-                {form.lat !== 0 && (
-                  <Text style={styles.coordText}>
-                    📍 {form.lat.toFixed(4)}, {form.lng.toFixed(4)}
-                  </Text>
+            
+            <View style={{ marginBottom: 15, zIndex: 100 }}>
+              <GooglePlacesAutocomplete
+                placeholder={form.address || "Search location..."}
+                fetchDetails={true}
+                onPress={(data, details = null) => {
+                  if (details) {
+                     const addr = data.description;
+                     const lat = details.geometry.location.lat;
+                     const lng = details.geometry.location.lng;
+                     
+                     handleInputChange('address', addr);
+                     handleInputChange('lat', lat);
+                     handleInputChange('lng', lng);
+                  }
+                }}
+                query={{
+                  key: 'AIzaSyCaEPPHig-6whefFn6_wSLffBIMReWs5gg', 
+                  language: 'en',
+                }}
+                textInputProps={{
+                  placeholderTextColor: COLORS.gray[400],
+                  style: {
+                    color: COLORS.white,
+                    fontSize: 15,
+                    flex: 1,
+                  }
+                }}
+                renderRightButton={() => (
+                  <TouchableOpacity
+                    style={styles.mapIconButton}
+                    onPress={() => {
+                        router.push({
+                          pathname: '/(host)/car/location-picker',
+                          params: {
+                            formState: JSON.stringify(form),
+                            imageUris: JSON.stringify(images.map(img => img.uri)),
+                          },
+                        });
+                    }}
+                  >
+                    <Ionicons name="map" size={20} color={COLORS.navy[900]} />
+                  </TouchableOpacity>
                 )}
-              </View>
-              <View style={styles.mapIconBox}>
-                <LinearGradient
-                  colors={[COLORS.gold[500], COLORS.gold[600]]}
-                  style={styles.mapIconGradient}
-                >
-                  <Ionicons name="navigate" size={20} color={COLORS.navy[900]} />
-                </LinearGradient>
-              </View>
-            </TouchableOpacity>
+                styles={{
+                  container: {
+                    flex: 0,
+                  },
+                  textInputContainer: {
+                    backgroundColor: COLORS.navy[700],
+                    borderWidth: 1,
+                    borderColor: COLORS.navy[600],
+                    borderRadius: 12,
+                    paddingHorizontal: 8,
+                    alignItems: 'center',
+                    height: 54,
+                  },
+                  textInput: {
+                    backgroundColor: 'transparent',
+                    color: COLORS.white,
+                    fontSize: 15,
+                    height: 54,
+                  },
+                  listView: {
+                    backgroundColor: COLORS.navy[800],
+                    borderWidth: 1,
+                    borderColor: COLORS.navy[600],
+                    borderRadius: 12,
+                    marginTop: 5,
+                  },
+                  row: {
+                    backgroundColor: 'transparent',
+                    padding: 13,
+                    height: 44,
+                    flexDirection: 'row',
+                  },
+                  description: {
+                    color: COLORS.white,
+                    fontSize: 14,
+                  },
+                  separator: {
+                    height: 0.5,
+                    backgroundColor: COLORS.navy[600],
+                  },
+                }}
+                enablePoweredByContainer={false}
+              />
+            </View>
 
             <View style={{ height: 15 }} />
             <Input
@@ -682,7 +749,7 @@ export default function CreateCar() {
               value={form.description}
               onChangeText={(t) => handleInputChange('description', t)}
               multiline
-              icon="document-text-outline"
+              // icon="document-text-outline"
             />
           </View>
         </ScrollView>
@@ -1167,6 +1234,15 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  mapIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: COLORS.gold[500],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
   },
 
   // Footer

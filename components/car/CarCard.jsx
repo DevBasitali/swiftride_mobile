@@ -23,7 +23,7 @@ export default function CarCard({ car }) {
           resizeMode="cover"
         />
         <View style={styles.priceBadge}>
-          <Text style={styles.priceText}>${car.pricePerDay}</Text>
+          <Text style={styles.priceText}>Rs. {car.pricePerDay}</Text>
           <Text style={styles.perDay}>/day</Text>
         </View>
       </View>
