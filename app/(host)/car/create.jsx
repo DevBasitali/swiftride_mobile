@@ -673,6 +673,8 @@ export default function CreateCar() {
                   key: 'AIzaSyCaEPPHig-6whefFn6_wSLffBIMReWs5gg', 
                   language: 'en',
                 }}
+                onFail={(error) => console.error("Google Places Error:", error)}
+                onNotFound={() => console.log("Google Places: No results found")}
                 textInputProps={{
                   placeholderTextColor: COLORS.gray[400],
                   style: {
@@ -717,11 +719,20 @@ export default function CreateCar() {
                     height: 54,
                   },
                   listView: {
+                    position: 'absolute',
+                    top: 60,
+                    left: 0,
+                    right: 0,
                     backgroundColor: COLORS.navy[800],
+                    borderRadius: 12,
                     borderWidth: 1,
                     borderColor: COLORS.navy[600],
-                    borderRadius: 12,
-                    marginTop: 5,
+                    elevation: 5,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                    zIndex: 9999, // Ensure it sits on top
                   },
                   row: {
                     backgroundColor: 'transparent',
