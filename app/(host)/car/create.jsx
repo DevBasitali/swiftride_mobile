@@ -670,7 +670,7 @@ export default function CreateCar() {
                   }
                 }}
                 query={{
-                  key: 'AIzaSyCaEPPHig-6whefFn6_wSLffBIMReWs5gg', 
+                  key: process.env.EXPO_PUBLIC_PLACES_API_KEY, 
                   language: 'en',
                 }}
                 onFail={(error) => console.error("Google Places Error:", error)}
