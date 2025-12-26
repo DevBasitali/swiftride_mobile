@@ -33,6 +33,17 @@ export const getBookingDetails = async (bookingId) => {
   return response.data;
 };
 
+/**
+ * Initialize Safepay Payment
+ * Calls the backend to create a Safepay checkout session
+ * Returns the redirect URL to open in browser
+ */
+export const initSafepayPayment = async (bookingId) => {
+  // Pass platform=mobile so backend returns deep link redirect URLs
+  const response = await api.post(`/payments/booking/${bookingId}/safepay/init?platform=mobile`);
+  return response.data;
+};
+
 export const downloadInvoice = async (bookingId) => {
   try {
     // Get the base URL from your api config
@@ -81,4 +92,5 @@ export default {
   updateBookingStatus,
   getBookingDetails,
   downloadInvoice,
+  initSafepayPayment,
 };

@@ -63,7 +63,7 @@ export default function Bookings() {
     try {
       const response = await bookingService.getMyBookings();
 
-      console.log("DEBUG MY TRIPS:", JSON.stringify(response, null, 2));
+      // console.log("DEBUG MY TRIPS:", JSON.stringify(response, null, 2));
 
       // ✅ ROBUST DATA EXTRACTION
       let items = [];
