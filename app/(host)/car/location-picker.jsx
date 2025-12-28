@@ -254,56 +254,87 @@ export default function LocationPicker() {
 
     setIsSearching(true);
     try {
-      const results = await Location.geocodeAsync(query);
+      const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-      if (results.length > 0) {
+      // Use Google Places Autocomplete API
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${apiKey}&types=geocode`
+      );
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.predictions.length > 0) {
+        // Get details for each prediction
         const detailedResults = await Promise.all(
-          results.slice(0, 6).map(async (result) => {
+          data.predictions.slice(0, 6).map(async (prediction) => {
             try {
-              const addressDetails = await Location.reverseGeocodeAsync({
-                latitude: result.latitude,
-                longitude: result.longitude,
-              });
-              const addr = addressDetails[0] || {};
-              const distance = userLocation
-                ? calculateDistance(userLocation.latitude, userLocation.longitude, result.latitude, result.longitude)
-                : null;
+              // Get place details for coordinates
+              const detailsResponse = await fetch(
+                `https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=geometry,formatted_address&key=${apiKey}`
+              );
+              const details = await detailsResponse.json();
 
-              // Build full address
-              const addressParts = [
-                addr.streetNumber,
-                addr.street,
-                addr.name,
-                addr.district,
-                addr.subregion,
-                addr.city,
-                addr.region,
-                addr.country,
-              ].filter(Boolean);
-              const uniqueParts = [...new Set(addressParts)];
+              if (details.status === 'OK' && details.result.geometry) {
+                const { lat, lng } = details.result.geometry.location;
+                const distance = userLocation
+                  ? calculateDistance(userLocation.latitude, userLocation.longitude, lat, lng)
+                  : null;
 
-              return {
-                latitude: result.latitude,
-                longitude: result.longitude,
-                address: uniqueParts.join(', ') || addr.city || query,
-                city: addr.city || addr.region || 'Unknown',
-                country: addr.country || '',
-                distance,
-              };
+                return {
+                  latitude: lat,
+                  longitude: lng,
+                  address: details.result.formatted_address || prediction.description,
+                  city: prediction.structured_formatting?.main_text || 'Location',
+                  country: prediction.structured_formatting?.secondary_text || '',
+                  distance,
+                };
+              }
+              return null;
             } catch {
-              return {
-                latitude: result.latitude,
-                longitude: result.longitude,
-                address: query,
-                city: 'Location',
-                distance: null,
-              };
+              return null;
             }
           })
         );
-        setSearchResults(detailedResults);
+
+        setSearchResults(detailedResults.filter(Boolean));
       } else {
-        setSearchResults([]);
+        // Fallback to expo-location if Google fails
+        const results = await Location.geocodeAsync(query);
+        if (results.length > 0) {
+          const detailedResults = await Promise.all(
+            results.slice(0, 6).map(async (result) => {
+              try {
+                const addressDetails = await Location.reverseGeocodeAsync({
+                  latitude: result.latitude,
+                  longitude: result.longitude,
+                });
+                const addr = addressDetails[0] || {};
+                const distance = userLocation
+                  ? calculateDistance(userLocation.latitude, userLocation.longitude, result.latitude, result.longitude)
+                  : null;
+
+                return {
+                  latitude: result.latitude,
+                  longitude: result.longitude,
+                  address: [addr.city, addr.region, addr.country].filter(Boolean).join(', ') || query,
+                  city: addr.city || addr.region || 'Unknown',
+                  country: addr.country || '',
+                  distance,
+                };
+              } catch {
+                return {
+                  latitude: result.latitude,
+                  longitude: result.longitude,
+                  address: query,
+                  city: 'Location',
+                  distance: null,
+                };
+              }
+            })
+          );
+          setSearchResults(detailedResults);
+        } else {
+          setSearchResults([]);
+        }
       }
     } catch (error) {
       console.log('Search error:', error);

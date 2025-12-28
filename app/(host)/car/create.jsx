@@ -1,5 +1,5 @@
 // app/(host)/car/create.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -66,6 +66,8 @@ export default function CreateCar() {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
   const { showAlert } = useAlert();
+  const placesRef = useRef(null);
+  const [showPlacesList, setShowPlacesList] = useState(false);
 
   const [form, setForm] = useState({
     make: '',
@@ -308,6 +310,8 @@ export default function CreateCar() {
           style={styles.container}
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={true}
         >
           {/* Photos Section */}
           <View style={styles.formCard}>
@@ -663,8 +667,27 @@ export default function CreateCar() {
 
             <View style={{ marginBottom: 15, zIndex: 100 }}>
               <GooglePlacesAutocomplete
-                placeholder={form.address || "Search location..."}
+                ref={placesRef}
+                placeholder={"Search location..."}
                 fetchDetails={true}
+                enablePoweredByContainer={false}
+                disableScroll={true}
+                listViewDisplayed={showPlacesList}
+                textInputProps={{
+                  value: form.address,
+                  onChangeText: (text) => {
+                    handleInputChange('address', text);
+                    setShowPlacesList(text.length >= 2);
+                  },
+                  onFocus: () => setShowPlacesList(form.address.length >= 2),
+                  onBlur: () => setTimeout(() => setShowPlacesList(false), 200),
+                  placeholderTextColor: COLORS.gray[400],
+                  style: {
+                    color: COLORS.white,
+                    fontSize: 15,
+                    flex: 1,
+                  }
+                }}
                 onPress={(data, details = null) => {
                   if (details) {
                     const addr = data.description;
@@ -674,7 +697,13 @@ export default function CreateCar() {
                     handleInputChange('address', addr);
                     handleInputChange('lat', lat);
                     handleInputChange('lng', lng);
+
+                    // Close the list
+                    setShowPlacesList(false);
+                    placesRef.current?.setAddressText(addr);
                   }
+                  // Dismiss keyboard
+                  Keyboard.dismiss();
                 }}
                 query={{
                   key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -682,14 +711,8 @@ export default function CreateCar() {
                 }}
                 onFail={(error) => console.error("Google Places Error:", error)}
                 onNotFound={() => console.log("Google Places: No results found")}
-                textInputProps={{
-                  placeholderTextColor: COLORS.gray[400],
-                  style: {
-                    color: COLORS.white,
-                    fontSize: 15,
-                    flex: 1,
-                  }
-                }}
+                debounce={300}
+                minLength={2}
                 renderRightButton={() => (
                   <TouchableOpacity
                     style={styles.mapIconButton}
@@ -756,7 +779,6 @@ export default function CreateCar() {
                     backgroundColor: COLORS.navy[600],
                   },
                 }}
-                enablePoweredByContainer={false}
               />
             </View>
 
