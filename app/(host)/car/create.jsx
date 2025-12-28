@@ -24,6 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import carService, { DAYS_OF_WEEK } from '../../../services/carService';
 import { useAlert } from '../../../context/AlertContext';
+import TimePicker from '../../../components/TimePicker';
 
 const { width } = Dimensions.get('window');
 
@@ -83,8 +84,8 @@ export default function CreateCar() {
     lng: 0,
     availability: {
       daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-      startTime: '00:00',
-      endTime: '23:59',
+      startTime: '09:00',
+      endTime: '17:00',
       isAvailable: true,
     },
   });
@@ -155,7 +156,7 @@ export default function CreateCar() {
         setImages([...images, ...validImages]);
       }
     } catch (error) {
-           showAlert({ title: "Error", message: "Could not open gallery.", type: "error" });
+      showAlert({ title: "Error", message: "Could not open gallery.", type: "error" });
     }
   };
 
@@ -176,6 +177,16 @@ export default function CreateCar() {
       showAlert({
         title: "Missing Fields",
         message: "Please fill in all required fields and add at least one photo.",
+        type: "warning"
+      });
+      return;
+    }
+
+    // Validate location has proper coordinates
+    if (!form.lat || !form.lng || (form.lat === 0 && form.lng === 0)) {
+      showAlert({
+        title: "Invalid Location",
+        message: "Please select a location from the search suggestions or use the map picker to set proper coordinates.",
         type: "warning"
       });
       return;
@@ -230,7 +241,7 @@ export default function CreateCar() {
       });
     } catch (error) {
       console.log('Create Error:', error);
-       showAlert({
+      showAlert({
         title: "Error",
         message: error?.response?.data?.message || "Failed to create listing.",
         type: "error"
@@ -570,32 +581,28 @@ export default function CreateCar() {
 
             {/* Time Slots */}
             <View style={styles.row}>
-              <Input
-                flex
+              <TimePicker
                 label="Start Time"
-                placeholder="09:00"
                 value={form.availability.startTime}
-                onChangeText={(t) =>
+                onChange={(t) =>
                   handleInputChange('availability', {
                     ...form.availability,
                     startTime: t,
                   })
                 }
-                icon="time-outline"
+                icon="sunny-outline"
               />
               <View style={{ width: 15 }} />
-              <Input
-                flex
+              <TimePicker
                 label="End Time"
-                placeholder="17:00"
                 value={form.availability.endTime}
-                onChangeText={(t) =>
+                onChange={(t) =>
                   handleInputChange('availability', {
                     ...form.availability,
                     endTime: t,
                   })
                 }
-                icon="time-outline"
+                icon="moon-outline"
               />
             </View>
 
@@ -653,24 +660,24 @@ export default function CreateCar() {
             </View>
 
             <Text style={styles.label}>Location</Text>
-            
+
             <View style={{ marginBottom: 15, zIndex: 100 }}>
               <GooglePlacesAutocomplete
                 placeholder={form.address || "Search location..."}
                 fetchDetails={true}
                 onPress={(data, details = null) => {
                   if (details) {
-                     const addr = data.description;
-                     const lat = details.geometry.location.lat;
-                     const lng = details.geometry.location.lng;
-                     
-                     handleInputChange('address', addr);
-                     handleInputChange('lat', lat);
-                     handleInputChange('lng', lng);
+                    const addr = data.description;
+                    const lat = details.geometry.location.lat;
+                    const lng = details.geometry.location.lng;
+
+                    handleInputChange('address', addr);
+                    handleInputChange('lat', lat);
+                    handleInputChange('lng', lng);
                   }
                 }}
                 query={{
-                  key: process.env.EXPO_PUBLIC_PLACES_API_KEY, 
+                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
                   language: 'en',
                 }}
                 onFail={(error) => console.error("Google Places Error:", error)}
@@ -687,13 +694,13 @@ export default function CreateCar() {
                   <TouchableOpacity
                     style={styles.mapIconButton}
                     onPress={() => {
-                        router.push({
-                          pathname: '/(host)/car/location-picker',
-                          params: {
-                            formState: JSON.stringify(form),
-                            imageUris: JSON.stringify(images.map(img => img.uri)),
-                          },
-                        });
+                      router.push({
+                        pathname: '/(host)/car/location-picker',
+                        params: {
+                          formState: JSON.stringify(form),
+                          imageUris: JSON.stringify(images.map(img => img.uri)),
+                        },
+                      });
                     }}
                   >
                     <Ionicons name="map" size={20} color={COLORS.navy[900]} />
@@ -760,7 +767,7 @@ export default function CreateCar() {
               value={form.description}
               onChangeText={(t) => handleInputChange('description', t)}
               multiline
-              // icon="document-text-outline"
+            // icon="document-text-outline"
             />
           </View>
         </ScrollView>

@@ -38,7 +38,6 @@ export default function TrackCarScreen() {
     const mapRef = useRef(null);
 
     useEffect(() => {
-        // Connect to socket and join tracking room
         const socket = connectSocket();
 
         socket.on("connect", () => {
@@ -50,10 +49,8 @@ export default function TrackCarScreen() {
             setIsConnected(false);
         });
 
-        // Listen for location updates
         onLocationUpdate((data) => {
             console.log("📍 Received location:", data);
-
             if (data.bookingId === bookingId) {
                 const newLocation = {
                     latitude: data.lat,
@@ -63,7 +60,6 @@ export default function TrackCarScreen() {
                 setCarLocation(newLocation);
                 setLastUpdate(new Date());
 
-                // Animate map to new location
                 mapRef.current?.animateToRegion({
                     ...newLocation,
                     latitudeDelta: 0.01,
@@ -72,7 +68,6 @@ export default function TrackCarScreen() {
             }
         });
 
-        // Cleanup
         return () => {
             offLocationUpdate();
             disconnectSocket();
@@ -88,11 +83,7 @@ export default function TrackCarScreen() {
         <View style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
 
-            {/* Header */}
-            <LinearGradient
-                colors={[COLORS.navy[900], COLORS.navy[800]]}
-                style={styles.header}
-            >
+            <LinearGradient colors={[COLORS.navy[900], COLORS.navy[800]]} style={styles.header}>
                 <SafeAreaView edges={["top"]} style={styles.headerContent}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                         <Ionicons name="arrow-back" size={24} color={COLORS.white} />
@@ -105,7 +96,6 @@ export default function TrackCarScreen() {
                 </SafeAreaView>
             </LinearGradient>
 
-            {/* Map */}
             <View style={styles.mapContainer}>
                 <MapView
                     ref={mapRef}
@@ -133,7 +123,6 @@ export default function TrackCarScreen() {
                     )}
                 </MapView>
 
-                {/* Status Overlay */}
                 <View style={styles.statusOverlay}>
                     <View style={styles.statusRow}>
                         <Ionicons
@@ -148,7 +137,6 @@ export default function TrackCarScreen() {
                     <Text style={styles.lastUpdate}>Last update: {formatTime(lastUpdate)}</Text>
                 </View>
 
-                {/* Waiting Message */}
                 {!carLocation && (
                     <View style={styles.waitingOverlay}>
                         <ActivityIndicator size="large" color={COLORS.gold[500]} />
@@ -160,7 +148,6 @@ export default function TrackCarScreen() {
                 )}
             </View>
 
-            {/* Driver Info */}
             <View style={styles.driverInfo}>
                 <View style={styles.driverAvatar}>
                     <Ionicons name="person" size={24} color={COLORS.navy[900]} />
@@ -182,104 +169,26 @@ export default function TrackCarScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.navy[900] },
-
     header: { paddingBottom: 16, paddingHorizontal: 20 },
-    headerContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 10,
-        gap: 12,
-    },
-    backBtn: {
-        width: 40,
-        height: 40,
-        backgroundColor: COLORS.navy[700],
-        borderRadius: 12,
-        justifyContent: "center",
-        alignItems: "center",
-    },
+    headerContent: { flexDirection: "row", alignItems: "center", marginTop: 10, gap: 12 },
+    backBtn: { width: 40, height: 40, backgroundColor: COLORS.navy[700], borderRadius: 12, justifyContent: "center", alignItems: "center" },
     headerTitle: { color: COLORS.white, fontSize: 18, fontWeight: "700" },
     headerSub: { color: COLORS.gray[400], fontSize: 12 },
-    statusDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: COLORS.gray[500],
-    },
+    statusDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: COLORS.gray[500] },
     statusConnected: { backgroundColor: COLORS.green[500] },
-
     mapContainer: { flex: 1, position: "relative" },
     map: { flex: 1 },
-
-    carMarker: {
-        backgroundColor: COLORS.navy[800],
-        padding: 8,
-        borderRadius: 20,
-        borderWidth: 2,
-        borderColor: COLORS.gold[500],
-    },
-
-    statusOverlay: {
-        position: "absolute",
-        top: 16,
-        left: 16,
-        backgroundColor: COLORS.navy[800] + "E6",
-        padding: 12,
-        borderRadius: 12,
-    },
+    carMarker: { backgroundColor: COLORS.navy[800], padding: 8, borderRadius: 20, borderWidth: 2, borderColor: COLORS.gold[500] },
+    statusOverlay: { position: "absolute", top: 16, left: 16, backgroundColor: COLORS.navy[800] + "E6", padding: 12, borderRadius: 12 },
     statusRow: { flexDirection: "row", alignItems: "center", gap: 6 },
     statusText: { color: COLORS.white, fontSize: 12, fontWeight: "600" },
     lastUpdate: { color: COLORS.gray[400], fontSize: 10, marginTop: 4 },
-
-    waitingOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: COLORS.navy[900] + "CC",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 40,
-    },
-    waitingText: {
-        color: COLORS.white,
-        fontSize: 18,
-        fontWeight: "700",
-        marginTop: 20,
-    },
-    waitingSubtext: {
-        color: COLORS.gray[400],
-        fontSize: 14,
-        textAlign: "center",
-        marginTop: 8,
-    },
-
-    driverInfo: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: COLORS.navy[800],
-        margin: 16,
-        padding: 16,
-        borderRadius: 16,
-        gap: 12,
-    },
-    driverAvatar: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: COLORS.gold[500],
-        justifyContent: "center",
-        alignItems: "center",
-    },
+    waitingOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: COLORS.navy[900] + "CC", justifyContent: "center", alignItems: "center", padding: 40 },
+    waitingText: { color: COLORS.white, fontSize: 18, fontWeight: "700", marginTop: 20 },
+    waitingSubtext: { color: COLORS.gray[400], fontSize: 14, textAlign: "center", marginTop: 8 },
+    driverInfo: { flexDirection: "row", alignItems: "center", backgroundColor: COLORS.navy[800], margin: 16, padding: 16, borderRadius: 16, gap: 12 },
+    driverAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.gold[500], justifyContent: "center", alignItems: "center" },
     driverName: { color: COLORS.white, fontSize: 16, fontWeight: "700" },
     driverStatus: { color: COLORS.green[500], fontSize: 12 },
-    callBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: COLORS.green[500],
-        justifyContent: "center",
-        alignItems: "center",
-    },
+    callBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.green[500], justifyContent: "center", alignItems: "center" },
 });

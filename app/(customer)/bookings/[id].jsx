@@ -235,22 +235,6 @@ export default function CustomerBookingDetail() {
           </View>
         </View>
 
-        {/* Location Tracking Indicator - Only for ongoing trips */}
-        {isOngoing && (
-          <View style={styles.trackingBanner}>
-            <View style={styles.trackingDot} />
-            <Ionicons name="location" size={18} color={COLORS.green[500]} />
-            <Text style={styles.trackingText}>
-              {isTracking ? "Location sharing active" : "Starting location sharing..."}
-            </Text>
-            {isTracking && location && (
-              <Text style={styles.trackingCoords}>
-                📍 {location.latitude?.toFixed(4)}, {location.longitude?.toFixed(4)}
-              </Text>
-            )}
-          </View>
-        )}
-
         {/* Car Info Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Vehicle Details</Text>
@@ -426,44 +410,6 @@ export default function CustomerBookingDetail() {
             <Text style={styles.actionText}>Contact Host</Text>
           </TouchableOpacity>
         </View>
-
-        {/* Extend Trip Button - For ongoing/confirmed bookings */}
-        {(booking.status === "ongoing" || booking.status === "confirmed") && (
-          <TouchableOpacity
-            style={styles.extendTripBtn}
-            onPress={() => {
-              Alert.alert(
-                "Extend Trip",
-                "Would you like to extend your trip? You'll be able to select a new end time and see the additional charges.",
-                [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Extend",
-                    onPress: () => {
-                      router.push({
-                        pathname: "/(customer)/bookings/extend",
-                        params: {
-                          bookingId: booking.id,
-                          currentEndTime: booking.endDateTime,
-                          pricePerHour: booking.car?.pricePerHour || 0,
-                          carName: `${booking.car?.make} ${booking.car?.model}`,
-                        },
-                      });
-                    },
-                  },
-                ]
-              );
-            }}
-          >
-            <LinearGradient
-              colors={[COLORS.green[500], "#34D399"]}
-              style={styles.extendGradient}
-            >
-              <Ionicons name="time" size={20} color={COLORS.white} />
-              <Text style={styles.extendText}>Extend Trip</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
 
         {/* Info Note for Pending */}
         {booking.status === "pending" && (

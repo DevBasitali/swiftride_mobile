@@ -85,17 +85,6 @@ export const downloadInvoice = async (bookingId) => {
   }
 };
 
-/**
- * Extend an ongoing or confirmed booking
- * Allows customer to extend their trip duration
- */
-export const extendBooking = async (bookingId, newEndTime) => {
-  const response = await api.patch(`/bookings/extend/${bookingId}`, {
-    newEndTime,
-  });
-  return response.data;
-};
-
 export default {
   createBooking,
   getMyBookings,
@@ -104,5 +93,4 @@ export default {
   getBookingDetails,
   downloadInvoice,
   initSafepayPayment,
-  extendBooking,
 };

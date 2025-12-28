@@ -108,7 +108,7 @@ const darkMapStyle = [
 export default function LocationPicker() {
   // Get params passed from create screen
   const params = useLocalSearchParams();
-  
+
   // ============================================
   // 🔒 STATE
   // ============================================
@@ -117,21 +117,21 @@ export default function LocationPicker() {
   const [address, setAddress] = useState('Locating...');
   const [coords, setCoords] = useState({ lat: 0, lng: 0 });
   const [userLocation, setUserLocation] = useState(null);
-  
+
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // Recent locations
   const [recentLocations, setRecentLocations] = useState([]);
-  
+
   const mapRef = useRef(null);
   const searchDebounceRef = useRef(null);
   const searchInputRef = useRef(null);
-  
+
   // Animation values
   const pinScale = useRef(new Animated.Value(1)).current;
   const pinTranslateY = useRef(new Animated.Value(0)).current;
@@ -144,7 +144,7 @@ export default function LocationPicker() {
     (async () => {
       // Load recent locations
       await loadRecentLocations();
-      
+
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permission Denied', 'Allow location access to pin your car.');
@@ -192,13 +192,13 @@ export default function LocationPicker() {
         city: location.city || '',
         timestamp: Date.now(),
       };
-      
+
       // Filter out duplicates and add new location at the beginning
       const filtered = recentLocations.filter(
-        loc => !(Math.abs(loc.latitude - newLocation.latitude) < 0.0001 && 
-                 Math.abs(loc.longitude - newLocation.longitude) < 0.0001)
+        loc => !(Math.abs(loc.latitude - newLocation.latitude) < 0.0001 &&
+          Math.abs(loc.longitude - newLocation.longitude) < 0.0001)
       );
-      
+
       const updated = [newLocation, ...filtered].slice(0, MAX_RECENT_LOCATIONS);
       setRecentLocations(updated);
       await SecureStore.setItemAsync(RECENT_LOCATIONS_KEY, JSON.stringify(updated));
@@ -224,12 +224,22 @@ export default function LocationPicker() {
       const response = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
       if (response.length > 0) {
         const item = response[0];
+        // Build complete address like web version
         const parts = [
           item.streetNumber,
           item.street,
+          item.name, // POI name if available
+          item.district,
+          item.subregion,
           item.city,
+          item.region,
+          item.country,
         ].filter(Boolean);
-        setAddress(parts.join(', ') || item.city || 'Unknown Location');
+
+        // Remove duplicates (sometimes city and region are same)
+        const uniqueParts = [...new Set(parts)];
+        const fullAddress = uniqueParts.join(', ') || item.city || 'Unknown Location';
+        setAddress(fullAddress);
       }
     } catch (e) {
       setAddress('Pinned Location');
@@ -245,7 +255,7 @@ export default function LocationPicker() {
     setIsSearching(true);
     try {
       const results = await Location.geocodeAsync(query);
-      
+
       if (results.length > 0) {
         const detailedResults = await Promise.all(
           results.slice(0, 6).map(async (result) => {
@@ -255,14 +265,27 @@ export default function LocationPicker() {
                 longitude: result.longitude,
               });
               const addr = addressDetails[0] || {};
-              const distance = userLocation 
+              const distance = userLocation
                 ? calculateDistance(userLocation.latitude, userLocation.longitude, result.latitude, result.longitude)
                 : null;
-              
+
+              // Build full address
+              const addressParts = [
+                addr.streetNumber,
+                addr.street,
+                addr.name,
+                addr.district,
+                addr.subregion,
+                addr.city,
+                addr.region,
+                addr.country,
+              ].filter(Boolean);
+              const uniqueParts = [...new Set(addressParts)];
+
               return {
                 latitude: result.latitude,
                 longitude: result.longitude,
-                address: [addr.streetNumber, addr.street, addr.city, addr.region].filter(Boolean).join(', '),
+                address: uniqueParts.join(', ') || addr.city || query,
                 city: addr.city || addr.region || 'Unknown',
                 country: addr.country || '',
                 distance,
@@ -295,10 +318,10 @@ export default function LocationPicker() {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
@@ -310,11 +333,11 @@ export default function LocationPicker() {
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
-    
+
     if (searchDebounceRef.current) {
       clearTimeout(searchDebounceRef.current);
     }
-    
+
     searchDebounceRef.current = setTimeout(() => {
       searchLocations(text);
     }, 400);
@@ -325,18 +348,18 @@ export default function LocationPicker() {
     setShowSearchPanel(false);
     setSearchQuery('');
     setSearchResults([]);
-    
+
     const newRegion = {
       latitude: result.latitude,
       longitude: result.longitude,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     };
-    
+
     setRegion(newRegion);
     setCoords({ lat: result.latitude, lng: result.longitude });
     setAddress(result.address || 'Selected Location');
-    
+
     if (mapRef.current) {
       mapRef.current.animateToRegion(newRegion, 500);
     }
@@ -407,13 +430,13 @@ export default function LocationPicker() {
     ]).start();
 
     setCoords({ lat: newRegion.latitude, lng: newRegion.longitude });
-    
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
-    
+
     setAddress('Finding address...');
-    
+
     debounceRef.current = setTimeout(() => {
       fetchAddress(newRegion.latitude, newRegion.longitude);
     }, 500);
@@ -517,7 +540,7 @@ export default function LocationPicker() {
       />
 
       {/* Center Pin with Animation */}
-      <Animated.View 
+      <Animated.View
         style={[
           styles.markerFixed,
           {
@@ -543,16 +566,16 @@ export default function LocationPicker() {
 
       {/* Zoom Controls */}
       <View style={styles.zoomControls}>
-        <TouchableOpacity 
-          style={styles.zoomButton} 
+        <TouchableOpacity
+          style={styles.zoomButton}
           onPress={handleZoomIn}
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={24} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.zoomDivider} />
-        <TouchableOpacity 
-          style={styles.zoomButton} 
+        <TouchableOpacity
+          style={styles.zoomButton}
           onPress={handleZoomOut}
           activeOpacity={0.7}
         >
@@ -561,8 +584,8 @@ export default function LocationPicker() {
       </View>
 
       {/* My Location Button */}
-      <TouchableOpacity 
-        style={styles.floatingMyLocationBtn} 
+      <TouchableOpacity
+        style={styles.floatingMyLocationBtn}
         onPress={goToCurrentLocation}
         activeOpacity={0.8}
       >
@@ -584,7 +607,7 @@ export default function LocationPicker() {
         </View>
 
         {/* Search Bar */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.searchBar}
           onPress={() => setShowSearchPanel(true)}
           activeOpacity={0.9}
@@ -602,7 +625,7 @@ export default function LocationPicker() {
           <View style={styles.searchPanel}>
             {/* Search Input */}
             <View style={styles.searchPanelHeader}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.searchPanelBack}
                 onPress={() => {
                   setShowSearchPanel(false);
@@ -638,7 +661,7 @@ export default function LocationPicker() {
               </View>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.searchPanelContent}
               keyboardShouldPersistTaps="handled"
             >
@@ -729,10 +752,10 @@ export default function LocationPicker() {
                           onPress={() => handleSuggestionPress(suggestion)}
                           activeOpacity={0.7}
                         >
-                          <Ionicons 
-                            name={suggestion.icon} 
-                            size={18} 
-                            color={suggestion.type === 'current' ? COLORS.emerald[500] : COLORS.gold[500]} 
+                          <Ionicons
+                            name={suggestion.icon}
+                            size={18}
+                            color={suggestion.type === 'current' ? COLORS.emerald[500] : COLORS.gold[500]}
                           />
                           <Text style={styles.suggestionText}>{suggestion.name}</Text>
                         </TouchableOpacity>
