@@ -239,7 +239,7 @@ export default function CreateCar() {
         title: "Success",
         message: "Car Listed Successfully!",
         type: "success",
-        buttons: [{ text: "OK", onPress: () => router.back() }]
+        buttons: [{ text: "OK", onPress: () => router.replace('/(host)/(tabs)/fleet') }]
       });
     } catch (error) {
       console.log('Create Error:', error);
