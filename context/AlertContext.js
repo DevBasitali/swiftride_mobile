@@ -3,6 +3,11 @@ import CustomAlert from "../components/common/CustomAlert";
 
 const AlertContext = createContext();
 
+// Global ref to access alert outside React components
+export const alertService = {
+  current: null,
+};
+
 export const useAlert = () => {
   const context = useContext(AlertContext);
   if (!context) {
@@ -38,6 +43,11 @@ export const AlertProvider = ({ children }) => {
       buttons: wrappedButtons,
     });
   }, []);
+
+  // Expose showAlert to global service
+  React.useEffect(() => {
+    alertService.current = showAlert;
+  }, [showAlert]);
 
   const hideAlert = useCallback(() => {
     setAlertConfig((prev) => ({ ...prev, visible: false }));

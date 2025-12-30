@@ -1,0 +1,21 @@
+env: load .env
+env: export EXPO_PUBLIC_SERVER_IP EXPO_PUBLIC_SERVER_PORT EXPO_PUBLIC_GOOGLE_MAPS_API_KEY EXPO_PUBLIC_LOCATION_INTERVAL_MS
+Starting Metro Bundler
+Android node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android node_modules/expo-router/entry.js ▓▓▓▓▓░░░░░░░░░░░ 35.2% (363/612)
+iOS node_modules/expo-router/entry.js ▓▓░░░░░░░░░░░░░░ 16.2% (157/390)
+Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓░░░░░░░░░ 48.0% (580/837)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓░░░░░░░░░░░ 37.0% (367/622)
+Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 67.9% ( 842/1022)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 51.5% (620/864)
+Android Bundling failed 13800ms node_modules/expo-router/entry.js (1556 modules)
+SyntaxError: SyntaxError: /home/basit-ali/projects/Swiftride/mobile/services/api.js: Identifier 'router' has already been declared. (6:9)
+
+[0m [90m 4 |[39m [36mimport[39m [33mConfig[39m [36mfrom[39m [32m"../constants/Config"[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m { router } [36mfrom[39m [32m"expo-router"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 6 |[39m [36mimport[39m { router } [36mfrom[39m [32m"expo-router"[39m[33m;[39m
+ [90m   |[39m          [31m[1m^[22m[39m
+ [90m 7 |[39m [36mimport[39m { alertService } [36mfrom[39m [32m"../context/AlertContext"[39m[33m;[39m
+ [90m 8 |[39m
+ [90m 9 |[39m [90m// Create Axios Instance[39m[0m

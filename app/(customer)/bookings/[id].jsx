@@ -7,8 +7,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  Alert,
-  Linking,
   StatusBar,
 } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
@@ -22,6 +20,7 @@ import carService from "../../../services/carService";
 import api from "../../../services/api";
 import { useLocationTracking } from "../../../hooks/useLocationTracking";
 import QRCodeDisplay from "../../../components/QRCodeDisplay";
+import { useAlert } from "../../../context/AlertContext";
 
 // Premium Theme
 const COLORS = {
@@ -43,19 +42,21 @@ export default function CustomerBookingDetail() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const { showAlert } = useAlert();
 
   // Location tracking - only active when booking is ongoing
   const isOngoing = booking?.status === "ongoing";
-  const { location, isTracking, error: trackingError } = useLocationTracking(
-    booking?._id || booking?.id,
-    isOngoing
-  );
+  const {
+    location,
+    isTracking,
+    error: trackingError,
+  } = useLocationTracking(booking?._id || booking?.id, isOngoing);
 
   useEffect(() => {
     if (id) {
       fetchBookingDetail();
     } else {
-      Alert.alert("Error", "Invalid booking");
+      showAlert({ title: "Error", message: "Invalid booking", type: "error" });
       router.back();
     }
   }, [id]);
@@ -69,7 +70,11 @@ export default function CustomerBookingDetail() {
       setBooking(bookingData);
     } catch (error) {
       console.error("Error fetching booking:", error);
-      Alert.alert("Error", "Could not load booking details");
+      showAlert({
+        title: "Error",
+        message: "Could not load booking details",
+        type: "error",
+      });
       router.back();
     } finally {
       setLoading(false);
@@ -120,11 +125,12 @@ export default function CustomerBookingDetail() {
 
   const handleDownloadInvoice = async () => {
     if (booking.status === "pending") {
-      Alert.alert(
-        "Invoice Not Available",
-        "Invoice will be generated once the host confirms your booking.",
-        [{ text: "OK" }]
-      );
+      showAlert({
+        title: "Invoice Not Available",
+        message:
+          "Invoice will be generated once the host confirms your booking.",
+        type: "info",
+      });
       return;
     }
 
@@ -132,14 +138,19 @@ export default function CustomerBookingDetail() {
     const pdfUrl = booking.invoicePdfPath;
 
     if (!pdfUrl) {
-      Alert.alert("Invoice Not Available", "Invoice PDF has not been generated yet.");
+      showAlert({
+        title: "Invoice Not Available",
+        message: "Invoice PDF has not been generated yet.",
+        type: "warning",
+      });
       return;
     }
 
-    Alert.alert(
-      "Download Invoice",
-      "Open invoice PDF in browser?",
-      [
+    showAlert({
+      title: "Download Invoice",
+      message: "Open invoice PDF in browser?",
+      type: "info",
+      buttons: [
         { text: "Cancel", style: "cancel" },
         {
           text: "Open",
@@ -150,27 +161,41 @@ export default function CustomerBookingDetail() {
               if (canOpen) {
                 await Linking.openURL(pdfUrl);
               } else {
-                Alert.alert("Error", "Cannot open PDF URL");
+                showAlert({
+                  title: "Error",
+                  message: "Cannot open PDF URL",
+                  type: "error",
+                });
               }
             } catch (error) {
               console.error("Open PDF error:", error);
-              Alert.alert("Error", "Could not open invoice");
+              showAlert({
+                title: "Error",
+                message: "Could not open invoice",
+                type: "error",
+              });
             }
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleContactHost = () => {
-    Alert.alert("Contact Host", "How would you like to contact the host?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Call", onPress: () => Linking.openURL("tel:+923111553572") },
-      {
-        text: "WhatsApp",
-        onPress: () => Linking.openURL("https://api.whatsapp.com/send?phone=923111553572"),
-      },
-    ]);
+    showAlert({
+      title: "Contact Host",
+      message: "How would you like to contact the host?",
+      type: "info",
+      buttons: [
+        { text: "Cancel", style: "cancel" },
+        { text: "Call", onPress: () => Linking.openURL("tel:+923111553572") },
+        {
+          text: "WhatsApp",
+          onPress: () =>
+            Linking.openURL("https://api.whatsapp.com/send?phone=923111553572"),
+        },
+      ],
+    });
   };
 
   if (loading) {
@@ -413,15 +438,21 @@ export default function CustomerBookingDetail() {
           </TouchableOpacity>
 
           {/* QR Code Button - Show for confirmed/ongoing bookings */}
-          {(booking.status === 'confirmed' || booking.status === 'ongoing') && booking.handoverSecret && (
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: COLORS.gold[500] + '20' }]}
-              onPress={() => setShowQR(true)}
-            >
-              <Ionicons name="qr-code" size={20} color={COLORS.gold[500]} />
-              <Text style={[styles.actionText, { color: COLORS.gold[500] }]}>Show QR Code</Text>
-            </TouchableOpacity>
-          )}
+          {(booking.status === "confirmed" || booking.status === "ongoing") &&
+            booking.handoverSecret && (
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: COLORS.gold[500] + "20" },
+                ]}
+                onPress={() => setShowQR(true)}
+              >
+                <Ionicons name="qr-code" size={20} color={COLORS.gold[500]} />
+                <Text style={[styles.actionText, { color: COLORS.gold[500] }]}>
+                  Show QR Code
+                </Text>
+              </TouchableOpacity>
+            )}
         </View>
 
         {/* Info Note for Pending */}

@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
-  Alert,
   StatusBar,
   Platform,
 } from "react-native";
@@ -22,6 +21,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import carService from "../../../services/carService";
 import bookingService from "../../../services/bookingService";
 import { useAuth } from "../../../context/AuthContext";
+import { useAlert } from "../../../context/AlertContext";
 
 const { width } = Dimensions.get("window");
 
@@ -38,6 +38,7 @@ const COLORS = {
 export default function CustomerCarDetails() {
   const { id } = useLocalSearchParams();
   const { user, kycStatus } = useAuth();
+  const { showAlert } = useAlert();
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -57,7 +58,8 @@ export default function CustomerCarDetails() {
       if (user) {
         try {
           const bookingsResponse = await bookingService.getMyBookings();
-          const myBookings = bookingsResponse.data?.items || bookingsResponse.items || [];
+          const myBookings =
+            bookingsResponse.data?.items || bookingsResponse.items || [];
 
           // Find any active booking for this car (pending, confirmed, or ongoing)
           const activeBooking = myBookings.find(
@@ -74,7 +76,11 @@ export default function CustomerCarDetails() {
         }
       }
     } catch (error) {
-      Alert.alert("Error", "Could not load car details.");
+      showAlert({
+        title: "Error",
+        message: "Could not load car details.",
+        type: "error",
+      });
       router.back();
     } finally {
       setLoading(false);
@@ -83,22 +89,28 @@ export default function CustomerCarDetails() {
 
   const handleBookNow = () => {
     if (!user) {
-      Alert.alert("Login Required", "Please log in to book a car.", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Login", onPress: () => router.push("/(auth)/login") },
-      ]);
+      showAlert({
+        title: "Login Required",
+        message: "Please log in to book a car.",
+        type: "warning",
+        buttons: [
+          { text: "Cancel", style: "cancel" },
+          { text: "Login", onPress: () => router.push("/(auth)/login") },
+        ],
+      });
       return;
     }
 
     if (kycStatus !== "approved") {
-      Alert.alert(
-        "Verification Required",
-        "You need a verified ID to rent cars.",
-        [
+      showAlert({
+        title: "Verification Required",
+        message: "You need a verified ID to rent cars.",
+        type: "warning",
+        buttons: [
           { text: "Cancel", style: "cancel" },
           { text: "Verify Now", onPress: () => router.push("/kyc") },
-        ]
-      );
+        ],
+      });
       return;
     }
 
@@ -145,7 +157,7 @@ export default function CustomerCarDetails() {
             onScroll={({ nativeEvent }) => {
               const slide = Math.ceil(
                 nativeEvent.contentOffset.x /
-                nativeEvent.layoutMeasurement.width
+                  nativeEvent.layoutMeasurement.width
               );
               if (slide !== activeSlide) setActiveSlide(slide);
             }}
@@ -245,37 +257,56 @@ export default function CustomerCarDetails() {
               <View style={styles.availabilityCard}>
                 {/* Days */}
                 <View style={styles.availabilityRow}>
-                  <Ionicons name="calendar-outline" size={18} color={COLORS.gold[500]} />
+                  <Ionicons
+                    name="calendar-outline"
+                    size={18}
+                    color={COLORS.gold[500]}
+                  />
                   <Text style={styles.availabilityLabel}>Available Days:</Text>
                 </View>
                 <View style={styles.daysContainer}>
-                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => {
-                    const isAvailable = (car.availability.daysOfWeek || [0, 1, 2, 3, 4, 5, 6]).includes(index);
-                    return (
-                      <View
-                        key={day}
-                        style={[
-                          styles.dayBadge,
-                          isAvailable ? styles.dayAvailable : styles.dayUnavailable
-                        ]}
-                      >
-                        <Text style={[
-                          styles.dayText,
-                          isAvailable ? styles.dayTextAvailable : styles.dayTextUnavailable
-                        ]}>
-                          {day}
-                        </Text>
-                      </View>
-                    );
-                  })}
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                    (day, index) => {
+                      const isAvailable = (
+                        car.availability.daysOfWeek || [0, 1, 2, 3, 4, 5, 6]
+                      ).includes(index);
+                      return (
+                        <View
+                          key={day}
+                          style={[
+                            styles.dayBadge,
+                            isAvailable
+                              ? styles.dayAvailable
+                              : styles.dayUnavailable,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.dayText,
+                              isAvailable
+                                ? styles.dayTextAvailable
+                                : styles.dayTextUnavailable,
+                            ]}
+                          >
+                            {day}
+                          </Text>
+                        </View>
+                      );
+                    }
+                  )}
                 </View>
 
                 {/* Time Range */}
                 <View style={[styles.availabilityRow, { marginTop: 12 }]}>
-                  <Ionicons name="time-outline" size={18} color={COLORS.gold[500]} />
+                  <Ionicons
+                    name="time-outline"
+                    size={18}
+                    color={COLORS.gold[500]}
+                  />
                   <Text style={styles.availabilityLabel}>Available Time:</Text>
                   <Text style={styles.availabilityValue}>
-                    {car.availability.startTime || "00:00"} - {car.availability.endTime || "23:59"}
+                    {car.availability.startTime || "00:00"} -{" "}
+                    {car.availability.endTime || "23:59"}
                   </Text>
                 </View>
               </View>
@@ -315,14 +346,22 @@ export default function CustomerCarDetails() {
           // User already has an active booking for this car
           <TouchableOpacity
             style={styles.bookBtn}
-            onPress={() => router.push(`/(customer)/bookings/${existingBooking.id}`)}
+            onPress={() =>
+              router.push(`/(customer)/bookings/${existingBooking.id}`)
+            }
           >
             <LinearGradient
               colors={[COLORS.blue[500], "#60A5FA"]}
               style={styles.gradientBtn}
             >
-              <Ionicons name="checkmark-circle" size={20} color={COLORS.white} />
-              <Text style={[styles.bookBtnText, { color: COLORS.white }]}>View Trip</Text>
+              <Ionicons
+                name="checkmark-circle"
+                size={20}
+                color={COLORS.white}
+              />
+              <Text style={[styles.bookBtnText, { color: COLORS.white }]}>
+                View Trip
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
         ) : (
@@ -333,7 +372,11 @@ export default function CustomerCarDetails() {
               style={styles.gradientBtn}
             >
               <Text style={styles.bookBtnText}>Book Now</Text>
-              <Ionicons name="arrow-forward" size={20} color={COLORS.navy[900]} />
+              <Ionicons
+                name="arrow-forward"
+                size={20}
+                color={COLORS.navy[900]}
+              />
             </LinearGradient>
           </TouchableOpacity>
         )}

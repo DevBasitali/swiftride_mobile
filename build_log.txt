@@ -1,0 +1,21 @@
+env: load .env
+env: export EXPO_PUBLIC_SERVER_IP EXPO_PUBLIC_SERVER_PORT EXPO_PUBLIC_GOOGLE_MAPS_API_KEY EXPO_PUBLIC_LOCATION_INTERVAL_MS
+Starting Metro Bundler
+Android node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  3.4% ( 46/248)
+iOS node_modules/expo-router/entry.js ▓▓▓▓░░░░░░░░░░░░ 30.5% (331/599)
+Android node_modules/expo-router/entry.js ▓▓▓▓▓░░░░░░░░░░░ 35.7% (341/571)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 50.0% (607/858)
+Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 93.6% (1194/1330)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.2% (1312/1382)
+Android node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.4% (1551/1556)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.0% (1544/1552)
+Android Bundling failed 14828ms node_modules/expo-router/entry.js (1556 modules)
+SyntaxError: SyntaxError: /home/basit-ali/projects/Swiftride/mobile/app/(host)/car/[id].jsx: Identifier 'ActivityIndicator' has already been declared. (12:2)
+
+[0m [90m 10 |[39m   [33mDimensions[39m[33m,[39m
+ [90m 11 |[39m   [33mActivityIndicator[39m[33m,[39m
+[31m[1m>[22m[39m[90m 12 |[39m   [33mActivityIndicator[39m[33m,[39m
+ [90m    |[39m   [31m[1m^[22m[39m
+ [90m 13 |[39m   [33mStatusBar[39m[33m,[39m
+ [90m 14 |[39m   [33mPlatform[39m[33m,[39m
+ [90m 15 |[39m } [36mfrom[39m [32m"react-native"[39m[33m;[39m[0m

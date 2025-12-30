@@ -3,7 +3,8 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import Config from "../constants/Config";
 import { router } from "expo-router";
-import { Alert } from "react-native";
+
+import { alertService } from "../context/AlertContext";
 
 // Create Axios Instance
 const api = axios.create({
@@ -47,7 +48,13 @@ api.interceptors.response.use(
 
         // Clear token and redirect to login
         await SecureStore.deleteItemAsync("accessToken");
-        Alert.alert("Session Expired", "Please login again.");
+        if (alertService.current) {
+          alertService.current({
+            title: "Session Expired",
+            message: "Please login again.",
+            type: "error"
+          });
+        }
         router.replace("/(auth)/login");
       }
     }

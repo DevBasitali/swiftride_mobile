@@ -2,7 +2,7 @@
 import api from "./api";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { Alert } from "react-native";
+import { alertService } from "../context/AlertContext";
 
 export const createBooking = async (bookingData) => {
   const response = await api.post("/bookings", bookingData);
@@ -73,7 +73,13 @@ export const downloadInvoice = async (bookingId) => {
         });
         return { success: true };
       } else {
-        Alert.alert("Success", "Invoice saved to: " + downloadResult.uri);
+        if (alertService.current) {
+          alertService.current({
+            title: "Success",
+            message: "Invoice saved to: " + downloadResult.uri,
+            type: "success"
+          });
+        }
         return { success: true, path: downloadResult.uri };
       }
     } else {

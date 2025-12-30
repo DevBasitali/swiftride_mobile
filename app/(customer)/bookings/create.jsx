@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
   Platform,
   Image,
@@ -19,6 +18,7 @@ import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import carService from "../../../services/carService";
 import bookingService from "../../../services/bookingService";
+import { useAlert } from "../../../context/AlertContext";
 
 // Premium Theme Colors
 const COLORS = {
@@ -34,6 +34,7 @@ export default function CreateBooking() {
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const { showAlert } = useAlert();
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -58,7 +59,7 @@ export default function CreateBooking() {
       const response = await carService.getCarById(carId);
       setCar(response.data?.car || response.car);
     } catch (error) {
-      Alert.alert("Error", "Car not found");
+      showAlert({ title: "Error", message: "Car not found", type: "error" });
       router.back();
     } finally {
       setLoading(false);
@@ -135,7 +136,11 @@ export default function CreateBooking() {
 
   const handleConfirm = async () => {
     if (endDate <= startDate) {
-      Alert.alert('Invalid Dates', 'End time must be after start time.');
+      showAlert({
+        title: "Invalid Dates",
+        message: "End time must be after start time.",
+        type: "warning",
+      });
       return;
     }
 
@@ -144,7 +149,7 @@ export default function CreateBooking() {
       const payload = {
         carId: car._id,
         startDateTime: startDate.toISOString(),
-        endDateTime: endDate.toISOString()
+        endDateTime: endDate.toISOString(),
       };
 
       console.log("Sending Booking Payload:", payload);
@@ -157,18 +162,20 @@ export default function CreateBooking() {
 
       // ✅ Navigate to payment screen
       router.push({
-        pathname: '/(customer)/bookings/payment',
+        pathname: "/(customer)/bookings/payment",
         params: {
           bookingId: bookingData._id || bookingData.id,
           amount: totalPrice,
-          carName: `${car.make} ${car.model}`
-        }
+          carName: `${car.make} ${car.model}`,
+        },
       });
-
     } catch (error) {
       console.log("Booking Error:", error);
-      const errMsg = error.response?.data?.message || error.message || 'Something went wrong.';
-      Alert.alert('Booking Failed', errMsg);
+      const errMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong.";
+      showAlert({ title: "Booking Failed", message: errMsg, type: "error" });
     } finally {
       setSubmitting(false);
     }

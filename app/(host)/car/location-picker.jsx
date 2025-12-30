@@ -1,125 +1,136 @@
 // app/(host)/car/location-picker.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StatusBar,
   Platform,
   TextInput,
   ScrollView,
   Keyboard,
   Animated,
-} from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import * as Location from 'expo-location';
-import * as SecureStore from 'expo-secure-store';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+} from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import * as Location from "expo-location";
+import * as SecureStore from "expo-secure-store";
+import { router, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useAlert } from "../../../context/AlertContext";
 
 // ============================================
 // 🎨 INLINE THEME COLORS
 // ============================================
 const COLORS = {
   navy: {
-    900: '#0A1628',
-    800: '#0F2137',
-    700: '#152A46',
-    600: '#1E3A5F',
-    500: '#2A4A6F',
+    900: "#0A1628",
+    800: "#0F2137",
+    700: "#152A46",
+    600: "#1E3A5F",
+    500: "#2A4A6F",
   },
   gold: {
-    600: '#D99413',
-    500: '#F59E0B',
-    400: '#FBBF24',
-    300: '#FCD34D',
+    600: "#D99413",
+    500: "#F59E0B",
+    400: "#FBBF24",
+    300: "#FCD34D",
   },
   emerald: {
-    500: '#10B981',
-    400: '#34D399',
+    500: "#10B981",
+    400: "#34D399",
   },
   gray: {
-    600: '#4B5563',
-    500: '#6B7280',
-    400: '#9CA3AF',
-    300: '#D1D5DB',
+    600: "#4B5563",
+    500: "#6B7280",
+    400: "#9CA3AF",
+    300: "#D1D5DB",
   },
-  white: '#FFFFFF',
+  white: "#FFFFFF",
   red: {
-    500: '#EF4444',
+    500: "#EF4444",
   },
 };
 
 // Recent locations storage key
-const RECENT_LOCATIONS_KEY = 'recentLocations';
+const RECENT_LOCATIONS_KEY = "recentLocations";
 const MAX_RECENT_LOCATIONS = 5;
 
 // Popular/suggested locations (can be customized based on region)
 const SUGGESTED_LOCATIONS = [
-  { name: 'Current Location', icon: 'navigate', type: 'current' },
-  { name: 'Airport', icon: 'airplane', type: 'search', query: 'airport' },
-  { name: 'Train Station', icon: 'train', type: 'search', query: 'train station' },
-  { name: 'Bus Terminal', icon: 'bus', type: 'search', query: 'bus terminal' },
-  { name: 'Shopping Mall', icon: 'cart', type: 'search', query: 'shopping mall' },
-  { name: 'Hotel', icon: 'bed', type: 'search', query: 'hotel' },
+  { name: "Current Location", icon: "navigate", type: "current" },
+  { name: "Airport", icon: "airplane", type: "search", query: "airport" },
+  {
+    name: "Train Station",
+    icon: "train",
+    type: "search",
+    query: "train station",
+  },
+  { name: "Bus Terminal", icon: "bus", type: "search", query: "bus terminal" },
+  {
+    name: "Shopping Mall",
+    icon: "cart",
+    type: "search",
+    query: "shopping mall",
+  },
+  { name: "Hotel", icon: "bed", type: "search", query: "hotel" },
 ];
 
 // Custom Dark Map Style
 const darkMapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#1E3A5F' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#0A1628' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#9CA3AF' }] },
+  { elementType: "geometry", stylers: [{ color: "#1E3A5F" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#0A1628" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#9CA3AF" }] },
   {
-    featureType: 'administrative.locality',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#F59E0B' }],
+    featureType: "administrative.locality",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#F59E0B" }],
   },
   {
-    featureType: 'poi',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#9CA3AF' }],
+    featureType: "poi",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#9CA3AF" }],
   },
   {
-    featureType: 'poi.park',
-    elementType: 'geometry',
-    stylers: [{ color: '#152A46' }],
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [{ color: "#152A46" }],
   },
   {
-    featureType: 'road',
-    elementType: 'geometry',
-    stylers: [{ color: '#0F2137' }],
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#0F2137" }],
   },
   {
-    featureType: 'road',
-    elementType: 'geometry.stroke',
-    stylers: [{ color: '#1E3A5F' }],
+    featureType: "road",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#1E3A5F" }],
   },
   {
-    featureType: 'water',
-    elementType: 'geometry',
-    stylers: [{ color: '#0A1628' }],
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#0A1628" }],
   },
 ];
 
 export default function LocationPicker() {
   // Get params passed from create screen
   const params = useLocalSearchParams();
+  const { showAlert } = useAlert();
 
   // ============================================
   // 🔒 STATE
   // ============================================
   const [region, setRegion] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [address, setAddress] = useState('Locating...');
+  const [address, setAddress] = useState("Locating...");
   const [coords, setCoords] = useState({ lat: 0, lng: 0 });
   const [userLocation, setUserLocation] = useState(null);
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchPanel, setShowSearchPanel] = useState(false);
@@ -146,8 +157,12 @@ export default function LocationPicker() {
       await loadRecentLocations();
 
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Allow location access to pin your car.');
+      if (status !== "granted") {
+        showAlert({
+          title: "Permission Denied",
+          message: "Allow location access to pin your car.",
+          type: "error",
+        });
         setLoading(false);
         return;
       }
@@ -179,7 +194,7 @@ export default function LocationPicker() {
         setRecentLocations(JSON.parse(stored));
       }
     } catch (e) {
-      console.log('Error loading recent locations:', e);
+      console.log("Error loading recent locations:", e);
     }
   };
 
@@ -189,21 +204,27 @@ export default function LocationPicker() {
         address: location.address,
         latitude: location.latitude,
         longitude: location.longitude,
-        city: location.city || '',
+        city: location.city || "",
         timestamp: Date.now(),
       };
 
       // Filter out duplicates and add new location at the beginning
       const filtered = recentLocations.filter(
-        loc => !(Math.abs(loc.latitude - newLocation.latitude) < 0.0001 &&
-          Math.abs(loc.longitude - newLocation.longitude) < 0.0001)
+        (loc) =>
+          !(
+            Math.abs(loc.latitude - newLocation.latitude) < 0.0001 &&
+            Math.abs(loc.longitude - newLocation.longitude) < 0.0001
+          )
       );
 
       const updated = [newLocation, ...filtered].slice(0, MAX_RECENT_LOCATIONS);
       setRecentLocations(updated);
-      await SecureStore.setItemAsync(RECENT_LOCATIONS_KEY, JSON.stringify(updated));
+      await SecureStore.setItemAsync(
+        RECENT_LOCATIONS_KEY,
+        JSON.stringify(updated)
+      );
     } catch (e) {
-      console.log('Error saving recent location:', e);
+      console.log("Error saving recent location:", e);
     }
   };
 
@@ -212,7 +233,7 @@ export default function LocationPicker() {
       await SecureStore.deleteItemAsync(RECENT_LOCATIONS_KEY);
       setRecentLocations([]);
     } catch (e) {
-      console.log('Error clearing recent locations:', e);
+      console.log("Error clearing recent locations:", e);
     }
   };
 
@@ -221,7 +242,10 @@ export default function LocationPicker() {
   // ============================================
   const fetchAddress = async (lat, lng) => {
     try {
-      const response = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+      const response = await Location.reverseGeocodeAsync({
+        latitude: lat,
+        longitude: lng,
+      });
       if (response.length > 0) {
         const item = response[0];
         // Build complete address like web version
@@ -238,11 +262,12 @@ export default function LocationPicker() {
 
         // Remove duplicates (sometimes city and region are same)
         const uniqueParts = [...new Set(parts)];
-        const fullAddress = uniqueParts.join(', ') || item.city || 'Unknown Location';
+        const fullAddress =
+          uniqueParts.join(", ") || item.city || "Unknown Location";
         setAddress(fullAddress);
       }
     } catch (e) {
-      setAddress('Pinned Location');
+      setAddress("Pinned Location");
     }
   };
 
@@ -258,11 +283,13 @@ export default function LocationPicker() {
 
       // Use Google Places Autocomplete API
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${apiKey}&types=geocode`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+          query
+        )}&key=${apiKey}&types=geocode`
       );
       const data = await response.json();
 
-      if (data.status === 'OK' && data.predictions.length > 0) {
+      if (data.status === "OK" && data.predictions.length > 0) {
         // Get details for each prediction
         const detailedResults = await Promise.all(
           data.predictions.slice(0, 6).map(async (prediction) => {
@@ -273,18 +300,26 @@ export default function LocationPicker() {
               );
               const details = await detailsResponse.json();
 
-              if (details.status === 'OK' && details.result.geometry) {
+              if (details.status === "OK" && details.result.geometry) {
                 const { lat, lng } = details.result.geometry.location;
                 const distance = userLocation
-                  ? calculateDistance(userLocation.latitude, userLocation.longitude, lat, lng)
+                  ? calculateDistance(
+                      userLocation.latitude,
+                      userLocation.longitude,
+                      lat,
+                      lng
+                    )
                   : null;
 
                 return {
                   latitude: lat,
                   longitude: lng,
-                  address: details.result.formatted_address || prediction.description,
-                  city: prediction.structured_formatting?.main_text || 'Location',
-                  country: prediction.structured_formatting?.secondary_text || '',
+                  address:
+                    details.result.formatted_address || prediction.description,
+                  city:
+                    prediction.structured_formatting?.main_text || "Location",
+                  country:
+                    prediction.structured_formatting?.secondary_text || "",
                   distance,
                 };
               }
@@ -309,15 +344,23 @@ export default function LocationPicker() {
                 });
                 const addr = addressDetails[0] || {};
                 const distance = userLocation
-                  ? calculateDistance(userLocation.latitude, userLocation.longitude, result.latitude, result.longitude)
+                  ? calculateDistance(
+                      userLocation.latitude,
+                      userLocation.longitude,
+                      result.latitude,
+                      result.longitude
+                    )
                   : null;
 
                 return {
                   latitude: result.latitude,
                   longitude: result.longitude,
-                  address: [addr.city, addr.region, addr.country].filter(Boolean).join(', ') || query,
-                  city: addr.city || addr.region || 'Unknown',
-                  country: addr.country || '',
+                  address:
+                    [addr.city, addr.region, addr.country]
+                      .filter(Boolean)
+                      .join(", ") || query,
+                  city: addr.city || addr.region || "Unknown",
+                  country: addr.country || "",
                   distance,
                 };
               } catch {
@@ -325,7 +368,7 @@ export default function LocationPicker() {
                   latitude: result.latitude,
                   longitude: result.longitude,
                   address: query,
-                  city: 'Location',
+                  city: "Location",
                   distance: null,
                 };
               }
@@ -337,7 +380,7 @@ export default function LocationPicker() {
         }
       }
     } catch (error) {
-      console.log('Search error:', error);
+      console.log("Search error:", error);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -347,17 +390,20 @@ export default function LocationPicker() {
   // Calculate distance between two points in km
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
   const formatDistance = (km) => {
-    if (!km) return '';
+    if (!km) return "";
     if (km < 1) return `${Math.round(km * 1000)}m`;
     return `${km.toFixed(1)}km`;
   };
@@ -377,7 +423,7 @@ export default function LocationPicker() {
   const handleSelectLocation = (result) => {
     Keyboard.dismiss();
     setShowSearchPanel(false);
-    setSearchQuery('');
+    setSearchQuery("");
     setSearchResults([]);
 
     const newRegion = {
@@ -389,7 +435,7 @@ export default function LocationPicker() {
 
     setRegion(newRegion);
     setCoords({ lat: result.latitude, lng: result.longitude });
-    setAddress(result.address || 'Selected Location');
+    setAddress(result.address || "Selected Location");
 
     if (mapRef.current) {
       mapRef.current.animateToRegion(newRegion, 500);
@@ -397,9 +443,9 @@ export default function LocationPicker() {
   };
 
   const handleSuggestionPress = async (suggestion) => {
-    if (suggestion.type === 'current') {
+    if (suggestion.type === "current") {
       goToCurrentLocation();
-    } else if (suggestion.type === 'search') {
+    } else if (suggestion.type === "search") {
       setSearchQuery(suggestion.query);
       searchLocations(suggestion.query);
     }
@@ -409,7 +455,12 @@ export default function LocationPicker() {
     try {
       let location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
-      const newRegion = { latitude, longitude, latitudeDelta: 0.005, longitudeDelta: 0.005 };
+      const newRegion = {
+        latitude,
+        longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      };
       setRegion(newRegion);
       setCoords({ lat: latitude, lng: longitude });
       fetchAddress(latitude, longitude);
@@ -418,7 +469,11 @@ export default function LocationPicker() {
         mapRef.current.animateToRegion(newRegion, 500);
       }
     } catch (e) {
-      Alert.alert('Error', 'Could not get current location');
+      showAlert({
+        title: "Error",
+        message: "Could not get current location",
+        type: "error",
+      });
     }
   };
 
@@ -466,7 +521,7 @@ export default function LocationPicker() {
       clearTimeout(debounceRef.current);
     }
 
-    setAddress('Finding address...');
+    setAddress("Finding address...");
 
     debounceRef.current = setTimeout(() => {
       fetchAddress(newRegion.latitude, newRegion.longitude);
@@ -518,14 +573,14 @@ export default function LocationPicker() {
       address,
       latitude: coords.lat,
       longitude: coords.lng,
-      city: address.split(',')[1]?.trim() || '',
+      city: address.split(",")[1]?.trim() || "",
     });
 
     router.replace({
-      pathname: '/(host)/car/create',
+      pathname: "/(host)/car/create",
       params: {
-        formState: params.formState || '',
-        imageUris: params.imageUris || '',
+        formState: params.formState || "",
+        imageUris: params.imageUris || "",
         address: address,
         lat: coords.lat.toString(),
         lng: coords.lng.toString(),
@@ -575,16 +630,22 @@ export default function LocationPicker() {
         style={[
           styles.markerFixed,
           {
-            transform: [
-              { scale: pinScale },
-              { translateY: pinTranslateY },
-            ],
+            transform: [{ scale: pinScale }, { translateY: pinTranslateY }],
           },
         ]}
       >
-        <View style={[styles.pinContainer, isDragging && styles.pinContainerDragging]}>
+        <View
+          style={[
+            styles.pinContainer,
+            isDragging && styles.pinContainerDragging,
+          ]}
+        >
           <LinearGradient
-            colors={isDragging ? [COLORS.gold[300], COLORS.gold[400]] : [COLORS.gold[500], COLORS.gold[600]]}
+            colors={
+              isDragging
+                ? [COLORS.gold[300], COLORS.gold[400]]
+                : [COLORS.gold[500], COLORS.gold[600]]
+            }
             style={styles.pinGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -592,7 +653,9 @@ export default function LocationPicker() {
             <Ionicons name="car" size={28} color={COLORS.navy[900]} />
           </LinearGradient>
         </View>
-        <View style={[styles.pinShadow, isDragging && styles.pinShadowDragging]} />
+        <View
+          style={[styles.pinShadow, isDragging && styles.pinShadowDragging]}
+        />
       </Animated.View>
 
       {/* Zoom Controls */}
@@ -626,7 +689,10 @@ export default function LocationPicker() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color={COLORS.white} />
           </TouchableOpacity>
 
@@ -645,7 +711,7 @@ export default function LocationPicker() {
         >
           <Ionicons name="search" size={20} color={COLORS.gray[400]} />
           <Text style={styles.searchPlaceholder}>
-            {searchQuery || 'Search for a location...'}
+            {searchQuery || "Search for a location..."}
           </Text>
         </TouchableOpacity>
       </View>
@@ -660,7 +726,7 @@ export default function LocationPicker() {
                 style={styles.searchPanelBack}
                 onPress={() => {
                   setShowSearchPanel(false);
-                  setSearchQuery('');
+                  setSearchQuery("");
                   setSearchResults([]);
                 }}
               >
@@ -682,11 +748,17 @@ export default function LocationPicker() {
                   <ActivityIndicator size="small" color={COLORS.gold[500]} />
                 )}
                 {searchQuery.length > 0 && !isSearching && (
-                  <TouchableOpacity onPress={() => {
-                    setSearchQuery('');
-                    setSearchResults([]);
-                  }}>
-                    <Ionicons name="close-circle" size={20} color={COLORS.gray[400]} />
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSearchQuery("");
+                      setSearchResults([]);
+                    }}
+                  >
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      color={COLORS.gray[400]}
+                    />
                   </TouchableOpacity>
                 )}
               </View>
@@ -708,7 +780,11 @@ export default function LocationPicker() {
                       activeOpacity={0.7}
                     >
                       <View style={styles.locationIconContainer}>
-                        <Ionicons name="location" size={20} color={COLORS.gold[500]} />
+                        <Ionicons
+                          name="location"
+                          size={20}
+                          color={COLORS.gold[500]}
+                        />
                       </View>
                       <View style={styles.locationInfo}>
                         <Text style={styles.locationCity} numberOfLines={1}>
@@ -729,13 +805,21 @@ export default function LocationPicker() {
               )}
 
               {/* No Results */}
-              {searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
-                <View style={styles.noResults}>
-                  <Ionicons name="search-outline" size={48} color={COLORS.gray[500]} />
-                  <Text style={styles.noResultsText}>No locations found</Text>
-                  <Text style={styles.noResultsSubtext}>Try a different search term</Text>
-                </View>
-              )}
+              {searchQuery.length >= 2 &&
+                searchResults.length === 0 &&
+                !isSearching && (
+                  <View style={styles.noResults}>
+                    <Ionicons
+                      name="search-outline"
+                      size={48}
+                      color={COLORS.gray[500]}
+                    />
+                    <Text style={styles.noResultsText}>No locations found</Text>
+                    <Text style={styles.noResultsSubtext}>
+                      Try a different search term
+                    </Text>
+                  </View>
+                )}
 
               {/* Quick Suggestions - Show when no search query */}
               {searchQuery.length === 0 && (
@@ -756,14 +840,26 @@ export default function LocationPicker() {
                           onPress={() => handleSelectLocation(loc)}
                           activeOpacity={0.7}
                         >
-                          <View style={[styles.locationIconContainer, styles.recentIcon]}>
-                            <Ionicons name="time" size={20} color={COLORS.emerald[500]} />
+                          <View
+                            style={[
+                              styles.locationIconContainer,
+                              styles.recentIcon,
+                            ]}
+                          >
+                            <Ionicons
+                              name="time"
+                              size={20}
+                              color={COLORS.emerald[500]}
+                            />
                           </View>
                           <View style={styles.locationInfo}>
                             <Text style={styles.locationCity} numberOfLines={1}>
-                              {loc.address.split(',')[0]}
+                              {loc.address.split(",")[0]}
                             </Text>
-                            <Text style={styles.locationAddress} numberOfLines={1}>
+                            <Text
+                              style={styles.locationAddress}
+                              numberOfLines={1}
+                            >
                               {loc.address}
                             </Text>
                           </View>
@@ -786,9 +882,15 @@ export default function LocationPicker() {
                           <Ionicons
                             name={suggestion.icon}
                             size={18}
-                            color={suggestion.type === 'current' ? COLORS.emerald[500] : COLORS.gold[500]}
+                            color={
+                              suggestion.type === "current"
+                                ? COLORS.emerald[500]
+                                : COLORS.gold[500]
+                            }
                           />
-                          <Text style={styles.suggestionText}>{suggestion.name}</Text>
+                          <Text style={styles.suggestionText}>
+                            {suggestion.name}
+                          </Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -835,7 +937,11 @@ export default function LocationPicker() {
               end={{ x: 1, y: 0 }}
             >
               <Text style={styles.confirmBtnText}>Confirm Location</Text>
-              <Ionicons name="checkmark-circle" size={22} color={COLORS.navy[900]} />
+              <Ionicons
+                name="checkmark-circle"
+                size={22}
+                color={COLORS.navy[900]}
+              />
             </LinearGradient>
           </TouchableOpacity>
         </LinearGradient>
@@ -854,18 +960,18 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: COLORS.navy[900],
   },
   loadingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 16,
     color: COLORS.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loadingSubtext: {
     marginTop: 4,
@@ -878,17 +984,17 @@ const styles = StyleSheet.create({
 
   // Pin
   markerFixed: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     marginLeft: -28,
     marginTop: -56,
-    alignItems: 'center',
+    alignItems: "center",
     zIndex: 10,
   },
   pinContainer: {
     borderRadius: 28,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.5,
@@ -903,13 +1009,13 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   pinShadow: {
     width: 16,
     height: 6,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: "rgba(0,0,0,0.3)",
     borderRadius: 8,
     marginTop: 4,
   },
@@ -921,15 +1027,15 @@ const styles = StyleSheet.create({
 
   // Zoom Controls
   zoomControls: {
-    position: 'absolute',
+    position: "absolute",
     right: 16,
-    top: '45%',
+    top: "45%",
     backgroundColor: COLORS.navy[800],
     borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.navy[600],
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -938,8 +1044,8 @@ const styles = StyleSheet.create({
   zoomButton: {
     width: 44,
     height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   zoomDivider: {
     height: 1,
@@ -948,18 +1054,18 @@ const styles = StyleSheet.create({
 
   // Floating My Location
   floatingMyLocationBtn: {
-    position: 'absolute',
+    position: "absolute",
     right: 16,
     bottom: 220,
     width: 48,
     height: 48,
     borderRadius: 24,
     backgroundColor: COLORS.navy[800],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: COLORS.navy[600],
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -968,22 +1074,22 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    paddingTop: Platform.OS === 'ios' ? 50 : 40,
+    paddingTop: Platform.OS === "ios" ? 50 : 40,
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: 'rgba(10, 22, 40, 0.95)',
+    backgroundColor: "rgba(10, 22, 40, 0.95)",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     zIndex: 100,
   },
   headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 12,
   },
   backBtn: {
@@ -991,23 +1097,23 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 12,
     backgroundColor: COLORS.navy[700],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerTitleText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.white,
   },
 
   // Search Bar (in header)
   searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.navy[700],
     borderRadius: 12,
     paddingHorizontal: 14,
@@ -1024,7 +1130,7 @@ const styles = StyleSheet.create({
 
   // Search Panel Overlay
   searchPanelOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -1036,9 +1142,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   searchPanelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? 50 : 40,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: Platform.OS === "ios" ? 50 : 40,
     paddingHorizontal: 16,
     paddingBottom: 16,
     backgroundColor: COLORS.navy[800],
@@ -1049,13 +1155,13 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 12,
     backgroundColor: COLORS.navy[700],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   searchInputContainer: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.navy[700],
     borderRadius: 12,
     paddingHorizontal: 12,
@@ -1078,14 +1184,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.gray[400],
     letterSpacing: 1,
     marginBottom: 12,
@@ -1093,13 +1199,13 @@ const styles = StyleSheet.create({
   clearButton: {
     fontSize: 13,
     color: COLORS.gold[500],
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   // Location Items
   locationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.navy[700],
@@ -1110,18 +1216,18 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 12,
     backgroundColor: COLORS.navy[700],
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   recentIcon: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
   },
   locationInfo: {
     flex: 1,
   },
   locationCity: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.white,
     marginBottom: 2,
   },
@@ -1132,18 +1238,18 @@ const styles = StyleSheet.create({
   locationDistance: {
     fontSize: 13,
     color: COLORS.emerald[500],
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   // Suggestions Grid
   suggestionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
   suggestionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.navy[700],
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -1155,17 +1261,17 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: 14,
     color: COLORS.white,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
   // No Results
   noResults: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 60,
   },
   noResultsText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.white,
     marginTop: 16,
   },
@@ -1177,13 +1283,13 @@ const styles = StyleSheet.create({
 
   // Bottom Card
   bottomCard: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
-    width: '100%',
+    width: "100%",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -1191,14 +1297,14 @@ const styles = StyleSheet.create({
   },
   bottomCardGradient: {
     padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 20,
+    paddingBottom: Platform.OS === "ios" ? 36 : 20,
   },
   addressSection: {
     marginBottom: 16,
   },
   addressHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     marginBottom: 8,
   },
@@ -1206,19 +1312,19 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   addressLabel: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.gray[400],
     letterSpacing: 1,
   },
   address: {
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.white,
     marginBottom: 4,
     lineHeight: 24,
@@ -1226,12 +1332,12 @@ const styles = StyleSheet.create({
   coords: {
     fontSize: 12,
     color: COLORS.emerald[500],
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    fontWeight: '600',
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+    fontWeight: "600",
   },
   confirmBtn: {
     borderRadius: 14,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
@@ -1239,15 +1345,15 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   confirmBtnGradient: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
   },
   confirmBtnText: {
     color: COLORS.navy[900],
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });

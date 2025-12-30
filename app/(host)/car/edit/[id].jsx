@@ -1,5 +1,5 @@
 // app/(host)/car/edit/[id].jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,43 +7,43 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
   StatusBar,
-} from 'react-native';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import carService, { DAYS_OF_WEEK } from '../../../../services/carService';
+} from "react-native";
+import { Stack, router, useLocalSearchParams } from "expo-router";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import carService, { DAYS_OF_WEEK } from "../../../../services/carService";
+import { useAlert } from "../../../../context/AlertContext";
 
 // ============================================
 // 🎨 INLINE THEME COLORS
 // ============================================
 const COLORS = {
   navy: {
-    900: '#0A1628',
-    800: '#0F2137',
-    700: '#152A46',
-    600: '#1E3A5F',
+    900: "#0A1628",
+    800: "#0F2137",
+    700: "#152A46",
+    600: "#1E3A5F",
   },
   gold: {
-    600: '#D99413',
-    500: '#F59E0B',
-    400: '#FBBF24',
+    600: "#D99413",
+    500: "#F59E0B",
+    400: "#FBBF24",
   },
   emerald: {
-    500: '#10B981',
+    500: "#10B981",
   },
   gray: {
-    600: '#4B5563',
-    500: '#6B7280',
-    400: '#9CA3AF',
+    600: "#4B5563",
+    500: "#6B7280",
+    400: "#9CA3AF",
   },
-  white: '#FFFFFF',
+  white: "#FFFFFF",
 };
 
 export default function EditCar() {
@@ -51,26 +51,27 @@ export default function EditCar() {
   // 🔒 ORIGINAL LOGIC - COMPLETELY UNTOUCHED
   // ============================================
   const { id } = useLocalSearchParams();
+  const { showAlert } = useAlert();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
-    make: '',
-    model: '',
-    year: '',
-    color: '',
-    plateNumber: '',
-    pricePerDay: '',
-    pricePerHour: '',
-    seats: '',
-    transmission: '',
-    fuelType: '',
-    address: '',
-    description: '',
+    make: "",
+    model: "",
+    year: "",
+    color: "",
+    plateNumber: "",
+    pricePerDay: "",
+    pricePerHour: "",
+    seats: "",
+    transmission: "",
+    fuelType: "",
+    address: "",
+    description: "",
     availability: {
       daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-      startTime: '00:00',
-      endTime: '23:59',
+      startTime: "00:00",
+      endTime: "23:59",
       isAvailable: true,
     },
   });
@@ -95,17 +96,24 @@ export default function EditCar() {
         seats: String(car.seats),
         transmission: car.transmission,
         fuelType: car.fuelType,
-        address: car.location?.address || '',
-        description: car.description || '',
+        address: car.location?.address || "",
+        description: car.description || "",
         availability: {
           daysOfWeek: car.availability?.daysOfWeek || [0, 1, 2, 3, 4, 5, 6],
-          startTime: car.availability?.startTime || '00:00',
-          endTime: car.availability?.endTime || '23:59',
-          isAvailable: car.availability?.isAvailable !== undefined ? car.availability.isAvailable : true,
+          startTime: car.availability?.startTime || "00:00",
+          endTime: car.availability?.endTime || "23:59",
+          isAvailable:
+            car.availability?.isAvailable !== undefined
+              ? car.availability.isAvailable
+              : true,
         },
       });
     } catch (error) {
-      Alert.alert('Error', 'Could not load car details');
+      showAlert({
+        title: "Error",
+        message: "Could not load car details",
+        type: "error",
+      });
       router.back();
     } finally {
       setLoading(false);
@@ -148,12 +156,21 @@ export default function EditCar() {
 
       await carService.updateCar(id, payload);
 
-      Alert.alert('Success', 'Car updated successfully!', [
-        { text: 'OK', onPress: () => router.push('/(host)/(tabs)/fleet') },
-      ]);
+      showAlert({
+        title: "Success",
+        message: "Car updated successfully!",
+        type: "success",
+        buttons: [
+          { text: "OK", onPress: () => router.push("/(host)/(tabs)/fleet") },
+        ],
+      });
     } catch (error) {
-      console.log('Update Error:', error);
-      Alert.alert('Error', 'Failed to update car.');
+      console.log("Update Error:", error);
+      showAlert({
+        title: "Error",
+        message: "Failed to update car.",
+        type: "error",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -181,8 +198,14 @@ export default function EditCar() {
         colors={[COLORS.navy[900], COLORS.navy[800]]}
         style={styles.header}
       >
-        <SafeAreaView edges={['top', 'left', 'right']} style={styles.headerContent}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <SafeAreaView
+          edges={["top", "left", "right"]}
+          style={styles.headerContent}
+        >
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backBtn}
+          >
             <Ionicons name="arrow-back" size={24} color={COLORS.white} />
           </TouchableOpacity>
           <View style={styles.headerTextContainer}>
@@ -194,7 +217,7 @@ export default function EditCar() {
       </LinearGradient>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <ScrollView
@@ -207,7 +230,7 @@ export default function EditCar() {
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIconContainer}>
                 <LinearGradient
-                  colors={['#3B82F6', '#2563EB']}
+                  colors={["#3B82F6", "#2563EB"]}
                   style={styles.sectionIconGradient}
                 >
                   <Ionicons name="car-sport" size={20} color={COLORS.white} />
@@ -224,7 +247,7 @@ export default function EditCar() {
                 flex
                 label="Make"
                 value={form.make}
-                onChangeText={(t) => handleInputChange('make', t)}
+                onChangeText={(t) => handleInputChange("make", t)}
                 icon="car-outline"
               />
               <View style={{ width: 15 }} />
@@ -232,7 +255,7 @@ export default function EditCar() {
                 flex
                 label="Model"
                 value={form.model}
-                onChangeText={(t) => handleInputChange('model', t)}
+                onChangeText={(t) => handleInputChange("model", t)}
                 icon="car-sport-outline"
               />
             </View>
@@ -243,7 +266,7 @@ export default function EditCar() {
                 label="Year"
                 value={form.year}
                 keyboardType="numeric"
-                onChangeText={(t) => handleInputChange('year', t)}
+                onChangeText={(t) => handleInputChange("year", t)}
                 icon="calendar-outline"
               />
               <View style={{ width: 15 }} />
@@ -251,7 +274,7 @@ export default function EditCar() {
                 flex
                 label="Color"
                 value={form.color}
-                onChangeText={(t) => handleInputChange('color', t)}
+                onChangeText={(t) => handleInputChange("color", t)}
                 icon="color-palette-outline"
               />
             </View>
@@ -259,7 +282,7 @@ export default function EditCar() {
             <Input
               label="Plate Number"
               value={form.plateNumber}
-              onChangeText={(t) => handleInputChange('plateNumber', t)}
+              onChangeText={(t) => handleInputChange("plateNumber", t)}
               icon="card-outline"
             />
           </View>
@@ -269,7 +292,7 @@ export default function EditCar() {
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIconContainer}>
                 <LinearGradient
-                  colors={[COLORS.emerald[500], '#059669']}
+                  colors={[COLORS.emerald[500], "#059669"]}
                   style={styles.sectionIconGradient}
                 >
                   <Ionicons name="cash" size={20} color={COLORS.white} />
@@ -287,7 +310,7 @@ export default function EditCar() {
                 label="Price Per Day"
                 value={form.pricePerDay}
                 keyboardType="numeric"
-                onChangeText={(t) => handleInputChange('pricePerDay', t)}
+                onChangeText={(t) => handleInputChange("pricePerDay", t)}
                 prefix="Rs"
               />
               <View style={{ width: 15 }} />
@@ -296,7 +319,7 @@ export default function EditCar() {
                 label="Price Per Hour"
                 value={form.pricePerHour}
                 keyboardType="numeric"
-                onChangeText={(t) => handleInputChange('pricePerHour', t)}
+                onChangeText={(t) => handleInputChange("pricePerHour", t)}
                 prefix="Rs"
               />
             </View>
@@ -307,10 +330,14 @@ export default function EditCar() {
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIconContainer}>
                 <LinearGradient
-                  colors={['#8B5CF6', '#7C3AED']}
+                  colors={["#8B5CF6", "#7C3AED"]}
                   style={styles.sectionIconGradient}
                 >
-                  <MaterialCommunityIcons name="car-info" size={20} color={COLORS.white} />
+                  <MaterialCommunityIcons
+                    name="car-info"
+                    size={20}
+                    color={COLORS.white}
+                  />
                 </LinearGradient>
               </View>
               <View>
@@ -324,7 +351,7 @@ export default function EditCar() {
                 flex
                 label="Transmission"
                 value={form.transmission}
-                onChangeText={(t) => handleInputChange('transmission', t)}
+                onChangeText={(t) => handleInputChange("transmission", t)}
                 icon="car-shift-pattern"
               />
               <View style={{ width: 15 }} />
@@ -332,7 +359,7 @@ export default function EditCar() {
                 flex
                 label="Fuel Type"
                 value={form.fuelType}
-                onChangeText={(t) => handleInputChange('fuelType', t)}
+                onChangeText={(t) => handleInputChange("fuelType", t)}
                 icon="water-outline"
               />
             </View>
@@ -341,7 +368,7 @@ export default function EditCar() {
               label="Seats"
               value={form.seats}
               keyboardType="numeric"
-              onChangeText={(t) => handleInputChange('seats', t)}
+              onChangeText={(t) => handleInputChange("seats", t)}
               icon="people-outline"
             />
           </View>
@@ -353,7 +380,7 @@ export default function EditCar() {
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIconContainer}>
                 <LinearGradient
-                  colors={[COLORS.emerald[500], '#059669']}
+                  colors={[COLORS.emerald[500], "#059669"]}
                   style={styles.sectionIconGradient}
                 >
                   <Ionicons name="time" size={20} color={COLORS.white} />
@@ -368,9 +395,13 @@ export default function EditCar() {
             {/* Available Toggle */}
             <View style={styles.availabilityToggleContainer}>
               <View>
-                <Text style={styles.availabilityToggleLabel}>Accept Bookings</Text>
+                <Text style={styles.availabilityToggleLabel}>
+                  Accept Bookings
+                </Text>
                 <Text style={styles.availabilityToggleSubtext}>
-                  {form.availability.isAvailable ? 'Car is available for rent' : 'Car is not available'}
+                  {form.availability.isAvailable
+                    ? "Car is available for rent"
+                    : "Car is not available"}
                 </Text>
               </View>
               <TouchableOpacity
@@ -379,7 +410,7 @@ export default function EditCar() {
                   form.availability.isAvailable && styles.toggleSwitchActive,
                 ]}
                 onPress={() =>
-                  handleInputChange('availability', {
+                  handleInputChange("availability", {
                     ...form.availability,
                     isAvailable: !form.availability.isAvailable,
                   })
@@ -403,7 +434,7 @@ export default function EditCar() {
                 placeholder="09:00"
                 value={form.availability.startTime}
                 onChangeText={(t) =>
-                  handleInputChange('availability', {
+                  handleInputChange("availability", {
                     ...form.availability,
                     startTime: t,
                   })
@@ -417,7 +448,7 @@ export default function EditCar() {
                 placeholder="17:00"
                 value={form.availability.endTime}
                 onChangeText={(t) =>
-                  handleInputChange('availability', {
+                  handleInputChange("availability", {
                     ...form.availability,
                     endTime: t,
                   })
@@ -434,15 +465,16 @@ export default function EditCar() {
                   key={day.value}
                   style={[
                     styles.dayButton,
-                    form.availability.daysOfWeek.includes(day.value) && styles.dayButtonActive,
+                    form.availability.daysOfWeek.includes(day.value) &&
+                      styles.dayButtonActive,
                   ]}
                   onPress={() => {
                     const currentDays = form.availability.daysOfWeek || [];
                     const newDays = currentDays.includes(day.value)
                       ? currentDays.filter((d) => d !== day.value)
                       : [...currentDays, day.value];
-                    
-                    handleInputChange('availability', {
+
+                    handleInputChange("availability", {
                       ...form.availability,
                       daysOfWeek: newDays,
                     });
@@ -452,7 +484,8 @@ export default function EditCar() {
                   <Text
                     style={[
                       styles.dayButtonText,
-                      form.availability.daysOfWeek.includes(day.value) && styles.dayButtonTextActive,
+                      form.availability.daysOfWeek.includes(day.value) &&
+                        styles.dayButtonTextActive,
                     ]}
                   >
                     {day.label.substring(0, 3)}
@@ -467,7 +500,7 @@ export default function EditCar() {
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIconContainer}>
                 <LinearGradient
-                  colors={['#F97316', '#EA580C']}
+                  colors={["#F97316", "#EA580C"]}
                   style={styles.sectionIconGradient}
                 >
                   <Ionicons name="location" size={20} color={COLORS.white} />
@@ -482,13 +515,13 @@ export default function EditCar() {
             <Input
               label="Location Address"
               value={form.address}
-              onChangeText={(t) => handleInputChange('address', t)}
+              onChangeText={(t) => handleInputChange("address", t)}
               icon="location-outline"
             />
             <Input
               label="Description"
               value={form.description}
-              onChangeText={(t) => handleInputChange('description', t)}
+              onChangeText={(t) => handleInputChange("description", t)}
               multiline
               icon="document-text-outline"
             />
@@ -519,7 +552,11 @@ export default function EditCar() {
             ) : (
               <>
                 <Text style={styles.submitText}>Save Changes</Text>
-                <Ionicons name="checkmark-circle" size={22} color={COLORS.navy[900]} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={22}
+                  color={COLORS.navy[900]}
+                />
               </>
             )}
           </LinearGradient>
@@ -549,7 +586,7 @@ function Input({
       <View
         style={[
           styles.inputWrapper,
-          multiline && { height: 100, alignItems: 'flex-start' },
+          multiline && { height: 100, alignItems: "flex-start" },
         ]}
       >
         {icon && (
@@ -564,7 +601,11 @@ function Input({
         <TextInput
           style={[
             styles.input,
-            multiline && { height: 90, textAlignVertical: 'top', paddingTop: 10 },
+            multiline && {
+              height: 90,
+              textAlignVertical: "top",
+              paddingTop: 10,
+            },
           ]}
           value={value}
           onChangeText={onChangeText}
@@ -588,8 +629,8 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: COLORS.navy[900],
   },
   loadingText: {
@@ -605,19 +646,19 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30,
   },
   headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginTop: 10,
   },
   headerTextContainer: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.white,
   },
   headerSubtitle: {
@@ -628,8 +669,8 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: COLORS.navy[700],
     borderRadius: 12,
     borderWidth: 1,
@@ -653,24 +694,24 @@ const styles = StyleSheet.create({
     borderColor: COLORS.navy[700],
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   sectionIconContainer: {
     marginRight: 14,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   sectionIconGradient: {
     width: 44,
     height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.white,
   },
   sectionSubtitle: {
@@ -681,23 +722,23 @@ const styles = StyleSheet.create({
 
   // Inputs
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   inputContainer: {
     marginBottom: 15,
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.gray[400],
     marginBottom: 8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.navy[700],
     borderWidth: 1,
     borderColor: COLORS.navy[600],
@@ -711,21 +752,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.gray[400],
     marginRight: 6,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   input: {
     flex: 1,
     paddingVertical: 14,
     fontSize: 15,
     color: COLORS.white,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
   // Availability Toggle
   availabilityToggleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: COLORS.navy[700],
     padding: 16,
     borderRadius: 12,
@@ -735,7 +776,7 @@ const styles = StyleSheet.create({
   },
   availabilityToggleLabel: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.white,
     marginBottom: 4,
   },
@@ -748,7 +789,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     backgroundColor: COLORS.navy[600],
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 3,
   },
   toggleSwitchActive: {
@@ -759,20 +800,20 @@ const styles = StyleSheet.create({
     height: 26,
     borderRadius: 13,
     backgroundColor: COLORS.white,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
     elevation: 3,
   },
   toggleThumbActive: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
   },
 
   // Days of Week
   daysContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   dayButton: {
@@ -783,37 +824,37 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.navy[700],
     borderWidth: 1.5,
     borderColor: COLORS.navy[600],
-    alignItems: 'center',
+    alignItems: "center",
   },
   dayButtonActive: {
-    backgroundColor: COLORS.gold[500] + '20',
+    backgroundColor: COLORS.gold[500] + "20",
     borderColor: COLORS.gold[500],
   },
   dayButtonText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.gray[400],
   },
   dayButtonTextActive: {
     color: COLORS.gold[500],
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   // Footer
   footer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: COLORS.navy[900],
     padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20,
     borderTopWidth: 1,
     borderTopColor: COLORS.navy[700],
   },
   submitBtn: {
     borderRadius: 14,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
@@ -824,15 +865,15 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   submitGradient: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 10,
   },
   submitText: {
     color: COLORS.navy[900],
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });

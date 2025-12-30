@@ -9,7 +9,6 @@ import {
   Image,
   RefreshControl,
   ActivityIndicator,
-  Alert,
   Dimensions,
   StatusBar,
 } from "react-native";
@@ -19,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import carService from "../../../services/carService";
 import { useAuth } from "../../../context/AuthContext";
+import { useAlert } from "../../../context/AlertContext";
 
 const { width } = Dimensions.get("window");
 
@@ -27,30 +27,30 @@ const { width } = Dimensions.get("window");
 // ============================================
 const COLORS = {
   navy: {
-    900: '#0A1628',
-    800: '#0F2137',
-    700: '#152A46',
-    600: '#1E3A5F',
-    500: '#2A4A73',
+    900: "#0A1628",
+    800: "#0F2137",
+    700: "#152A46",
+    600: "#1E3A5F",
+    500: "#2A4A73",
   },
   gold: {
-    600: '#D99413',
-    500: '#F59E0B',
-    400: '#FBBF24',
+    600: "#D99413",
+    500: "#F59E0B",
+    400: "#FBBF24",
   },
   emerald: {
-    500: '#10B981',
-    400: '#34D399',
+    500: "#10B981",
+    400: "#34D399",
   },
   red: {
-    500: '#EF4444',
+    500: "#EF4444",
   },
   gray: {
-    600: '#4B5563',
-    500: '#6B7280',
-    400: '#9CA3AF',
+    600: "#4B5563",
+    500: "#6B7280",
+    400: "#9CA3AF",
   },
-  white: '#FFFFFF',
+  white: "#FFFFFF",
 };
 
 export default function HostFleet() {
@@ -58,6 +58,7 @@ export default function HostFleet() {
   // 🔒 ORIGINAL LOGIC - COMPLETELY UNTOUCHED
   // ============================================
   const { kycStatus } = useAuth();
+  const { showAlert } = useAlert();
   const [myCars, setMyCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -82,10 +83,15 @@ export default function HostFleet() {
 
   const handleAddNew = () => {
     if (kycStatus !== "approved") {
-      Alert.alert("Verification Required", "Complete KYC first.", [
-        { text: "Verify", onPress: () => router.push('/kyc') },
-        { text: "Cancel" },
-      ]);
+      showAlert({
+        title: "Verification Required",
+        message: "Complete KYC first.",
+        type: "warning",
+        buttons: [
+          { text: "Verify", onPress: () => router.push("/kyc") },
+          { text: "Cancel", style: "cancel" },
+        ],
+      });
       return;
     }
     router.push("/(host)/car/create");
@@ -200,7 +206,11 @@ export default function HostFleet() {
 
             <View style={styles.actionContainer}>
               <Text style={styles.manageText}>Manage</Text>
-              <Ionicons name="arrow-forward-circle" size={24} color={COLORS.gold[500]} />
+              <Ionicons
+                name="arrow-forward-circle"
+                size={24}
+                color={COLORS.gold[500]}
+              />
             </View>
           </View>
         </View>
@@ -217,13 +227,17 @@ export default function HostFleet() {
         colors={[COLORS.navy[900], COLORS.navy[800]]}
         style={styles.header}
       >
-        <SafeAreaView edges={["top", "left", "right"]} style={styles.headerContent}>
+        <SafeAreaView
+          edges={["top", "left", "right"]}
+          style={styles.headerContent}
+        >
           <View>
             <Text style={styles.headerTitle}>My Fleet</Text>
             <View style={styles.headerSubtitleContainer}>
               <Ionicons name="car-sport" size={16} color={COLORS.gold[500]} />
               <Text style={styles.headerSubtitle}>
-                {myCars.length} {myCars.length === 1 ? 'vehicle' : 'vehicles'} listed
+                {myCars.length} {myCars.length === 1 ? "vehicle" : "vehicles"}{" "}
+                listed
               </Text>
             </View>
           </View>
@@ -300,8 +314,14 @@ export default function HostFleet() {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                   >
-                    <Ionicons name="add-circle-outline" size={22} color={COLORS.navy[900]} />
-                    <Text style={styles.emptyButtonText}>Add Your First Car</Text>
+                    <Ionicons
+                      name="add-circle-outline"
+                      size={22}
+                      color={COLORS.navy[900]}
+                    />
+                    <Text style={styles.emptyButtonText}>
+                      Add Your First Car
+                    </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
@@ -342,20 +362,20 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   headerSubtitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   headerSubtitle: {
     fontSize: 14,
     color: COLORS.gray[400],
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
   // Add Button
   addBtn: {
     borderRadius: 14,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -422,11 +442,11 @@ const styles = StyleSheet.create({
 
   // Price Tag
   priceContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 14,
     left: 14,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
@@ -460,7 +480,7 @@ const styles = StyleSheet.create({
 
   // Status Badge
   statusBadgeContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 14,
     right: 14,
   },
@@ -550,8 +570,8 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.navy[700],
   },
   plateBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     backgroundColor: COLORS.navy[700],
     paddingHorizontal: 12,
@@ -586,13 +606,13 @@ const styles = StyleSheet.create({
   emptyIconContainer: {
     marginBottom: 24,
     borderRadius: 24,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   emptyIconGradient: {
     width: 120,
     height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyText: {
     fontSize: 22,
@@ -604,12 +624,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.gray[400],
     marginBottom: 28,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
   emptyButton: {
     borderRadius: 14,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: COLORS.gold[500],
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
@@ -617,8 +637,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   emptyButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
     paddingHorizontal: 24,
     paddingVertical: 14,
@@ -626,6 +646,6 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     color: COLORS.navy[900],
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
