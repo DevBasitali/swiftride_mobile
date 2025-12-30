@@ -32,11 +32,14 @@ export const useLocationTracking = (bookingId, isActive = false) => {
                 setIsTracking(true);
 
                 // Start watching location
+                // Time interval from env (defaults to 10 seconds)
+                const intervalMs = Number(process.env.EXPO_PUBLIC_LOCATION_INTERVAL_MS) || 1000;
+
                 watchRef.current = await Location.watchPositionAsync(
                     {
                         accuracy: Location.Accuracy.High,
-                        timeInterval: 10000, // Update every 10 seconds
-                        distanceInterval: 10, // Or every 10 meters
+                        timeInterval: intervalMs,
+                        distanceInterval: 10, // Update if moved 10 meters
                     },
                     (newLocation) => {
                         if (!isMounted) return;

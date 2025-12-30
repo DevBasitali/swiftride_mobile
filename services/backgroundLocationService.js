@@ -1,39 +1,57 @@
 // services/backgroundLocationService.js
+// Background location tracking that works even when app is closed or phone is locked
+
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import apiClient from './apiClient';
-import { connectSocket, sendLocation, disconnectSocket } from './socketService';
+import * as SecureStore from 'expo-secure-store';
+import axios from 'axios';
 
 const BACKGROUND_LOCATION_TASK = 'background-location-tracking';
+const API_BASE = process.env.EXPO_PUBLIC_SERVER_IP
+    ? `http://${process.env.EXPO_PUBLIC_SERVER_IP}:${process.env.EXPO_PUBLIC_SERVER_PORT || 5000}/api`
+    : 'http://localhost:5000/api';
 
 // Store the current booking ID for background task
 let currentBookingId = null;
 
-// Define the background task
+// Define the background task - this runs even when app is closed
 TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }) => {
     if (error) {
-        console.error('Background location error:', error);
+        console.error('🔴 Background location error:', error);
         return;
     }
 
-    if (data && currentBookingId) {
+    if (data) {
         const { locations } = data;
         const location = locations[0];
 
-        if (location) {
-            console.log('📍 [Background] Sending location:', location.coords.latitude, location.coords.longitude);
+        if (location && currentBookingId) {
+            console.log('📍 [Background] Location update:', location.coords.latitude, location.coords.longitude);
 
-            // Send to server via HTTP (socket might not be connected in background)
+            // Get auth token from secure store
             try {
-                await apiClient.post(`/bookings/${currentBookingId}/location`, {
-                    lat: location.coords.latitude,
-                    lng: location.coords.longitude,
-                    heading: location.coords.heading || 0,
-                    speed: location.coords.speed || 0,
-                    timestamp: new Date().toISOString(),
-                });
+                const token = await SecureStore.getItemAsync('accessToken');
+
+                if (token) {
+                    // Send via HTTP POST (sockets don't work in background)
+                    await axios.post(
+                        `${API_BASE}/bookings/${currentBookingId}/location`,
+                        {
+                            lat: location.coords.latitude,
+                            lng: location.coords.longitude,
+                            heading: location.coords.heading || 0,
+                            speed: location.coords.speed || 0,
+                            timestamp: new Date().toISOString(),
+                        },
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            timeout: 10000,
+                        }
+                    );
+                    console.log('✅ [Background] Location sent successfully');
+                }
             } catch (err) {
-                console.log('Background location send error:', err.message);
+                console.log('⚠️ [Background] Location send failed:', err.message);
             }
         }
     }
@@ -42,17 +60,20 @@ TaskManager.defineTask(BACKGROUND_LOCATION_TASK, async ({ data, error }) => {
 // Start background location tracking
 export const startBackgroundTracking = async (bookingId) => {
     try {
-        // Request background permission
+        console.log('🚗 Starting background tracking for booking:', bookingId);
+
+        // Request foreground permission first
         const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
         if (foregroundStatus !== 'granted') {
-            console.log('Foreground location permission denied');
+            console.log('❌ Foreground location permission denied');
             return false;
         }
 
+        // Request background permission
         const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
         if (backgroundStatus !== 'granted') {
-            console.log('Background location permission denied');
-            return false;
+            console.log('❌ Background location permission denied - tracking will only work when app is open');
+            // Continue anyway with foreground-only tracking
         }
 
         // Store booking ID for the task
@@ -61,7 +82,7 @@ export const startBackgroundTracking = async (bookingId) => {
         // Check if already tracking
         const hasStarted = await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK);
         if (hasStarted) {
-            console.log('Background tracking already running');
+            console.log('ℹ️ Background tracking already running');
             return true;
         }
 
@@ -73,16 +94,16 @@ export const startBackgroundTracking = async (bookingId) => {
             deferredUpdatesInterval: 10000,
             showsBackgroundLocationIndicator: true,
             foregroundService: {
-                notificationTitle: 'SwiftRide',
-                notificationBody: 'Tracking your location for car rental safety',
+                notificationTitle: 'SwiftRide Tracking',
+                notificationBody: 'Your car location is being shared for safety',
                 notificationColor: '#4F46E5',
             },
         });
 
-        console.log('🚗 Background location tracking started for booking:', bookingId);
+        console.log('✅ Background location tracking started');
         return true;
     } catch (error) {
-        console.error('Failed to start background tracking:', error);
+        console.error('❌ Failed to start background tracking:', error);
         return false;
     }
 };
@@ -97,7 +118,7 @@ export const stopBackgroundTracking = async () => {
         }
         currentBookingId = null;
     } catch (error) {
-        console.error('Failed to stop background tracking:', error);
+        console.error('❌ Failed to stop background tracking:', error);
     }
 };
 
@@ -113,10 +134,16 @@ export const isBackgroundTrackingRunning = async () => {
 // Get current booking being tracked
 export const getCurrentTrackingBookingId = () => currentBookingId;
 
+// Set booking ID (used when restoring from storage)
+export const setTrackingBookingId = (bookingId) => {
+    currentBookingId = bookingId;
+};
+
 export default {
     startBackgroundTracking,
     stopBackgroundTracking,
     isBackgroundTrackingRunning,
     getCurrentTrackingBookingId,
+    setTrackingBookingId,
     BACKGROUND_LOCATION_TASK,
 };

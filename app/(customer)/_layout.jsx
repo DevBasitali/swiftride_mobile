@@ -12,31 +12,57 @@ function BackgroundLocationTracker() {
   useEffect(() => {
     const checkOngoingBooking = async () => {
       try {
+        // console.log('🔍 Checking for ongoing bookings...');
         const response = await getMyBookings();
-        const bookings = response.data?.docs || response.data?.data?.items || [];
+
+        // getMyBookings returns response.data, which contains { data: { items: [...] } }
+        let bookings = [];
+        if (response?.data?.items) {
+          bookings = response.data.items;
+        } else if (Array.isArray(response?.data)) {
+          bookings = response.data;
+        } else if (Array.isArray(response)) {
+          bookings = response;
+        }
+
+        // console.log('📋 Found bookings:', bookings.length);
+
         const ongoing = bookings.find(b => b.status === 'ongoing');
+
         if (ongoing) {
-          console.log('🚗 Found ongoing booking, starting auto-tracking:', ongoing.id);
-          setOngoingBookingId(ongoing.id);
+          const bookingIdToUse = ongoing.id || ongoing._id;
+          // console.log('🚗 Found ongoing booking:', bookingIdToUse);
+          setOngoingBookingId(bookingIdToUse);
         } else {
+          console.log('ℹ️ No ongoing booking found');
           setOngoingBookingId(null);
         }
       } catch (error) {
-        console.log('Error checking for ongoing bookings:', error.message);
+        console.log('❌ Error checking bookings:', error.message);
       }
     };
 
-    // Check immediately
+    // Check immediately on mount
     checkOngoingBooking();
 
-    // Check every 30 seconds for new ongoing bookings
+    // Check every 30 seconds for status changes
     const interval = setInterval(checkOngoingBooking, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Use the location tracking hook - automatically tracks when ongoingBookingId exists
-  useLocationTracking(ongoingBookingId, !!ongoingBookingId);
+  // Use the location tracking hook - this continuously tracks when ongoingBookingId exists
+  // This hook uses watchPositionAsync which sends updates every 10 seconds automatically
+  const { isTracking, error } = useLocationTracking(ongoingBookingId, !!ongoingBookingId);
+
+  useEffect(() => {
+    if (ongoingBookingId) {
+      console.log(`📍 Location tracking status: ${isTracking ? 'ACTIVE' : 'STARTING'}, Booking: ${ongoingBookingId}`);
+      if (error) {
+        console.log('⚠️ Tracking error:', error);
+      }
+    }
+  }, [isTracking, error, ongoingBookingId]);
 
   return null; // This component doesn't render anything
 }
