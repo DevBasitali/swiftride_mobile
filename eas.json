@@ -14,7 +14,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://swiftride-server.vercel.app/api",
+        "EXPO_PUBLIC_API_URL": "http://34.47.183.227:5000/api",
         "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyCaEPPHig-6whefFn6_wSLffBIMReWs5gg"
       }
     },

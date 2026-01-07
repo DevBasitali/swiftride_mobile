@@ -27,7 +27,7 @@ export default ({ config }) => {
     },
     android: {
       package: "com.swiftride.app",
-      // CRITICAL FIX: This links your Firebase config to the native build
+      usesCleartextTraffic: true,
       googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
