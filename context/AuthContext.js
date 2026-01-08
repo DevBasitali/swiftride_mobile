@@ -116,6 +116,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setIsLoading(true);
     try {
+      // Debug: Log the API URL being used
+      const Config = require("../constants/Config").default;
+      console.log("🔗 Login attempting to:", Config.API_URL);
+
       const response = await authService.login(email, password);
 
       // Handle the structure: { success: true, data: { user, token } }
@@ -133,8 +137,17 @@ export const AuthProvider = ({ children }) => {
 
       throw new Error("Invalid response from server");
     } catch (error) {
-      console.log("Login Error:", error);
-      return { success: false, msg: error.message || "Login failed" };
+      // Enhanced error logging for debugging
+      console.log("❌ Login Error Details:");
+      console.log("- Message:", error.message);
+      console.log("- Full Error:", JSON.stringify(error, null, 2));
+
+      // Check if it's a network error
+      const errorMsg = error.message?.includes("Network")
+        ? "Cannot connect to server. Check your internet connection and server status."
+        : error.message || "Login failed";
+
+      return { success: false, msg: errorMsg };
     } finally {
       setIsLoading(false);
     }

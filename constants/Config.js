@@ -1,9 +1,18 @@
-const CUSTOM_URL = process.env.EXPO_PUBLIC_API_URL;
+const PRODUCTION_API_URL = "http://34.47.183.227:5000/api";
 
+const CUSTOM_URL = process.env.EXPO_PUBLIC_API_URL;
 const IP_ADDRESS = process.env.EXPO_PUBLIC_SERVER_IP;
 const PORT = process.env.EXPO_PUBLIC_SERVER_PORT;
 
-const finalUrl = CUSTOM_URL ? CUSTOM_URL : `http://${IP_ADDRESS}:${PORT}/api`;
+let finalUrl;
+if (CUSTOM_URL) {
+  finalUrl = CUSTOM_URL;
+} else if (IP_ADDRESS && PORT) {
+  finalUrl = `http://${IP_ADDRESS}:${PORT}/api`;
+} else {
+  finalUrl = PRODUCTION_API_URL;
+  console.warn("⚠️ Using hardcoded production URL - env vars not found");
+}
 
 console.log("🔗 Connecting to:", finalUrl);
 
@@ -12,14 +21,3 @@ const Config = {
 };
 
 export default Config;
-
-// const IP_ADDRESS = process.env.EXPO_PUBLIC_SERVER_IP;
-// const PORT = process.env.EXPO_PUBLIC_SERVER_PORT;
-
-// console.log("IP ADDRESS:", IP_ADDRESS);
-// console.log("PORT:", PORT);
-// const Config = {
-//   API_URL: `http://${IP_ADDRESS}:${PORT}/api`,
-// };
-
-// export default Config;

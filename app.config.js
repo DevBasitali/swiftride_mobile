@@ -74,6 +74,7 @@ export default ({ config }) => {
       "expo-router",
       "expo-secure-store",
       "@react-native-google-signin/google-signin",
+      "./plugins/withCleartextTraffic",
       [
         "expo-location",
         {
