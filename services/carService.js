@@ -49,7 +49,7 @@ export const VALIDATION = {
 
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return 'https://via.placeholder.com/400x300.png?text=No+Image';
-  
+
   if (imagePath.startsWith('http')) return imagePath;
 
   let cleanPath = imagePath.replace(/\\/g, '/');
@@ -69,7 +69,7 @@ export const getImageUrl = (imagePath) => {
 export const searchCars = async (filters = {}) => {
   try {
     const params = new URLSearchParams();
-    
+
     if (filters.page) params.append('page', filters.page);
     if (filters.limit) params.append('limit', filters.limit);
     if (filters.brand) params.append('brand', filters.brand);
@@ -128,7 +128,7 @@ export const createCar = async (formData) => {
         'Content-Type': 'multipart/form-data',
       },
     });
-    
+
     return response.data;
   } catch (error) {
     console.error('Create Car Error:', error);
@@ -156,6 +156,8 @@ export const updateCar = async (carId, carData) => {
       availability: carData.availability,
       features: carData.features,
       isActive: carData.isActive,
+      description: carData.description,
+      insuranceDetails: carData.insuranceDetails,
     };
 
     Object.keys(updatePayload).forEach(key => {

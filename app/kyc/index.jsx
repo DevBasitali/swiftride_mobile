@@ -58,7 +58,7 @@ export default function KycScreen() {
   // ============================================
   // 🔒 ORIGINAL LOGIC - COMPLETELY UNTOUCHED
   // ============================================
-  const { kycStatus, refreshKycStatus, user, redirectByRole } = useAuth();
+  const { kycStatus, kycRejectionReason, refreshKycStatus, user, redirectByRole } = useAuth();
   const { role: urlRole } = useLocalSearchParams(); // Get role from URL query params
   const { showAlert } = useAlert();
   const [uploading, setUploading] = useState(false);
@@ -71,6 +71,8 @@ export default function KycScreen() {
     live_selfie: null,
     driving_license: null,
   });
+
+  const isCustomer = user?.role === 'customer';
 
   const pickFromGallery = async (field) => {
     try {
@@ -154,19 +156,27 @@ export default function KycScreen() {
   };
 
   const handleSubmit = async () => {
-    if (
-      !images.id_front ||
-      !images.id_back ||
-      !images.live_selfie ||
-      !images.driving_license
-    ) {
+    // Common required docs for everyone
+    if (!images.id_front || !images.id_back || !images.live_selfie) {
       showAlert({
         title: "Missing Documents",
-        message: "Please upload all 4 required documents.",
+        message: "Please upload ID Front, ID Back, and Live Selfie.",
         type: "warning",
       });
       return;
     }
+
+    // Driving license required only for customers
+    if (isCustomer && !images.driving_license) {
+      showAlert({
+        title: "Missing Document",
+        message: "Driving license is required for customer accounts.",
+        type: "warning",
+      });
+      return;
+    }
+
+    // Showroom-specific: N/A on Android
 
     setUploading(true);
 
@@ -187,8 +197,9 @@ export default function KycScreen() {
       appendFile("id_front", images.id_front);
       appendFile("id_back", images.id_back);
       appendFile("live_selfie", images.live_selfie);
-      appendFile("driving_license", images.driving_license);
 
+      // Individual KYC (customer/host)
+      if (images.driving_license) appendFile("driving_license", images.driving_license);
       await kycService.submitUserKyc(formData);
 
       // Show success modal instead of alert
@@ -242,9 +253,87 @@ export default function KycScreen() {
     ]).start();
   }, []);
 
-  // Calculate progress
-  const uploadedCount = Object.values(images).filter(Boolean).length;
-  const progress = (uploadedCount / 4) * 100;
+  // Calculate progress based on role
+  const getRequiredDocs = () => {
+    if (isCustomer) return ['id_front', 'id_back', 'live_selfie', 'driving_license'];
+    return ['id_front', 'id_back', 'live_selfie']; // host — license optional
+  };
+  const requiredDocs = getRequiredDocs();
+  const uploadedCount = requiredDocs.filter(key => images[key]).length;
+  const totalDocs = requiredDocs.length;
+  const progress = (uploadedCount / totalDocs) * 100;
+
+  // ============================================
+  // ❌ REJECTED STATE
+  // ============================================
+  if (kycStatus === "rejected" && !allowReupload) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.navy[900]} />
+        <Stack.Screen options={{ headerShown: false }} />
+        <LinearGradient
+          colors={[COLORS.navy[900], COLORS.navy[800]]}
+          style={styles.gradient}
+        />
+        <Animated.View
+          style={[
+            styles.statusContainer,
+            { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+          ]}
+        >
+          <View style={styles.statusIconContainer}>
+            <LinearGradient
+              colors={['#EF4444', '#DC2626']}
+              style={styles.statusIconGradient}
+            >
+              <Ionicons name="close-circle" size={60} color={COLORS.white} />
+            </LinearGradient>
+          </View>
+
+          <Text style={styles.statusTitle}>Verification Rejected</Text>
+          <Text style={styles.statusSubtitle}>
+            Your documents were not accepted.{"\n"}Please review the reason and re-submit.
+          </Text>
+
+          {kycStatus === "rejected" && (
+            <View style={styles.rejectionCard}>
+              <Ionicons name="alert-circle" size={22} color="#EF4444" />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rejectionLabel}>Reason for Rejection</Text>
+                <Text style={styles.rejectionReason}>
+                  {kycRejectionReason || 'Please re-submit with clearer documents.'}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => setAllowReupload(true)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={[COLORS.gold[500], COLORS.gold[600]]}
+              style={styles.buttonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.primaryButtonText}>Re-submit Documents</Text>
+              <Ionicons name="refresh" size={20} color={COLORS.navy[900]} />
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={handleSkip}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.secondaryButtonText}>Go to Dashboard</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    );
+  }
 
   // ============================================
   // 📊 PENDING STATE
@@ -453,21 +542,21 @@ export default function KycScreen() {
           headerLeft:
             kycStatus === "pending" && allowReupload
               ? () => (
-                  <TouchableOpacity
-                    onPress={() => setAllowReupload(false)}
-                    style={{
-                      paddingLeft: 8,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Ionicons
-                      name="arrow-back"
-                      size={24}
-                      color={COLORS.white}
-                    />
-                  </TouchableOpacity>
-                )
+                <TouchableOpacity
+                  onPress={() => setAllowReupload(false)}
+                  style={{
+                    paddingLeft: 8,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <Ionicons
+                    name="arrow-back"
+                    size={24}
+                    color={COLORS.white}
+                  />
+                </TouchableOpacity>
+              )
               : undefined,
           headerRight: () => (
             <TouchableOpacity onPress={handleSkip} style={{ paddingRight: 8 }}>
@@ -519,7 +608,7 @@ export default function KycScreen() {
         <View style={styles.progressContainer}>
           <View style={styles.progressHeader}>
             <Text style={styles.progressText}>
-              {uploadedCount} of 4 documents uploaded
+              {uploadedCount} of {totalDocs} documents uploaded
             </Text>
             <Text style={styles.progressPercent}>{Math.round(progress)}%</Text>
           </View>
@@ -572,10 +661,10 @@ export default function KycScreen() {
           icon="face-recognition"
           iconType="camera"
         />
-
+        {/* Driving License */}
         <UploadBlock
           label="Driving License"
-          description="Valid driving license"
+          description={isCustomer ? 'Required for customers' : 'Optional for hosts'}
           image={images.driving_license}
           onPress={() => pickFromGallery("driving_license")}
           onRemove={() =>
@@ -1044,5 +1133,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.gold[500],
     fontWeight: "600",
+  },
+  rejectionCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#EF444415',
+    borderWidth: 1,
+    borderColor: '#EF444440',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+    marginBottom: 32,
+  },
+  rejectionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#EF4444',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  rejectionReason: {
+    fontSize: 14,
+    color: COLORS.gray[300],
+    lineHeight: 20,
   },
 });

@@ -137,7 +137,22 @@ export default function HostFleet() {
 
           {/* Status Badge */}
           <View style={styles.statusBadgeContainer}>
-            {item.isActive ? (
+            {item.approvalStatus === 'pending' ? (
+              <View style={[styles.statusBadge, styles.statusPending]}>
+                <Ionicons name="time-outline" size={12} color={COLORS.gold[500]} />
+                <Text style={[styles.statusText, { color: COLORS.gold[500] }]}>PENDING</Text>
+              </View>
+            ) : item.approvalStatus === 'rejected' ? (
+              <View style={[styles.statusBadge, styles.statusRejected]}>
+                <Ionicons name="close-circle-outline" size={12} color="#EF4444" />
+                <Text style={[styles.statusText, { color: '#EF4444' }]}>REJECTED</Text>
+              </View>
+            ) : item.approvalStatus === 'suspended' ? (
+              <View style={[styles.statusBadge, styles.statusSuspended]}>
+                <Ionicons name="ban-outline" size={12} color="#F97316" />
+                <Text style={[styles.statusText, { color: '#F97316' }]}>SUSPENDED</Text>
+              </View>
+            ) : item.isActive ? (
               <LinearGradient
                 colors={[COLORS.emerald[400], COLORS.emerald[500]]}
                 style={styles.statusBadge}
@@ -166,6 +181,14 @@ export default function HostFleet() {
               <Text style={styles.carYear}>{item.year}</Text>
             </View>
           </View>
+
+          {/* Rejection Reason Banner */}
+          {item.approvalStatus === 'rejected' && item.rejectionReason && (
+            <View style={styles.rejectionBanner}>
+              <Ionicons name="alert-circle" size={16} color="#EF4444" />
+              <Text style={styles.rejectionText} numberOfLines={2}>{item.rejectionReason}</Text>
+            </View>
+          )}
 
           {/* Specs Row */}
           <View style={styles.specsRow}>
@@ -509,6 +532,39 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1,
+  },
+  statusPending: {
+    backgroundColor: COLORS.gold[500] + '20',
+    borderWidth: 1,
+    borderColor: COLORS.gold[500],
+  },
+  statusRejected: {
+    backgroundColor: '#EF444420',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+  },
+  statusSuspended: {
+    backgroundColor: '#F9731620',
+    borderWidth: 1,
+    borderColor: '#F97316',
+  },
+  rejectionBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EF444415',
+    borderWidth: 1,
+    borderColor: '#EF444440',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+    gap: 8,
+  },
+  rejectionText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#EF4444',
+    fontWeight: '500',
+    lineHeight: 16,
   },
 
   // Bottom Content

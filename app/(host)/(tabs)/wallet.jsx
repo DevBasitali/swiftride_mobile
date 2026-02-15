@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getWallet, getTransactions, requestWithdrawal } from '../../../services/walletService';
+import { getWallet, requestWithdrawal } from '../../../services/walletService';
 import WithdrawalModal from '../../../components/WithdrawalModal';
 import { useAlert } from '../../../context/AlertContext';
 
@@ -35,25 +35,22 @@ export default function HostWallet() {
   const fetchWalletData = async () => {
     try {
       setError(null);
-      const [walletRes, txRes] = await Promise.all([
-        getWallet(),
-        getTransactions(20)
-      ]);
+      // Single call — backend returns wallet, transactions, and withdrawalRequests
+      const walletRes = await getWallet();
 
-      // Handle wallet response - backend now returns wallet, transactions, and withdrawalRequests
-      const walletData = walletRes?.data?.wallet || walletRes?.wallet || walletRes?.data || walletRes;
+      // walletRes = { success, message, data: { wallet, transactions, withdrawalRequests } }
+      const payload = walletRes?.data || walletRes;
+      const walletData = payload?.wallet || payload;
+      const txData = payload?.transactions || [];
+      const withdrawals = payload?.withdrawalRequests || [];
+
       setWallet(walletData);
-
-      // Handle transactions from wallet response or separate call
-      const txData = walletRes?.data?.transactions || walletRes?.transactions || txRes?.data?.items || txRes?.items || [];
-
-      // Handle withdrawal requests from wallet response
-      const withdrawals = walletRes?.data?.withdrawalRequests || walletRes?.withdrawalRequests || [];
-      setWithdrawalRequests(withdrawals);
       setTransactions(txData);
+      setWithdrawalRequests(withdrawals);
     } catch (err) {
-      console.log('Wallet fetch error:', err.message);
-      setError(err.message);
+      console.log('Wallet fetch error:', err);
+      const msg = err?.message || err?.data?.message || 'Could not load wallet data';
+      setError(msg);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -192,32 +189,32 @@ export default function HostWallet() {
         {/* ⚡ QUICK ACTIONS */}
         <View style={styles.actionsContainer}>
           <ActionButton icon="arrow-down-circle-outline" label="Withdraw" onPress={() => setShowWithdrawModal(true)} />
-          <ActionButton 
-            icon="document-text-outline" 
-            label="Statement" 
+          <ActionButton
+            icon="document-text-outline"
+            label="Statement"
             onPress={() => showAlert({
               title: 'Statement',
               message: 'Detailed statement export is coming soon!',
               type: 'info',
-            })} 
+            })}
           />
-          <ActionButton 
-            icon="card-outline" 
-            label="Cards" 
+          <ActionButton
+            icon="card-outline"
+            label="Cards"
             onPress={() => showAlert({
               title: 'Cards',
               message: 'Card management is coming soon!',
               type: 'info',
-            })} 
+            })}
           />
-          <ActionButton 
-            icon="settings-outline" 
-            label="Settings" 
+          <ActionButton
+            icon="settings-outline"
+            label="Settings"
             onPress={() => showAlert({
               title: 'Wallet Settings',
               message: 'Wallet settings are coming soon!',
               type: 'info',
-            })} 
+            })}
           />
         </View>
 
@@ -233,7 +230,14 @@ export default function HostWallet() {
 
         {error && (
           <View style={styles.errorBox}>
-            <Text style={styles.errorText}>Failed to load transactions</Text>
+            <Ionicons name="alert-circle-outline" size={24} color={COLORS.danger} style={{ marginBottom: 8 }} />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: COLORS.gold, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10, marginTop: 12 }}
+              onPress={() => { setLoading(true); fetchWalletData(); }}
+            >
+              <Text style={{ color: COLORS.background, fontWeight: '700', fontSize: 14 }}>Retry</Text>
+            </TouchableOpacity>
           </View>
         )}
 

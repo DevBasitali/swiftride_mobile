@@ -154,7 +154,7 @@ export default function HostCarDetails() {
             onScroll={({ nativeEvent }) => {
               const slide = Math.ceil(
                 nativeEvent.contentOffset.x /
-                  nativeEvent.layoutMeasurement.width
+                nativeEvent.layoutMeasurement.width
               );
               if (slide !== activeSlide) setActiveSlide(slide);
             }}
@@ -208,22 +208,50 @@ export default function HostCarDetails() {
 
           {/* Status Badge */}
           <View style={styles.statusBadgeContainer}>
-            {car.isActive ? (
-              <LinearGradient
-                colors={[COLORS.emerald[500], COLORS.emerald[400]]}
-                style={styles.statusBadge}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                <View style={styles.statusDot} />
-                <Text style={styles.statusText}>LIVE</Text>
-              </LinearGradient>
-            ) : (
-              <View style={[styles.statusBadge, styles.statusInactive]}>
-                <View style={[styles.statusDot, styles.statusDotInactive]} />
-                <Text style={styles.statusText}>HIDDEN</Text>
-              </View>
-            )}
+            {(() => {
+              const approval = car.approvalStatus || 'approved';
+              if (approval === 'pending') {
+                return (
+                  <View style={[styles.statusBadge, { backgroundColor: COLORS.gold[500] + '30', borderWidth: 1, borderColor: COLORS.gold[500] }]}>
+                    <Ionicons name="time" size={12} color={COLORS.gold[500]} />
+                    <Text style={[styles.statusText, { color: COLORS.gold[500] }]}>PENDING</Text>
+                  </View>
+                );
+              }
+              if (approval === 'rejected') {
+                return (
+                  <View style={[styles.statusBadge, { backgroundColor: COLORS.red[500] + '30', borderWidth: 1, borderColor: COLORS.red[500] }]}>
+                    <Ionicons name="close-circle" size={12} color={COLORS.red[500]} />
+                    <Text style={[styles.statusText, { color: COLORS.red[500] }]}>REJECTED</Text>
+                  </View>
+                );
+              }
+              if (approval === 'suspended') {
+                return (
+                  <View style={[styles.statusBadge, { backgroundColor: COLORS.orange[500] + '30', borderWidth: 1, borderColor: COLORS.orange[500] }]}>
+                    <Ionicons name="warning" size={12} color={COLORS.orange[500]} />
+                    <Text style={[styles.statusText, { color: COLORS.orange[500] }]}>SUSPENDED</Text>
+                  </View>
+                );
+              }
+              // approved
+              return car.isActive ? (
+                <LinearGradient
+                  colors={[COLORS.emerald[500], COLORS.emerald[400]]}
+                  style={styles.statusBadge}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <View style={styles.statusDot} />
+                  <Text style={styles.statusText}>LIVE</Text>
+                </LinearGradient>
+              ) : (
+                <View style={[styles.statusBadge, styles.statusInactive]}>
+                  <View style={[styles.statusDot, styles.statusDotInactive]} />
+                  <Text style={styles.statusText}>HIDDEN</Text>
+                </View>
+              );
+            })()}
           </View>
         </View>
 
@@ -237,7 +265,7 @@ export default function HostCarDetails() {
                 {car.model} {car.year}
               </Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.ratingBox}
               onPress={() => router.push({
                 pathname: "/(host)/car/reviews",
@@ -273,6 +301,17 @@ export default function HostCarDetails() {
               <Text style={styles.colorText}>{car.color}</Text>
             </View>
           </View>
+
+          {/* Rejection Reason Banner */}
+          {car.approvalStatus === 'rejected' && car.rejectionReason && (
+            <View style={{ backgroundColor: COLORS.red[500] + '15', borderWidth: 1, borderColor: COLORS.red[500] + '40', borderRadius: 14, padding: 14, marginBottom: 20, flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+              <Ionicons name="alert-circle" size={20} color={COLORS.red[500]} style={{ marginTop: 2 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: COLORS.red[500], fontWeight: '700', fontSize: 12, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>Rejection Reason</Text>
+                <Text style={{ color: COLORS.gray[400], fontSize: 14, lineHeight: 20 }}>{car.rejectionReason}</Text>
+              </View>
+            </View>
+          )}
 
           {/* Price Row */}
           <View style={styles.priceCard}>
@@ -329,12 +368,61 @@ export default function HostCarDetails() {
             />
           </View>
 
+          {/* Features */}
+          {car.features && car.features.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Features</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 28 }}>
+                {car.features.map((feat, idx) => (
+                  <View key={idx} style={{ backgroundColor: COLORS.gold[500] + '15', borderWidth: 1, borderColor: COLORS.gold[500] + '40', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8 }}>
+                    <Text style={{ color: COLORS.gold[500], fontSize: 13, fontWeight: '600' }}>{feat}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+
           {/* Description */}
           {car.description && (
             <>
               <Text style={styles.sectionTitle}>Description</Text>
               <View style={styles.descriptionCard}>
                 <Text style={styles.description}>{car.description}</Text>
+              </View>
+            </>
+          )}
+
+          {/* Insurance Details */}
+          {car.insuranceDetails && car.insuranceDetails.provider && (
+            <>
+              <Text style={styles.sectionTitle}>Insurance</Text>
+              <View style={styles.descriptionCard}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <View>
+                    <Text style={{ color: COLORS.gray[500], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Provider</Text>
+                    <Text style={{ color: COLORS.white, fontSize: 15, fontWeight: '600' }}>{car.insuranceDetails.provider}</Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ color: COLORS.gray[500], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Type</Text>
+                    <Text style={{ color: COLORS.gold[500], fontSize: 13, fontWeight: '700' }}>{car.insuranceDetails.type || '—'}</Text>
+                  </View>
+                </View>
+                {car.insuranceDetails.policyNumber && (
+                  <View style={{ marginBottom: 10 }}>
+                    <Text style={{ color: COLORS.gray[500], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Policy Number</Text>
+                    <Text style={{ color: COLORS.white, fontSize: 14, fontWeight: '500' }}>{car.insuranceDetails.policyNumber}</Text>
+                  </View>
+                )}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <View>
+                    <Text style={{ color: COLORS.gray[500], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Start Date</Text>
+                    <Text style={{ color: COLORS.white, fontSize: 13, fontWeight: '500' }}>{car.insuranceDetails.startDate?.split('T')[0] || '—'}</Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ color: COLORS.gray[500], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Expiry Date</Text>
+                    <Text style={{ color: COLORS.white, fontSize: 13, fontWeight: '500' }}>{car.insuranceDetails.expiryDate?.split('T')[0] || '—'}</Text>
+                  </View>
+                </View>
               </View>
             </>
           )}

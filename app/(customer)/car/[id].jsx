@@ -170,7 +170,7 @@ export default function CustomerCarDetails() {
             onScroll={({ nativeEvent }) => {
               const slide = Math.ceil(
                 nativeEvent.contentOffset.x /
-                  nativeEvent.layoutMeasurement.width
+                nativeEvent.layoutMeasurement.width
               );
               if (slide !== activeSlide) setActiveSlide(slide);
             }}
@@ -219,7 +219,7 @@ export default function CustomerCarDetails() {
                 {car.model} {car.year}
               </Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.ratingBox}
               onPress={() => router.push({
                 pathname: "/common/car-reviews",
@@ -267,12 +267,51 @@ export default function CustomerCarDetails() {
             <SpecItem icon="speedometer" label="Mileage" value="Unlimited" />
           </View>
 
+          {/* Features */}
+          {car.features && car.features.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Features</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+                {car.features.map((feat, idx) => (
+                  <View key={idx} style={{ backgroundColor: COLORS.gold[500] + '15', borderWidth: 1, borderColor: COLORS.gold[500] + '40', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8 }}>
+                    <Text style={{ color: COLORS.gold[500], fontSize: 13, fontWeight: '600' }}>{feat}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+
           {/* Description */}
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>
             {car.description ||
               "This car is well maintained and perfect for city drives or long weekend trips. Instant booking available."}
           </Text>
+
+          {/* Insurance Info */}
+          {car.insuranceDetails && car.insuranceDetails.provider && (
+            <>
+              <Text style={styles.sectionTitle}>Insurance</Text>
+              <View style={{ backgroundColor: COLORS.navy[800], padding: 16, borderRadius: 16, borderWidth: 1, borderColor: COLORS.navy[700], marginBottom: 32 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <View>
+                    <Text style={{ color: COLORS.gray[400], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Provider</Text>
+                    <Text style={{ color: COLORS.white, fontSize: 15, fontWeight: '600' }}>{car.insuranceDetails.provider}</Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ color: COLORS.gray[400], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Type</Text>
+                    <Text style={{ color: COLORS.gold[500], fontSize: 13, fontWeight: '700' }}>{car.insuranceDetails.type || '—'}</Text>
+                  </View>
+                </View>
+                {car.insuranceDetails.expiryDate && (
+                  <View>
+                    <Text style={{ color: COLORS.gray[400], fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Valid Until</Text>
+                    <Text style={{ color: COLORS.emerald[500], fontSize: 13, fontWeight: '600' }}>{car.insuranceDetails.expiryDate?.split('T')[0]}</Text>
+                  </View>
+                )}
+              </View>
+            </>
+          )}
 
           {/* Availability */}
           {car.availability && (

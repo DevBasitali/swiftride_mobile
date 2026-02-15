@@ -65,6 +65,8 @@ export default function CreateCar() {
   const params = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
+  const [insuranceDoc, setInsuranceDoc] = useState(null);
+  const [featureInput, setFeatureInput] = useState('');
   const { showAlert } = useAlert();
   const placesRef = useRef(null);
   const [showPlacesList, setShowPlacesList] = useState(false);
@@ -90,6 +92,12 @@ export default function CreateCar() {
       endTime: '17:00',
       isAvailable: true,
     },
+    features: [],
+    insuranceProvider: '',
+    insurancePolicyNumber: '',
+    insuranceType: '',
+    insuranceStartDate: '',
+    insuranceExpiryDate: '',
   });
 
   useEffect(() => {
@@ -166,6 +174,39 @@ export default function CreateCar() {
     setImages(images.filter((_, i) => i !== index));
   };
 
+  const pickInsuranceDoc = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: false,
+        quality: 0.7,
+      });
+      if (!result.canceled) {
+        const asset = result.assets[0];
+        const MAX_SIZE = 5 * 1024 * 1024;
+        if (asset.fileSize && asset.fileSize > MAX_SIZE) {
+          showAlert({ title: 'File Too Large', message: 'Insurance document must be under 5MB.', type: 'warning' });
+          return;
+        }
+        setInsuranceDoc(asset);
+      }
+    } catch (error) {
+      showAlert({ title: 'Error', message: 'Could not open gallery.', type: 'error' });
+    }
+  };
+
+  const addFeature = () => {
+    const trimmed = featureInput.trim();
+    if (trimmed && !form.features.includes(trimmed)) {
+      handleInputChange('features', [...form.features, trimmed]);
+    }
+    setFeatureInput('');
+  };
+
+  const removeFeature = (index) => {
+    handleInputChange('features', form.features.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async () => {
     Keyboard.dismiss();
 
@@ -221,6 +262,29 @@ export default function CreateCar() {
 
       if (form.description && form.description.trim()) {
         formData.append('description', form.description.trim());
+      }
+
+      // Insurance fields
+      if (form.insuranceProvider.trim()) formData.append('insuranceProvider', form.insuranceProvider.trim());
+      if (form.insurancePolicyNumber.trim()) formData.append('insurancePolicyNumber', form.insurancePolicyNumber.trim());
+      if (form.insuranceType) formData.append('insuranceType', form.insuranceType);
+      if (form.insuranceStartDate.trim()) formData.append('insuranceStartDate', form.insuranceStartDate.trim());
+      if (form.insuranceExpiryDate.trim()) formData.append('insuranceExpiryDate', form.insuranceExpiryDate.trim());
+
+      // Insurance document
+      if (insuranceDoc) {
+        const uriParts = insuranceDoc.uri.split('.');
+        const fileType = uriParts[uriParts.length - 1];
+        formData.append('insuranceDoc', {
+          uri: insuranceDoc.uri,
+          name: `insurance_doc.${fileType}`,
+          type: `image/${fileType === 'jpg' ? 'jpeg' : fileType}`,
+        });
+      }
+
+      // Features
+      if (form.features.length > 0) {
+        formData.append('features', form.features.join(','));
       }
 
       images.forEach((img, index) => {
@@ -792,6 +856,163 @@ export default function CreateCar() {
             // icon="document-text-outline"
             />
           </View>
+
+          {/* Insurance Details */}
+          <View style={styles.formCard}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={['#EC4899', '#DB2777']}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="shield-checkmark" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Insurance Details</Text>
+                <Text style={styles.sectionSubtitle}>Optional but recommended</Text>
+              </View>
+            </View>
+
+            <View style={styles.row}>
+              <Input
+                flex
+                label="Provider"
+                placeholder="EFU, State Life..."
+                value={form.insuranceProvider}
+                onChangeText={(t) => handleInputChange('insuranceProvider', t)}
+                icon="business-outline"
+              />
+              <View style={{ width: 15 }} />
+              <Input
+                flex
+                label="Policy Number"
+                placeholder="POL-12345"
+                value={form.insurancePolicyNumber}
+                onChangeText={(t) => handleInputChange('insurancePolicyNumber', t)}
+                icon="document-text-outline"
+              />
+            </View>
+
+            <Text style={styles.label}>Insurance Type</Text>
+            <View style={styles.row}>
+              <SelectButton
+                label="Third-Party"
+                icon="shield-half-full"
+                selected={form.insuranceType === 'Third-Party'}
+                onPress={() => handleInputChange('insuranceType', 'Third-Party')}
+              />
+              <View style={{ width: 10 }} />
+              <SelectButton
+                label="Comprehensive"
+                icon="shield-check"
+                selected={form.insuranceType === 'Comprehensive'}
+                onPress={() => handleInputChange('insuranceType', 'Comprehensive')}
+              />
+            </View>
+
+            <View style={{ height: 15 }} />
+
+            <View style={styles.row}>
+              <Input
+                flex
+                label="Start Date"
+                placeholder="YYYY-MM-DD"
+                value={form.insuranceStartDate}
+                onChangeText={(t) => handleInputChange('insuranceStartDate', t)}
+                icon="calendar-outline"
+              />
+              <View style={{ width: 15 }} />
+              <Input
+                flex
+                label="Expiry Date"
+                placeholder="YYYY-MM-DD"
+                value={form.insuranceExpiryDate}
+                onChangeText={(t) => handleInputChange('insuranceExpiryDate', t)}
+                icon="calendar-outline"
+              />
+            </View>
+
+            {/* Insurance Document Upload */}
+            <Text style={styles.label}>Insurance Document</Text>
+            <TouchableOpacity
+              style={styles.insuranceDocBtn}
+              onPress={pickInsuranceDoc}
+              activeOpacity={0.7}
+            >
+              {insuranceDoc ? (
+                <View style={styles.insuranceDocPreview}>
+                  <Image source={{ uri: insuranceDoc.uri }} style={styles.insuranceDocImage} />
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={styles.insuranceDocName} numberOfLines={1}>
+                      Document uploaded
+                    </Text>
+                    <Text style={styles.insuranceDocHint}>Tap to change</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => setInsuranceDoc(null)}>
+                    <Ionicons name="close-circle" size={24} color={COLORS.red[500]} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.insuranceDocPlaceholder}>
+                  <Ionicons name="cloud-upload-outline" size={28} color={COLORS.gold[500]} />
+                  <Text style={styles.insuranceDocText}>Upload Insurance Document</Text>
+                  <Text style={styles.insuranceDocHint}>Photo of your policy document</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Features */}
+          <View style={styles.formCard}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={['#06B6D4', '#0891B2']}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="list" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Features</Text>
+                <Text style={styles.sectionSubtitle}>AC, Bluetooth, GPS, etc.</Text>
+              </View>
+            </View>
+
+            <View style={styles.featureInputRow}>
+              <TextInput
+                style={styles.featureInput}
+                placeholder="e.g. AC, Bluetooth, GPS"
+                placeholderTextColor={COLORS.gray[400]}
+                value={featureInput}
+                onChangeText={setFeatureInput}
+                onSubmitEditing={addFeature}
+                returnKeyType="done"
+              />
+              <TouchableOpacity style={styles.featureAddBtn} onPress={addFeature}>
+                <LinearGradient
+                  colors={[COLORS.gold[500], COLORS.gold[600]]}
+                  style={styles.featureAddGradient}
+                >
+                  <Ionicons name="add" size={22} color={COLORS.navy[900]} />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+
+            {form.features.length > 0 && (
+              <View style={styles.featureChipsContainer}>
+                {form.features.map((feature, index) => (
+                  <View key={index} style={styles.featureChip}>
+                    <Text style={styles.featureChipText}>{feature}</Text>
+                    <TouchableOpacity onPress={() => removeFeature(index)}>
+                      <Ionicons name="close-circle" size={18} color={COLORS.gray[400]} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -1320,5 +1541,95 @@ const styles = StyleSheet.create({
     color: COLORS.navy[900],
     fontSize: 16,
     fontWeight: '700',
+  },
+
+  // Insurance Document
+  insuranceDocBtn: {
+    backgroundColor: COLORS.navy[700],
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  insuranceDocPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+  },
+  insuranceDocImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: COLORS.navy[600],
+  },
+  insuranceDocName: {
+    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: '600',
+  },
+  insuranceDocPlaceholder: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 6,
+  },
+  insuranceDocText: {
+    fontSize: 14,
+    color: COLORS.gold[500],
+    fontWeight: '600',
+  },
+  insuranceDocHint: {
+    fontSize: 12,
+    color: COLORS.gray[500],
+  },
+
+  // Features
+  featureInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  featureInput: {
+    flex: 1,
+    backgroundColor: COLORS.navy[700],
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: COLORS.white,
+    fontWeight: '500',
+  },
+  featureAddBtn: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  featureAddGradient: {
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  featureChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 12,
+  },
+  featureChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.gold[500] + '20',
+    borderWidth: 1,
+    borderColor: COLORS.gold[500],
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 6,
+  },
+  featureChipText: {
+    fontSize: 13,
+    color: COLORS.gold[500],
+    fontWeight: '600',
   },
 });

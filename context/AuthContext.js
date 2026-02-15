@@ -9,6 +9,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [kycStatus, setKycStatus] = useState(null);
+  const [kycRejectionReason, setKycRejectionReason] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const segments = useSegments();
 
@@ -118,6 +119,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const kycRes = await kycService.getKycStatus();
       setKycStatus(kycRes.data.status);
+      if (kycRes.data.rejectionReason) {
+        setKycRejectionReason(kycRes.data.rejectionReason);
+      }
       return kycRes.data.status;
     } catch (error) {
       setKycStatus("missing");
@@ -277,6 +281,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         kycStatus,
+        kycRejectionReason,
         isLoading,
         login,
         register,

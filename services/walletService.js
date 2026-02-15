@@ -6,7 +6,7 @@ import api from "./api";
  * @returns {Promise} Wallet data with balanceAvailable and balancePending
  */
 export const getWallet = async () => {
-    const response = await api.get("/wallet/me");
+    const response = await api.get("/wallets/me");
     return response.data;
 };
 
@@ -16,7 +16,7 @@ export const getWallet = async () => {
  * @returns {Promise} Array of transactions
  */
 export const getTransactions = async (limit = 50) => {
-    const response = await api.get(`/wallet/me/transactions?limit=${limit}`);
+    const response = await api.get(`/wallets/me/transactions?limit=${limit}`);
     return response.data;
 };
 
@@ -27,7 +27,7 @@ export const getTransactions = async (limit = 50) => {
  * @returns {Promise} Withdrawal request object
  */
 export const requestWithdrawal = async (amount, bankDetails) => {
-    const response = await api.post("/wallet/withdraw", { amount, bankDetails });
+    const response = await api.post("/wallets/withdraw", { amount, bankDetails });
     return response.data;
 };
 

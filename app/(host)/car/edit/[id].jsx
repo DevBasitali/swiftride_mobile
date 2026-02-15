@@ -74,7 +74,17 @@ export default function EditCar() {
       endTime: "23:59",
       isAvailable: true,
     },
+    // Insurance fields
+    insuranceProvider: "",
+    insurancePolicyNumber: "",
+    insuranceType: "",
+    insuranceStartDate: "",
+    insuranceExpiryDate: "",
+    // Features
+    features: [],
   });
+
+  const [featureInput, setFeatureInput] = useState("");
 
   useEffect(() => {
     loadCarData();
@@ -107,6 +117,12 @@ export default function EditCar() {
               ? car.availability.isAvailable
               : true,
         },
+        insuranceProvider: car.insuranceDetails?.provider || "",
+        insurancePolicyNumber: car.insuranceDetails?.policyNumber || "",
+        insuranceType: car.insuranceDetails?.type || "",
+        insuranceStartDate: car.insuranceDetails?.startDate?.split('T')[0] || "",
+        insuranceExpiryDate: car.insuranceDetails?.expiryDate?.split('T')[0] || "",
+        features: car.features || [],
       });
     } catch (error) {
       showAlert({
@@ -152,6 +168,14 @@ export default function EditCar() {
           endTime: form.availability.endTime,
           isAvailable: form.availability.isAvailable,
         },
+        insuranceDetails: {
+          provider: form.insuranceProvider,
+          policyNumber: form.insurancePolicyNumber,
+          type: form.insuranceType,
+          startDate: form.insuranceStartDate,
+          expiryDate: form.insuranceExpiryDate,
+        },
+        features: form.features,
       };
 
       await carService.updateCar(id, payload);
@@ -493,6 +517,150 @@ export default function EditCar() {
                 </TouchableOpacity>
               ))}
             </View>
+          </View>
+
+          {/* Insurance Details */}
+          <View style={styles.formCard}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={["#EC4899", "#DB2777"]}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="shield-checkmark" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Insurance Details</Text>
+                <Text style={styles.sectionSubtitle}>Coverage information</Text>
+              </View>
+            </View>
+
+            <Input
+              label="Insurance Provider"
+              value={form.insuranceProvider}
+              onChangeText={(t) => handleInputChange("insuranceProvider", t)}
+              icon="business-outline"
+            />
+            <Input
+              label="Policy Number"
+              value={form.insurancePolicyNumber}
+              onChangeText={(t) => handleInputChange("insurancePolicyNumber", t)}
+              icon="document-outline"
+            />
+
+            {/* Insurance Type Selector */}
+            <Text style={styles.label}>Insurance Type</Text>
+            <View style={[styles.row, { marginBottom: 15 }]}>
+              {['Third-Party', 'Comprehensive'].map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.dayButton,
+                    form.insuranceType === type && styles.dayButtonActive,
+                  ]}
+                  onPress={() => handleInputChange('insuranceType', type)}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.dayButtonText,
+                      form.insuranceType === type && styles.dayButtonTextActive,
+                    ]}
+                  >
+                    {type}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.row}>
+              <Input
+                flex
+                label="Start Date"
+                placeholder="YYYY-MM-DD"
+                value={form.insuranceStartDate}
+                onChangeText={(t) => handleInputChange("insuranceStartDate", t)}
+                icon="calendar-outline"
+              />
+              <View style={{ width: 15 }} />
+              <Input
+                flex
+                label="Expiry Date"
+                placeholder="YYYY-MM-DD"
+                value={form.insuranceExpiryDate}
+                onChangeText={(t) => handleInputChange("insuranceExpiryDate", t)}
+                icon="calendar-outline"
+              />
+            </View>
+          </View>
+
+          {/* Features */}
+          <View style={styles.formCard}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={["#14B8A6", "#0D9488"]}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="list" size={20} color={COLORS.white} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Features</Text>
+                <Text style={styles.sectionSubtitle}>AC, Bluetooth, GPS, etc.</Text>
+              </View>
+            </View>
+
+            <View style={[styles.row, { marginBottom: 15 }]}>
+              <View style={{ flex: 1 }}>
+                <Input
+                  label="Add Feature"
+                  value={featureInput}
+                  onChangeText={setFeatureInput}
+                  placeholder="e.g. Bluetooth"
+                  icon="add-circle-outline"
+                />
+              </View>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: COLORS.gold[500],
+                  borderRadius: 12,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  paddingHorizontal: 16,
+                  marginLeft: 10,
+                  alignSelf: 'flex-end',
+                  marginBottom: 15,
+                  height: 48,
+                }}
+                onPress={() => {
+                  const trimmed = featureInput.trim();
+                  if (trimmed && !form.features.includes(trimmed)) {
+                    handleInputChange('features', [...form.features, trimmed]);
+                    setFeatureInput('');
+                  }
+                }}
+              >
+                <Text style={{ color: COLORS.navy[900], fontWeight: '700', fontSize: 14 }}>Add</Text>
+              </TouchableOpacity>
+            </View>
+
+            {form.features.length > 0 && (
+              <View style={styles.daysContainer}>
+                {form.features.map((feat, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    style={[styles.dayButton, styles.dayButtonActive, { flexDirection: 'row', gap: 6 }]}
+                    onPress={() => handleInputChange('features', form.features.filter((_, i) => i !== idx))}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.dayButtonText, styles.dayButtonTextActive]}>{feat}</Text>
+                    <Ionicons name="close-circle" size={16} color={COLORS.gold[500]} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
 
           {/* Details */}
