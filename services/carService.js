@@ -213,7 +213,7 @@ export const formatCarName = (car) => {
 };
 
 export const getTransmissionIcon = (transmission) => {
-  return transmission === TRANSMISSION_TYPES.AUTOMATIC ? 'car-shift-pattern' : 'car-clutch';
+  return transmission === TRANSMISSION_TYPES.AUTOMATIC ? 'settings-outline' : 'cog-outline';
 };
 
 export const getFuelTypeIcon = (fuelType) => {

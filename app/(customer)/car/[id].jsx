@@ -128,7 +128,7 @@ export default function CustomerCarDetails() {
     }
 
     router.push({
-      pathname: "/(customer)/bookings/create",
+      pathname: "/(customer)/bookings/disclaimer",
       params: { carId: car._id },
     });
   };

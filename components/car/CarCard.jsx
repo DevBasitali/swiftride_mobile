@@ -17,9 +17,9 @@ export default function CarCard({ car }) {
     <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={0.9}>
       {/* IMAGE SECTION */}
       <View style={styles.imageContainer}>
-        <Image 
-          source={{ uri: carService.getImageUrl(car.photos?.[0]) }} 
-          style={styles.image} 
+        <Image
+          source={{ uri: carService.getImageUrl(car.photos?.[0]) }}
+          style={styles.image}
           resizeMode="cover"
         />
         <View style={styles.priceBadge}>

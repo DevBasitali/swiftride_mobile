@@ -6,6 +6,7 @@ import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import * as Location from "expo-location";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -21,6 +22,20 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
+
+  // Request Global Permissions on App Start
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Location permission denied");
+        }
+      } catch (e) {
+        console.log("Error requesting permissions:", e);
+      }
+    })();
+  }, []);
 
   if (!loaded) return null;
 

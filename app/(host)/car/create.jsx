@@ -19,7 +19,7 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import carService, { DAYS_OF_WEEK } from '../../../services/carService';
@@ -68,8 +68,7 @@ export default function CreateCar() {
   const [insuranceDoc, setInsuranceDoc] = useState(null);
   const [featureInput, setFeatureInput] = useState('');
   const { showAlert } = useAlert();
-  const placesRef = useRef(null);
-  const [showPlacesList, setShowPlacesList] = useState(false);
+
 
   const [form, setForm] = useState({
     make: '',
@@ -729,122 +728,43 @@ export default function CreateCar() {
 
             <Text style={styles.label}>Location</Text>
 
-            <View style={{ marginBottom: 15, zIndex: 100 }}>
-              <GooglePlacesAutocomplete
-                ref={placesRef}
-                placeholder={"Search location..."}
-                fetchDetails={true}
-                enablePoweredByContainer={false}
-                disableScroll={true}
-                listViewDisplayed={showPlacesList}
-                textInputProps={{
-                  value: form.address,
-                  onChangeText: (text) => {
-                    handleInputChange('address', text);
-                    setShowPlacesList(text.length >= 2);
+            <TouchableOpacity
+              style={styles.locationInputBtn}
+              onPress={() => {
+                router.push({
+                  pathname: '/(host)/car/location-picker',
+                  params: {
+                    formState: JSON.stringify(form),
+                    imageUris: JSON.stringify(images.map((img) => img.uri)),
                   },
-                  onFocus: () => setShowPlacesList(form.address.length >= 2),
-                  onBlur: () => setTimeout(() => setShowPlacesList(false), 200),
-                  placeholderTextColor: COLORS.gray[400],
-                  style: {
-                    color: COLORS.white,
-                    fontSize: 15,
-                    flex: 1,
-                  }
-                }}
-                onPress={(data, details = null) => {
-                  if (details) {
-                    const addr = data.description;
-                    const lat = details.geometry.location.lat;
-                    const lng = details.geometry.location.lng;
-
-                    handleInputChange('address', addr);
-                    handleInputChange('lat', lat);
-                    handleInputChange('lng', lng);
-
-                    // Close the list
-                    setShowPlacesList(false);
-                    placesRef.current?.setAddressText(addr);
-                  }
-                  // Dismiss keyboard
-                  Keyboard.dismiss();
-                }}
-                query={{
-                  key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-                  language: 'en',
-                }}
-                onFail={(error) => console.error("Google Places Error:", error)}
-                onNotFound={() => console.log("Google Places: No results found")}
-                debounce={300}
-                minLength={2}
-                renderRightButton={() => (
-                  <TouchableOpacity
-                    style={styles.mapIconButton}
-                    onPress={() => {
-                      router.push({
-                        pathname: '/(host)/car/location-picker',
-                        params: {
-                          formState: JSON.stringify(form),
-                          imageUris: JSON.stringify(images.map(img => img.uri)),
-                        },
-                      });
-                    }}
-                  >
-                    <Ionicons name="map" size={20} color={COLORS.navy[900]} />
-                  </TouchableOpacity>
-                )}
-                styles={{
-                  container: {
-                    flex: 0,
-                  },
-                  textInputContainer: {
-                    backgroundColor: COLORS.navy[700],
-                    borderWidth: 1,
-                    borderColor: COLORS.navy[600],
-                    borderRadius: 12,
-                    paddingHorizontal: 8,
-                    alignItems: 'center',
-                    height: 54,
-                  },
-                  textInput: {
-                    backgroundColor: 'transparent',
-                    color: COLORS.white,
-                    fontSize: 15,
-                    height: 54,
-                  },
-                  listView: {
-                    position: 'absolute',
-                    top: 60,
-                    left: 0,
-                    right: 0,
-                    backgroundColor: COLORS.navy[800],
-                    borderRadius: 12,
-                    borderWidth: 1,
-                    borderColor: COLORS.navy[600],
-                    elevation: 5,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 4,
-                    zIndex: 9999, // Ensure it sits on top
-                  },
-                  row: {
-                    backgroundColor: 'transparent',
-                    padding: 13,
-                    height: 44,
-                    flexDirection: 'row',
-                  },
-                  description: {
-                    color: COLORS.white,
-                    fontSize: 14,
-                  },
-                  separator: {
-                    height: 0.5,
-                    backgroundColor: COLORS.navy[600],
-                  },
-                }}
-              />
-            </View>
+                });
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.locationInputContent}>
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color={COLORS.gray[400]}
+                />
+                <Text
+                  style={[
+                    styles.locationInputText,
+                    !form.address && styles.locationPlaceholder,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {form.address || 'Select car location...'}
+                </Text>
+              </View>
+              <View style={styles.locationActionIcon}>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={COLORS.gray[500]}
+                />
+              </View>
+            </TouchableOpacity>
 
             <View style={{ height: 15 }} />
             <Input
@@ -1045,7 +965,7 @@ export default function CreateCar() {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-    </View>
+    </View >
   );
 }
 
@@ -1626,6 +1546,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     gap: 6,
+  },
+  locationInputBtn: {
+    backgroundColor: COLORS.navy[700],
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  locationInputContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  locationInputText: {
+    fontSize: 15,
+    color: COLORS.white,
+    fontWeight: '500',
+    flex: 1,
+  },
+  locationPlaceholder: {
+    color: COLORS.gray[400],
+  },
+  locationActionIcon: {
+    marginLeft: 8,
   },
   featureChipText: {
     fontSize: 13,

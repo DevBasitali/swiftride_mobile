@@ -118,11 +118,11 @@ export const AuthProvider = ({ children }) => {
   const refreshKycStatus = async () => {
     try {
       const kycRes = await kycService.getKycStatus();
-      setKycStatus(kycRes.data.status);
+      setKycStatus(kycRes.data.status?.toLowerCase());
       if (kycRes.data.rejectionReason) {
         setKycRejectionReason(kycRes.data.rejectionReason);
       }
-      return kycRes.data.status;
+      return kycRes.data.status?.toLowerCase();
     } catch (error) {
       setKycStatus("missing");
     }

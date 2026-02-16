@@ -376,7 +376,7 @@ export default function EditCar() {
                 label="Transmission"
                 value={form.transmission}
                 onChangeText={(t) => handleInputChange("transmission", t)}
-                icon="car-shift-pattern"
+                icon="settings-outline"
               />
               <View style={{ width: 15 }} />
               <Input
@@ -490,7 +490,7 @@ export default function EditCar() {
                   style={[
                     styles.dayButton,
                     form.availability.daysOfWeek.includes(day.value) &&
-                      styles.dayButtonActive,
+                    styles.dayButtonActive,
                   ]}
                   onPress={() => {
                     const currentDays = form.availability.daysOfWeek || [];
@@ -509,7 +509,7 @@ export default function EditCar() {
                     style={[
                       styles.dayButtonText,
                       form.availability.daysOfWeek.includes(day.value) &&
-                        styles.dayButtonTextActive,
+                      styles.dayButtonTextActive,
                     ]}
                   >
                     {day.label.substring(0, 3)}

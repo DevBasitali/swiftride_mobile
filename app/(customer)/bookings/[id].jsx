@@ -225,6 +225,33 @@ export default function CustomerBookingDetail() {
     });
   };
 
+  const handleCancelBooking = () => {
+    showAlert({
+      title: "Cancel Booking",
+      message: "Are you sure you want to cancel this booking? This action cannot be undone.",
+      type: "warning",
+      buttons: [
+        { text: "No, Keep it", style: "cancel" },
+        {
+          text: "Yes, Cancel",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await bookingService.updateBookingStatus(id, "cancelled", "Cancelled by customer");
+              await fetchBookingDetail(); // Refresh
+              showAlert({ title: "Success", message: "Booking cancelled successfully", type: "success" });
+            } catch (error) {
+              showAlert({ title: "Error", message: "Failed to cancel booking", type: "error" });
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    });
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -475,6 +502,21 @@ export default function CustomerBookingDetail() {
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
+          {/* Cancel Button - Pending/Confirmed Only */}
+          {(booking.status === "pending" || booking.status === "confirmed") && (
+            <TouchableOpacity
+              style={[
+                styles.actionBtn,
+                { borderColor: COLORS.red[500], backgroundColor: COLORS.red[500] + "10" }
+              ]}
+              onPress={handleCancelBooking}
+              disabled={downloading}
+            >
+              <Ionicons name="close-circle" size={20} color={COLORS.red[500]} />
+              <Text style={[styles.actionText, { color: COLORS.red[500] }]}>Cancel Booking</Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             style={[styles.actionBtn, downloading && styles.actionBtnDisabled]}
             onPress={handleDownloadInvoice}
