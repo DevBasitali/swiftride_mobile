@@ -1,5 +1,5 @@
 // app/(customer)/(tabs)/index.jsx
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Dimensions,
   RefreshControl,
   StatusBar,
+  ScrollView
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,9 +20,13 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 
 import carService from "../../../services/carService";
+import bookingService from "../../../services/bookingService"; // Import booking service
 import FloatingChatButton from "../../../components/FloatingChatButton";
+import ActiveTripCard from "../../../components/ActiveTripCard"; // Import new component
+import SectionHeader from "../../../components/SectionHeader"; // Import new component
+import HorizontalCarCard from "../../../components/HorizontalCarCard.jsx"; // New Component with explicit extension
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 // ============================================
 // 🎨 INLINE THEME COLORS
@@ -47,6 +52,7 @@ const COLORS = {
     500: "#6B7280",
     400: "#9CA3AF",
     300: "#D1D5DB",
+    200: "#E5E7EB",
   },
   white: "#FFFFFF",
   red: {
@@ -61,9 +67,9 @@ export default function CustomerHome() {
   // ============================================
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [cars, setCars] = useState([]);
+  const [allCars, setAllCars] = useState([]); // Store ALL cars here
+  const [activeBooking, setActiveBooking] = useState(null); // Add active booking state
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
 
 
   // ============================================
@@ -72,32 +78,52 @@ export default function CustomerHome() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchCars();
-    }, [selectedCategory, searchQuery])
+      fetchData();
+    }, [])
   );
 
-  const fetchCars = async () => {
+  const fetchData = async () => {
     try {
-      const filters = {};
-      if (selectedCategory !== "All") filters.type = selectedCategory;
-      if (searchQuery) filters.search = searchQuery;
+      // 1. Fetch ALL Cars (No filters) & Bookings
+      const [carsRes, bookingsRes] = await Promise.allSettled([
+        carService.getAllCars({}),
+        bookingService.getMyBookings()
+      ]);
 
-      const response = await carService.getAllCars(filters);
-
-      let allCars = [];
-      if (Array.isArray(response)) {
-        allCars = response;
-      } else if (response.data && Array.isArray(response.data)) {
-        allCars = response.data;
-      } else if (response.data && response.data.cars) {
-        allCars = response.data.cars;
-      } else if (response.cars) {
-        allCars = response.cars;
+      // Process Cars
+      let carsData = [];
+      if (carsRes.status === "fulfilled") {
+        const response = carsRes.value;
+        if (Array.isArray(response)) {
+          carsData = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          carsData = response.data;
+        } else if (response.data && response.data.cars) {
+          carsData = response.data.cars;
+        } else if (response.cars) {
+          carsData = response.cars;
+        }
+        setAllCars(carsData);
       }
 
+      // Process Bookings (Find active one)
+      if (bookingsRes.status === "fulfilled") {
+        const responseData = bookingsRes.value.data || {};
+        // Handle various potential structures: 
+        // 1. { data: { items: [...] } } (Standard)
+        // 2. { data: [...] } (Direct array)
+        // 3. [...] (Raw array)
+        const bookings = Array.isArray(responseData)
+          ? responseData
+          : (responseData.items || responseData.bookings || []);
 
-      // Use the cars returned from backend (already filtered)
-      setCars(allCars);
+        const active = Array.isArray(bookings) ? bookings.find(b =>
+          b.status === 'confirmed' ||
+          b.status === 'ongoing' ||
+          b.status === 'active'
+        ) : null;
+        setActiveBooking(active || null);
+      }
 
     } catch (error) {
       console.error("Fetch Error:", error);
@@ -107,39 +133,124 @@ export default function CustomerHome() {
     }
   };
 
-  // Auto-search with debounce
-  const searchDebounceRef = useRef(null);
+  // ============================================
+  // 🧠 DATA SEGMENTATION (MEMOIZED)
+  // ============================================
 
-  const handleSearchChange = (text) => {
-    setSearchQuery(text);
-
-    // Debounce search to avoid excessive API calls
-    if (searchDebounceRef.current) {
-      clearTimeout(searchDebounceRef.current);
+  const { featuredCars, newArrivals, economyCars, filteredList } = useMemo(() => {
+    // 1. Search Active? -> Return filtered list only
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      const filtered = allCars.filter(car => {
+        const matchMake = car.make?.toLowerCase().includes(lowerQuery);
+        const matchModel = car.model?.toLowerCase().includes(lowerQuery);
+        const matchYear = car.year?.toString().includes(lowerQuery);
+        return matchMake || matchModel || matchYear;
+      });
+      return {
+        featuredCars: [],
+        newArrivals: [],
+        economyCars: [],
+        filteredList: filtered
+      };
     }
 
-    searchDebounceRef.current = setTimeout(() => {
-      setLoading(true);
-      fetchCars();
-    }, 500);
-  };
+    // 2. No Search -> Segment Data
+    // Clone to avoid mutating original state in sort
+    const sortedByPrice = [...allCars].sort((a, b) => b.pricePerDay - a.pricePerDay);
+    const sortedByDate = [...allCars].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  // Cleanup debounce on unmount
-  useEffect(() => {
-    return () => {
-      if (searchDebounceRef.current) {
-        clearTimeout(searchDebounceRef.current);
-      }
+    return {
+      featuredCars: sortedByPrice.slice(0, 5), // Top 5 most expensive
+      newArrivals: sortedByDate.slice(0, 5),   // Top 5 newest
+      economyCars: allCars.filter(c => c.pricePerDay < 5000).slice(0, 5), // Cheap cars
+      filteredList: allCars // Full list at bottom
     };
-  }, []);
+  }, [searchQuery, allCars]);
 
 
   // ============================================
   // 🎨 RENDER COMPONENTS
   // ============================================
+
+  const renderSectionResult = ({ item }) => (
+    <View style={{ marginRight: 16 }}>
+      <HorizontalCarCard item={item} />
+    </View>
+  );
+
+  const renderHeader = () => (
+    <View style={styles.listHeader}>
+      {/* Active Trip Widget */}
+      {activeBooking && (
+        <View style={styles.activeTripContainer}>
+          <ActiveTripCard booking={activeBooking} />
+        </View>
+      )}
+
+      {/* CURATED SHELVES (Only when NOT searching) */}
+      {!searchQuery && (
+        <>
+          {/* Featured Section */}
+          {featuredCars.length > 0 && (
+            <View style={styles.sectionContainer}>
+              <SectionHeader title="Featured Fleet" subtitle="Top of the line luxury" />
+              <FlatList
+                data={featuredCars}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => <HorizontalCarCard item={item} />}
+                contentContainerStyle={{ paddingHorizontal: 0, paddingVertical: 10 }}
+                keyExtractor={item => `featured-${item._id}`}
+              />
+            </View>
+          )}
+
+          {/* New Arrivals Section */}
+          {newArrivals.length > 0 && (
+            <View style={styles.sectionContainer}>
+              <SectionHeader title="Fresh Arrivals" subtitle="Just added to our garage" />
+              <FlatList
+                data={newArrivals}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => <HorizontalCarCard item={item} />}
+                contentContainerStyle={{ paddingHorizontal: 0, paddingVertical: 10 }}
+                keyExtractor={item => `new-${item._id}`}
+              />
+            </View>
+          )}
+
+          {/* Economy Section */}
+          {economyCars.length > 0 && (
+            <View style={styles.sectionContainer}>
+              <SectionHeader title="Economy Savers" subtitle="Budget friendly options" />
+              <FlatList
+                data={economyCars}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => <HorizontalCarCard item={item} />}
+                contentContainerStyle={{ paddingHorizontal: 0, paddingVertical: 10 }}
+                keyExtractor={item => `eco-${item._id}`}
+              />
+            </View>
+          )}
+        </>
+      )}
+
+      {/* Main List Header */}
+      <View style={{ marginTop: 10 }}>
+        <SectionHeader
+          title={searchQuery ? `Results for "${searchQuery}"` : "All Cars"}
+          subtitle={searchQuery ? `${filteredList.length} cars found` : "Explore our complete collection"}
+        />
+      </View>
+    </View>
+  );
+
   const renderCarItem = ({ item }) => (
     <TouchableOpacity
-      activeOpacity={0.9}
+      activeOpacity={0.95}
       onPress={() => {
         if (item?._id) {
           router.push(`/(customer)/car/${item._id}`);
@@ -147,66 +258,50 @@ export default function CustomerHome() {
       }}
       style={styles.card}
     >
-      <View style={styles.imageWrapper}>
-        <Image
-          source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
-          style={styles.carImage}
-          resizeMode="cover"
-        />
-        <LinearGradient
-          colors={["transparent", "rgba(10, 22, 40, 0.9)"]}
-          style={styles.imageGradient}
-        />
+      {/* Full Background Image */}
+      <Image
+        source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
+        style={styles.cardBg}
+        resizeMode="cover"
+      />
 
-        <View style={styles.priceBadgeContainer}>
-          <LinearGradient
-            colors={[COLORS.gold[500], COLORS.gold[600]]}
-            style={styles.priceBadge}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          >
-            <Text style={styles.priceText}>PKR {item.pricePerDay}</Text>
-            <Text style={styles.dayText}>/day</Text>
-          </LinearGradient>
-        </View>
+      {/* Dark Overlay for Text Readability */}
+      <LinearGradient
+        colors={["transparent", "rgba(10, 22, 40, 0.4)", "rgba(10, 22, 40, 0.95)"]}
+        locations={[0, 0.5, 1]}
+        style={styles.cardOverlay}
+      />
 
-        {item.isActive && (
-          <View style={styles.availableBadge}>
-            <View style={styles.availableDot} />
-            <Text style={styles.availableText}>Available</Text>
+      {/* Top Badges */}
+      <View style={styles.topBadges}>
+        {item.isActive ? (
+          <View style={styles.statusBadge}>
+            <View style={styles.dot} />
+            <Text style={styles.statusText}>AVAILABLE</Text>
+          </View>
+        ) : (
+          <View style={[styles.statusBadge, { backgroundColor: COLORS.red[500] }]}>
+            <Text style={styles.statusText}>UNAVAILABLE</Text>
           </View>
         )}
+
+        <View style={styles.ratingBadge}>
+          <Ionicons name="star" size={12} color={COLORS.gold[500]} />
+          <Text style={styles.ratingText}>5.0</Text>
+        </View>
       </View>
 
+      {/* Content Area */}
       <View style={styles.cardContent}>
-        <View style={styles.titleRow}>
-          <Text style={styles.carTitle} numberOfLines={1}>
-            {item.make} {item.model}
-          </Text>
-          <View style={styles.ratingBox}>
-            <Ionicons name="star" size={12} color={COLORS.gold[500]} />
-            <Text style={styles.ratingText}>5.0</Text>
-          </View>
+        <View>
+          <Text style={styles.carName}>{item.make} {item.model}</Text>
+          <Text style={styles.carSub}>{item.year} • {item.transmission || "Auto"}</Text>
         </View>
 
-        <Text style={styles.yearText}>
-          {item.year} • {item.color}
-        </Text>
-
-        <View style={styles.detailsRow}>
-          <DetailIcon
-            icon="car-shift-pattern"
-            text={item.transmission || "Auto"}
-          />
-          <DetailIcon icon="car-seat" text={`${item.seats || 4}`} />
-          <DetailIcon icon="gas-station" text={item.fuelType || "Petrol"} />
-        </View>
-
-        <View style={styles.locationRow}>
-          <Ionicons name="location" size={14} color={COLORS.gold[500]} />
-          <Text style={styles.locationText} numberOfLines={1}>
-            {item.location?.address || "City Center"}
-          </Text>
+        <View style={styles.priceContainer}>
+          <Text style={styles.currency}>PKR</Text>
+          <Text style={styles.price}>{item.pricePerDay}</Text>
+          <Text style={styles.perDay}>/day</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -246,24 +341,20 @@ export default function CustomerHome() {
             <Ionicons
               name="search"
               size={20}
-              color={COLORS.gray[500]}
+              color={COLORS.gray[400]}
               style={{ marginRight: 10 }}
             />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search by make, model, or location..."
+              placeholder="Search by make, model..."
               placeholderTextColor={COLORS.gray[400]}
               value={searchQuery}
-              onChangeText={handleSearchChange}
+              onChangeText={setSearchQuery} // Direct state update for instant search
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity
-                onPress={() => {
-                  setSearchQuery("");
-                  setLoading(true);
-                  setTimeout(() => fetchCars(), 100);
-                }}
+                onPress={() => setSearchQuery("")}
               >
                 <Ionicons
                   name="close-circle"
@@ -279,43 +370,7 @@ export default function CustomerHome() {
 
       {/* Body */}
       <View style={styles.body}>
-        <View style={styles.categoryContainer}>
-          <FlatList
-            horizontal
-            data={CATEGORIES}
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item}
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingVertical: 15,
-            }}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.catChip,
-                  selectedCategory === item && styles.catChipActive,
-                ]}
-                onPress={() => setSelectedCategory(item)}
-                activeOpacity={0.7}
-              >
-                {selectedCategory === item ? (
-                  <LinearGradient
-                    colors={[COLORS.gold[500], COLORS.gold[600]]}
-                    style={styles.catChipGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <Text style={styles.catTextActive}>{item}</Text>
-                  </LinearGradient>
-                ) : (
-                  <Text style={styles.catText}>{item}</Text>
-                )}
-              </TouchableOpacity>
-            )}
-          />
-        </View>
 
-        {/* Content */}
         {loading ? (
           <ActivityIndicator
             size="large"
@@ -325,9 +380,10 @@ export default function CustomerHome() {
         ) : (
           // List View
           <FlatList
-            data={cars}
+            data={filteredList}
             keyExtractor={(item) => item._id}
             renderItem={renderCarItem}
+            ListHeaderComponent={renderHeader} // Add Header Component
             contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
             showsVerticalScrollIndicator={false}
             refreshControl={
@@ -335,27 +391,16 @@ export default function CustomerHome() {
                 refreshing={refreshing}
                 onRefresh={() => {
                   setRefreshing(true);
-                  fetchCars();
+                  fetchData();
                 }}
                 tintColor={COLORS.gold[500]}
               />
             }
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <View style={styles.emptyIconContainer}>
-                  <LinearGradient
-                    colors={[COLORS.navy[700], COLORS.navy[600]]}
-                    style={styles.emptyIconGradient}
-                  >
-                    <Ionicons
-                      name="car-sport-outline"
-                      size={60}
-                      color={COLORS.gray[500]}
-                    />
-                  </LinearGradient>
-                </View>
+                <Ionicons name="car-sport-outline" size={64} color={COLORS.navy[700]} />
                 <Text style={styles.emptyText}>No cars found</Text>
-                <Text style={styles.emptySub}>Try adjusting your filters</Text>
+                <Text style={styles.emptySub}>Try a different search term</Text>
               </View>
             }
           />
@@ -364,19 +409,6 @@ export default function CustomerHome() {
 
       {/* Floating AI Chat Button */}
       <FloatingChatButton />
-    </View>
-  );
-}
-
-// ============================================
-// 📦 HELPER COMPONENTS
-// ============================================
-
-function DetailIcon({ icon, text }) {
-  return (
-    <View style={styles.detailItem}>
-      <MaterialCommunityIcons name={icon} size={14} color={COLORS.gray[400]} />
-      <Text style={styles.detailText}>{text}</Text>
     </View>
   );
 }
@@ -396,6 +428,12 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    zIndex: 10,
   },
   headerContent: {
     paddingHorizontal: 20,
@@ -405,29 +443,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   greeting: {
     color: COLORS.gray[400],
     fontSize: 14,
     fontWeight: "600",
+    marginBottom: 4,
   },
   title: {
     color: COLORS.white,
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "700",
-    marginTop: 4,
   },
-  profileBtn: {},
   profileBtnInner: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: COLORS.navy[700],
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: COLORS.navy[600],
+    borderColor: "rgba(255,255,255,0.1)",
   },
 
   // Search
@@ -435,20 +472,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.navy[700],
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    height: 50,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
     borderWidth: 1,
-    borderColor: COLORS.navy[600],
-    marginBottom: 12,
+    borderColor: "rgba(255,255,255,0.05)",
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.white,
-    color: COLORS.navy[900],
-    fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "500",
   },
 
   // Body
@@ -456,226 +490,152 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.navy[900],
   },
-  categoryContainer: {
-    height: 70,
+  listHeader: {
+    marginBottom: 10,
   },
-  catChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: COLORS.navy[800],
-    borderRadius: 20,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: COLORS.navy[700],
-    minWidth: 80,
-    alignItems: "center",
+  activeTripContainer: {
+    marginBottom: 10,
   },
-  catChipActive: {
-    borderColor: COLORS.gold[500],
-    backgroundColor: "transparent",
-  },
-  catChipGradient: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    position: "absolute",
-    top: -1,
-    left: -1,
-    right: -1,
-    bottom: -1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  catText: {
-    color: COLORS.gray[400],
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  catTextActive: {
-    color: COLORS.navy[900],
-    fontWeight: "700",
-    fontSize: 14,
+  sectionContainer: {
+    marginBottom: 24,
   },
 
-  // Car Card (List View)
+  // New Car Card
   card: {
-    backgroundColor: COLORS.navy[800],
-    borderRadius: 20,
-    marginBottom: 20,
+    height: 240,
+    borderRadius: 24,
+    marginBottom: 24,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: COLORS.navy[700],
-    shadowColor: COLORS.gold[500],
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  imageWrapper: {
-    height: 200,
     position: "relative",
-    backgroundColor: COLORS.navy[700],
+    backgroundColor: COLORS.navy[800],
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
   },
-  carImage: {
+  cardBg: {
     width: "100%",
     height: "100%",
+    position: "absolute",
   },
-  imageGradient: {
+  cardOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  topBadges: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    right: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  statusBadge: {
+    backgroundColor: "rgba(16, 185, 129, 0.9)", // Emerald
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backdropFilter: "blur(10px)",
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "white",
+    shadowColor: "white",
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  statusText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  ratingBadge: {
+    backgroundColor: "rgba(15, 33, 55, 0.8)", // Navy 800
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  ratingText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  cardContent: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80,
-  },
-  priceBadgeContainer: {
-    position: "absolute",
-    top: 15,
-    right: 15,
-    borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: COLORS.gold[500],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  priceBadge: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  priceText: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: COLORS.navy[900],
-  },
-  dayText: {
-    fontSize: 11,
-    color: COLORS.navy[900],
-    marginLeft: 2,
-    fontWeight: "600",
-    opacity: 0.8,
-  },
-  availableBadge: {
-    position: "absolute",
-    top: 15,
-    left: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.emerald[500],
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    gap: 5,
-  },
-  availableDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.white,
-  },
-  availableText: {
-    color: COLORS.white,
-    fontSize: 11,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  cardContent: {
-    padding: 16,
-  },
-  titleRow: {
+    padding: 20,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
+    alignItems: "flex-end",
   },
-  carTitle: {
-    fontSize: 18,
+  carName: {
+    color: "white",
+    fontSize: 22,
     fontWeight: "800",
-    color: COLORS.white,
-    flex: 1,
-    marginRight: 10,
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
-  ratingBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: COLORS.gold[500] + "20",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: COLORS.gold[500],
-  },
-  yearText: {
-    fontSize: 13,
-    color: COLORS.gray[400],
-    marginBottom: 12,
+  carSub: {
+    color: COLORS.gray[300],
+    fontSize: 14,
     fontWeight: "500",
   },
-  detailsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 12,
+  priceContainer: {
+    alignItems: "flex-end",
   },
-  detailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: COLORS.navy[700],
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  detailText: {
+  currency: {
+    color: COLORS.gold[500],
     fontSize: 12,
-    color: COLORS.gray[400],
-    fontWeight: "600",
+    fontWeight: "700",
+    marginBottom: -2,
   },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
+  price: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "800",
   },
-  locationText: {
+  perDay: {
     color: COLORS.gray[400],
-    fontSize: 13,
-    flex: 1,
+    fontSize: 12,
     fontWeight: "500",
   },
 
   // Empty State
   emptyState: {
     alignItems: "center",
-    marginTop: 80,
-    paddingHorizontal: 40,
-  },
-  emptyIconContainer: {
-    marginBottom: 20,
-    borderRadius: 24,
-    overflow: "hidden",
-  },
-  emptyIconGradient: {
-    width: 120,
-    height: 120,
-    justifyContent: "center",
-    alignItems: "center",
+    marginTop: 60,
+    opacity: 0.7,
   },
   emptyText: {
-    fontSize: 20,
-    fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 8,
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 16,
   },
   emptySub: {
     color: COLORS.gray[400],
     fontSize: 14,
-    textAlign: "center",
+    marginTop: 8,
   },
 
 });
