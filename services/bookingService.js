@@ -28,6 +28,11 @@ export const updateBookingStatus = async (bookingId, status, note = "") => {
   return response.data;
 };
 
+export const cancelBooking = async (bookingId) => {
+  const response = await api.post(`/bookings/${bookingId}/cancel`);
+  return response.data;
+};
+
 export const getBookingDetails = async (bookingId) => {
   const response = await api.get(`/bookings/${bookingId}`);
   return response.data;
@@ -97,6 +102,8 @@ export default {
   getHostBookings,
   updateBookingStatus,
   getBookingDetails,
+  getBookingDetails,
   downloadInvoice,
   initSafepayPayment,
+  cancelBooking,
 };

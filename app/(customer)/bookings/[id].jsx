@@ -238,7 +238,7 @@ export default function CustomerBookingDetail() {
           onPress: async () => {
             try {
               setLoading(true);
-              await bookingService.updateBookingStatus(id, "cancelled", "Cancelled by customer");
+              await bookingService.cancelBooking(id);
               await fetchBookingDetail(); // Refresh
               showAlert({ title: "Success", message: "Booking cancelled successfully", type: "success" });
             } catch (error) {

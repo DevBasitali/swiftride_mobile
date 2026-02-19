@@ -192,6 +192,24 @@ export default function CustomerHome() {
     }
   };
 
+  const fitToMarkers = () => {
+    if (!mapRef.current || filteredList.length === 0) return;
+
+    const coordinates = filteredList
+      .filter(c => c.location && c.location.lat && c.location.lng)
+      .map(c => ({
+        latitude: parseFloat(c.location.lat),
+        longitude: parseFloat(c.location.lng),
+      }));
+
+    if (coordinates.length > 0) {
+      mapRef.current.fitToCoordinates(coordinates, {
+        edgePadding: { top: 100, right: 50, bottom: 200, left: 50 },
+        animated: true,
+      });
+    }
+  };
+
 
   // ============================================
   // ❤️ FAVORITES LOGIC
@@ -493,6 +511,15 @@ export default function CustomerHome() {
                     </TouchableOpacity>
                   </View>
                 )}
+
+                {/* Fit To Map Button */}
+                <TouchableOpacity
+                  style={styles.fitMapBtn}
+                  onPress={fitToMarkers}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="scan" size={24} color={COLORS.navy[900]} />
+                </TouchableOpacity>
               </View>
             ) : (
               <FlatList
@@ -830,5 +857,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
     elevation: 5,
+  },
+  fitMapBtn: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: COLORS.gold[500],
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 50,
   }
 });
