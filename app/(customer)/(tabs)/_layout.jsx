@@ -70,6 +70,21 @@ export default function CustomerTabs() {
         }}
       />
       <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Favorites',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+              <MaterialCommunityIcons
+                name={focused ? 'heart' : 'heart-outline'}
+                size={26}
+                color={color}
+              />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="bookings"
         options={{
           title: 'My Trips',

@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import * as Haptics from 'expo-haptics';
 import carService from "../services/carService";
+import favoritesService from "../services/favoritesService";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.7; // 70% of screen width
@@ -23,11 +25,36 @@ const COLORS = {
     },
     emerald: {
         500: "#10B981",
+    },
+    red: {
+        500: "#EF4444",
     }
 };
 
 export default function HorizontalCarCard({ item }) {
+    const [isFavorite, setIsFavorite] = useState(false);
+
     if (!item) return null;
+
+    useFocusEffect(
+        React.useCallback(() => {
+            checkFavoriteStatus();
+        }, [])
+    );
+
+    const checkFavoriteStatus = async () => {
+        const status = await favoritesService.isFavorite(item._id);
+        setIsFavorite(status);
+    };
+
+    const toggleFavorite = async (e) => {
+        // Prevent navigation to details
+        // Trigger simple haptic
+        await Haptics.selectionAsync();
+
+        const newStatus = await favoritesService.toggleFavorite(item._id);
+        setIsFavorite(newStatus);
+    };
 
     return (
         <TouchableOpacity
@@ -46,6 +73,21 @@ export default function HorizontalCarCard({ item }) {
                     colors={["transparent", "rgba(10, 22, 40, 0.8)"]}
                     style={styles.gradient}
                 />
+
+                {/* Favorite Button */}
+                <TouchableOpacity
+                    style={styles.favButton}
+                    onPress={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite();
+                    }}
+                >
+                    <Ionicons
+                        name={isFavorite ? "heart" : "heart-outline"}
+                        size={20}
+                        color={isFavorite ? COLORS.red[500] : COLORS.white}
+                    />
+                </TouchableOpacity>
 
                 {/* Price Badge */}
                 <View style={styles.priceBadge}>
@@ -115,9 +157,24 @@ const styles = StyleSheet.create({
         right: 0,
         height: 60,
     },
-    priceBadge: {
+    favButton: {
         position: "absolute",
         top: 10,
+        right: 10,
+        backgroundColor: "rgba(15, 33, 55, 0.4)",
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.2)",
+        zIndex: 10,
+        backdropFilter: "blur(4px)",
+    },
+    priceBadge: {
+        position: "absolute",
+        bottom: 10,
         right: 10,
         backgroundColor: "rgba(15, 33, 55, 0.9)",
         paddingHorizontal: 8,

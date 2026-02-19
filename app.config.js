@@ -1,6 +1,13 @@
+// Load env variables explicitly
+try {
+  require('dotenv').config();
+} catch (e) {
+  // Ignore if dotenv is not available
+}
+
 export default ({ config }) => {
   // Safe fallback if env variable is missing during local dev
-  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCaEPPHig-6whefFn6_wSLffBIMReWs5gg";
 
   return {
     ...config,

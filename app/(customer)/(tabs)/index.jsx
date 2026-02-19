@@ -12,21 +12,26 @@ import {
   Dimensions,
   RefreshControl,
   StatusBar,
-  ScrollView
+  ScrollView,
+  Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
+import MapView, { Marker, Callout } from 'react-native-maps'; // Import Map
 
 import carService from "../../../services/carService";
 import bookingService from "../../../services/bookingService"; // Import booking service
+import favoritesService from "../../../services/favoritesService"; // Import favorites
+import * as Haptics from 'expo-haptics'; // Import Haptics
 import FloatingChatButton from "../../../components/FloatingChatButton";
 import ActiveTripCard from "../../../components/ActiveTripCard"; // Import new component
 import SectionHeader from "../../../components/SectionHeader"; // Import new component
 import HorizontalCarCard from "../../../components/HorizontalCarCard.jsx"; // New Component with explicit extension
+import MapToggle from "../../../components/MapToggle"; // Import Toggle
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 // ============================================
 // 🎨 INLINE THEME COLORS
@@ -70,6 +75,8 @@ export default function CustomerHome() {
   const [allCars, setAllCars] = useState([]); // Store ALL cars here
   const [activeBooking, setActiveBooking] = useState(null); // Add active booking state
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMapMode, setIsMapMode] = useState(false); // Map Mode State
+  const mapRef = useRef(null);
 
 
   // ============================================
@@ -170,14 +177,61 @@ export default function CustomerHome() {
 
 
   // ============================================
-  // 🎨 RENDER COMPONENTS
+  // 🗺️ MAP INTERACTION
+  // ============================================
+  const [selectedCar, setSelectedCar] = useState(null);
+
+  const handleMarkerPress = (car) => {
+    setSelectedCar(car);
+    Haptics.selectionAsync();
+  };
+
+  const handleMapPress = () => {
+    if (selectedCar) {
+      setSelectedCar(null);
+    }
+  };
+
+
+  // ============================================
+  // ❤️ FAVORITES LOGIC
   // ============================================
 
-  const renderSectionResult = ({ item }) => (
-    <View style={{ marginRight: 16 }}>
-      <HorizontalCarCard item={item} />
-    </View>
+  const [favorites, setFavorites] = useState([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFavorites();
+    }, [])
   );
+
+  const loadFavorites = async () => {
+    const favs = await favoritesService.getFavorites();
+    setFavorites(favs);
+  };
+
+  const toggleFavorite = async (carId) => {
+    // Optimistic Update
+    const isFav = favorites.includes(carId);
+    let newFavs;
+    if (isFav) {
+      newFavs = favorites.filter(id => id !== carId);
+    } else {
+      newFavs = [...favorites, carId];
+    }
+    setFavorites(newFavs);
+
+    // Haptics
+    await Haptics.selectionAsync();
+
+    // Persist
+    await favoritesService.toggleFavorite(carId);
+  };
+
+
+  // ============================================
+  // 🎨 RENDER COMPONENTS
+  // ============================================
 
   const renderHeader = () => (
     <View style={styles.listHeader}>
@@ -248,64 +302,85 @@ export default function CustomerHome() {
     </View>
   );
 
-  const renderCarItem = ({ item }) => (
-    <TouchableOpacity
-      activeOpacity={0.95}
-      onPress={() => {
-        if (item?._id) {
-          router.push(`/(customer)/car/${item._id}`);
-        }
-      }}
-      style={styles.card}
-    >
-      {/* Full Background Image */}
-      <Image
-        source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
-        style={styles.cardBg}
-        resizeMode="cover"
-      />
+  const renderCarItem = ({ item }) => {
+    const isFavorite = favorites.includes(item._id);
 
-      {/* Dark Overlay for Text Readability */}
-      <LinearGradient
-        colors={["transparent", "rgba(10, 22, 40, 0.4)", "rgba(10, 22, 40, 0.95)"]}
-        locations={[0, 0.5, 1]}
-        style={styles.cardOverlay}
-      />
+    return (
+      <TouchableOpacity
+        activeOpacity={0.95}
+        onPress={() => {
+          if (item?._id) {
+            router.push(`/(customer)/car/${item._id}`);
+          }
+        }}
+        style={styles.card}
+      >
+        {/* Full Background Image */}
+        <Image
+          source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
+          style={styles.cardBg}
+          resizeMode="cover"
+        />
 
-      {/* Top Badges */}
-      <View style={styles.topBadges}>
-        {item.isActive ? (
-          <View style={styles.statusBadge}>
-            <View style={styles.dot} />
-            <Text style={styles.statusText}>AVAILABLE</Text>
+        {/* Dark Overlay for Text Readability */}
+        <LinearGradient
+          colors={["transparent", "rgba(10, 22, 40, 0.4)", "rgba(10, 22, 40, 0.95)"]}
+          locations={[0, 0.5, 1]}
+          style={styles.cardOverlay}
+        />
+
+        {/* Top Badges */}
+        <View style={styles.topBadges}>
+          {item.isActive ? (
+            <View style={styles.statusBadge}>
+              <View style={styles.dot} />
+              <Text style={styles.statusText}>AVAILABLE</Text>
+            </View>
+          ) : (
+            <View style={[styles.statusBadge, { backgroundColor: COLORS.red[500] }]}>
+              <Text style={styles.statusText}>UNAVAILABLE</Text>
+            </View>
+          )}
+
+          {/* ACTION BUTTONS ROW */}
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={(e) => {
+                e.stopPropagation();
+                toggleFavorite(item._id);
+              }}
+            >
+              <Ionicons
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={20}
+                color={isFavorite ? COLORS.red[500] : COLORS.white}
+              />
+            </TouchableOpacity>
+
+            <View style={styles.ratingBadge}>
+              <Ionicons name="star" size={12} color={COLORS.gold[500]} />
+              <Text style={styles.ratingText}>5.0</Text>
+            </View>
           </View>
-        ) : (
-          <View style={[styles.statusBadge, { backgroundColor: COLORS.red[500] }]}>
-            <Text style={styles.statusText}>UNAVAILABLE</Text>
+        </View>
+
+        {/* Content Area */}
+        <View style={styles.cardContent}>
+          <View>
+            <Text style={styles.carName}>{item.make} {item.model}</Text>
+            <Text style={styles.carSub}>{item.year} • {item.transmission || "Auto"}</Text>
           </View>
-        )}
 
-        <View style={styles.ratingBadge}>
-          <Ionicons name="star" size={12} color={COLORS.gold[500]} />
-          <Text style={styles.ratingText}>5.0</Text>
+          <View style={styles.priceContainer}>
+            <Text style={styles.currency}>PKR</Text>
+            <Text style={styles.price}>{item.pricePerDay}</Text>
+            <Text style={styles.perDay}>/day</Text>
+          </View>
         </View>
-      </View>
-
-      {/* Content Area */}
-      <View style={styles.cardContent}>
-        <View>
-          <Text style={styles.carName}>{item.make} {item.model}</Text>
-          <Text style={styles.carSub}>{item.year} • {item.transmission || "Auto"}</Text>
-        </View>
-
-        <View style={styles.priceContainer}>
-          <Text style={styles.currency}>PKR</Text>
-          <Text style={styles.price}>{item.pricePerDay}</Text>
-          <Text style={styles.perDay}>/day</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    )
+  };
 
 
   return (
@@ -378,34 +453,90 @@ export default function CustomerHome() {
             style={{ marginTop: 50 }}
           />
         ) : (
-          // List View
-          <FlatList
-            data={filteredList}
-            keyExtractor={(item) => item._id}
-            renderItem={renderCarItem}
-            ListHeaderComponent={renderHeader} // Add Header Component
-            contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => {
-                  setRefreshing(true);
-                  fetchData();
-                }}
-                tintColor={COLORS.gold[500]}
-              />
-            }
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="car-sport-outline" size={64} color={COLORS.navy[700]} />
-                <Text style={styles.emptyText}>No cars found</Text>
-                <Text style={styles.emptySub}>Try a different search term</Text>
+          <>
+            {isMapMode ? (
+              <View style={{ flex: 1 }}>
+                <MapView
+                  ref={mapRef}
+                  style={styles.map}
+                  initialRegion={{
+                    latitude: 33.6844,
+                    longitude: 73.0479,
+                    latitudeDelta: 0.1,
+                    longitudeDelta: 0.1,
+                  }}
+                  onPress={handleMapPress}
+                >
+                  {filteredList.map((car, index) => (
+                    car.location && car.location.lat && (
+                      <Marker
+                        key={car._id}
+                        coordinate={{
+                          latitude: parseFloat(car.location.lat),
+                          longitude: parseFloat(car.location.lng),
+                        }}
+                        onPress={() => handleMarkerPress(car)}
+                      />
+                    )
+                  ))}
+                </MapView>
+
+                {/* Floating Car Card */}
+                {selectedCar && (
+                  <View style={styles.floatingCardContainer}>
+                    <HorizontalCarCard item={selectedCar} />
+                    <TouchableOpacity
+                      style={styles.closeCardBtn}
+                      onPress={() => setSelectedCar(null)}
+                    >
+                      <Ionicons name="close" size={20} color={COLORS.white} />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
-            }
-          />
+            ) : (
+              <FlatList
+                data={filteredList}
+                keyExtractor={(item) => item._id}
+                renderItem={renderCarItem}
+                ListHeaderComponent={renderHeader}
+                contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => {
+                      setRefreshing(true);
+                      fetchData();
+                    }}
+                    tintColor={COLORS.gold[500]}
+                  />
+                }
+                ListEmptyComponent={
+                  <View style={styles.emptyState}>
+                    <Ionicons name="car-sport-outline" size={64} color={COLORS.navy[700]} />
+                    <Text style={styles.emptyText}>No cars found</Text>
+                    <Text style={styles.emptySub}>Try a different search term</Text>
+                  </View>
+                }
+              />
+            )}
+          </>
         )}
       </View>
+
+      {/* Map Toggle Button (Top layer) */}
+      {!loading && (
+        <View style={styles.floatingContainer}>
+          <MapToggle
+            isMapMode={isMapMode}
+            onToggle={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setIsMapMode(!isMapMode);
+            }}
+          />
+        </View>
+      )}
 
       {/* Floating AI Chat Button */}
       <FloatingChatButton />
@@ -544,6 +675,17 @@ const styles = StyleSheet.create({
     gap: 6,
     backdropFilter: "blur(10px)",
   },
+  iconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(15, 33, 55, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    backdropFilter: "blur(4px)",
+  },
   dot: {
     width: 6,
     height: 6,
@@ -637,5 +779,56 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 8,
   },
-
+  // Map Styles
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+  floatingContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 50,
+  },
+  priceMarker: {
+    backgroundColor: COLORS.navy[800],
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: COLORS.gold[500],
+    elevation: 5,
+  },
+  markerText: {
+    color: COLORS.white,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  calloutContainer: {
+    width: 280,
+    height: 240,
+    marginBottom: 10,
+  },
+  floatingCardContainer: {
+    position: 'absolute',
+    bottom: 100, // Above tab bar
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    zIndex: 60,
+  },
+  closeCardBtn: {
+    position: 'absolute',
+    top: -10,
+    right: 20,
+    backgroundColor: COLORS.navy[700],
+    borderRadius: 15,
+    padding: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    elevation: 5,
+  }
 });
