@@ -502,80 +502,90 @@ export default function CustomerBookingDetail() {
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
-          {/* Cancel Button - Pending/Confirmed Only */}
-          {(booking.status === "pending" || booking.status === "confirmed") && (
+          {/* Main Actions Group */}
+          <View style={styles.primaryActions}>
             <TouchableOpacity
-              style={[
-                styles.actionBtn,
-                { borderColor: COLORS.red[500], backgroundColor: COLORS.red[500] + "10" }
-              ]}
-              onPress={handleCancelBooking}
+              style={[styles.actionBtn, styles.primaryBtn]}
+              onPress={handleContactHost}
+            >
+              <Ionicons name="call" size={20} color={COLORS.navy[900]} />
+              <Text style={[styles.actionText, styles.primaryBtnText]}>Contact Host</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionBtn, downloading && styles.actionBtnDisabled]}
+              onPress={handleDownloadInvoice}
               disabled={downloading}
             >
-              <Ionicons name="close-circle" size={20} color={COLORS.red[500]} />
-              <Text style={[styles.actionText, { color: COLORS.red[500] }]}>Cancel Booking</Text>
+              {downloading ? (
+                <ActivityIndicator size="small" color={COLORS.gold[500]} />
+              ) : (
+                <Ionicons
+                  name="document-text-outline"
+                  size={20}
+                  color={COLORS.gold[500]}
+                />
+              )}
+              <Text style={styles.actionText}>
+                {downloading ? "Downloading..." : "Download Invoice"}
+              </Text>
             </TouchableOpacity>
-          )}
+          </View>
 
-          <TouchableOpacity
-            style={[styles.actionBtn, downloading && styles.actionBtnDisabled]}
-            onPress={handleDownloadInvoice}
-            disabled={downloading}
-          >
-            {downloading ? (
-              <ActivityIndicator size="small" color={COLORS.gold[500]} />
-            ) : (
-              <Ionicons
-                name="document-text"
-                size={20}
-                color={COLORS.gold[500]}
-              />
-            )}
-            <Text style={styles.actionText}>
-              {downloading ? "Downloading..." : "Download Invoice"}
-            </Text>
-          </TouchableOpacity>
+          {/* Secondary / Contextual Actions */}
+          <View style={styles.secondaryActions}>
+            {/* QR Code Button - Show for confirmed/ongoing bookings */}
+            {(booking.status === "confirmed" || booking.status === "ongoing") &&
+              booking.handoverSecret && (
+                <TouchableOpacity
+                  style={[
+                    styles.actionBtn,
+                    { backgroundColor: COLORS.gold[500] + "15", borderColor: COLORS.gold[500] + "30" },
+                  ]}
+                  onPress={() => setShowQR(true)}
+                >
+                  <Ionicons name="qr-code-outline" size={20} color={COLORS.gold[500]} />
+                  <Text style={[styles.actionText, { color: COLORS.gold[500] }]}>
+                    Show QR Code
+                  </Text>
+                </TouchableOpacity>
+              )}
 
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={handleContactHost}
-          >
-            <Ionicons name="call" size={20} color={COLORS.blue[500]} />
-            <Text style={styles.actionText}>Contact Host</Text>
-          </TouchableOpacity>
-
-          {/* QR Code Button - Show for confirmed/ongoing bookings */}
-          {(booking.status === "confirmed" || booking.status === "ongoing") &&
-            booking.handoverSecret && (
+            {/* Leave Review Button - Show for completed bookings */}
+            {booking.status === "completed" && !hasReviewed && (
               <TouchableOpacity
                 style={[
                   styles.actionBtn,
-                  { backgroundColor: COLORS.gold[500] + "20" },
+                  { backgroundColor: COLORS.green[500] + "15", borderColor: COLORS.green[500] + "30" },
                 ]}
-                onPress={() => setShowQR(true)}
+                onPress={() => setShowReviewModal(true)}
               >
-                <Ionicons name="qr-code" size={20} color={COLORS.gold[500]} />
-                <Text style={[styles.actionText, { color: COLORS.gold[500] }]}>
-                  Show QR Code
+                <Ionicons name="star-outline" size={20} color={COLORS.green[500]} />
+                <Text style={[styles.actionText, { color: COLORS.green[500] }]}>
+                  Leave Review
                 </Text>
               </TouchableOpacity>
             )}
 
-          {/* Leave Review Button - Show for completed bookings */}
-          {booking.status === "completed" && !hasReviewed && (
-            <TouchableOpacity
-              style={[
-                styles.actionBtn,
-                { backgroundColor: COLORS.green[500] + "20" },
-              ]}
-              onPress={() => setShowReviewModal(true)}
-            >
-              <Ionicons name="star" size={20} color={COLORS.green[500]} />
-              <Text style={[styles.actionText, { color: COLORS.green[500] }]}>
-                Leave Review
-              </Text>
-            </TouchableOpacity>
-          )}
+            {/* Cancel Button - Pending/Confirmed Only - MOVED TO BOTTOM */}
+            {(booking.status === "pending" || booking.status === "confirmed") && (
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  {
+                    borderColor: COLORS.red[500] + "50",
+                    backgroundColor: "transparent",
+                    marginTop: 8
+                  }
+                ]}
+                onPress={handleCancelBooking}
+                disabled={downloading}
+              >
+                <Ionicons name="close-circle-outline" size={20} color={COLORS.red[500]} />
+                <Text style={[styles.actionText, { color: COLORS.red[500] }]}>Cancel Booking</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         {/* Info Note for Pending */}
@@ -779,21 +789,43 @@ const styles = StyleSheet.create({
   timelineDate: { fontSize: 12, color: COLORS.gray[400], marginBottom: 4 },
   timelineNote: { fontSize: 12, color: COLORS.gray[500], fontStyle: "italic" },
 
-  actionsContainer: { flexDirection: "row", gap: 12, marginTop: 8 },
+  actionsContainer: {
+    marginTop: 12,
+    gap: 16,
+  },
+  primaryActions: {
+    gap: 12,
+  },
+  secondaryActions: {
+    gap: 12,
+  },
   actionBtn: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 10,
     backgroundColor: COLORS.navy[800],
-    padding: 16,
-    borderRadius: 14,
+    paddingVertical: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: COLORS.navy[700],
+    borderColor: COLORS.navy[600],
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  primaryBtn: {
+    backgroundColor: COLORS.gold[500],
+    borderColor: COLORS.gold[500],
+  },
+  primaryBtnText: {
+    color: COLORS.navy[900],
+    fontWeight: "700",
+    fontSize: 15,
   },
   actionBtnDisabled: { opacity: 0.6 },
-  actionText: { fontSize: 13, fontWeight: "600", color: COLORS.white },
+  actionText: { fontSize: 14, fontWeight: "600", color: COLORS.gray[400] },
 
   infoBox: {
     flexDirection: "row",

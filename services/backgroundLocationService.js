@@ -73,14 +73,12 @@ export const startBackgroundTracking = async (bookingId) => {
       return false;
     }
 
-    // Request background permission
-    const { status: backgroundStatus } =
+    // Optional: Request background permission (can be skipped for Foreground Service in many cases)
+    // We try it, but don't block if it fails or requires manual intervention
+    try {
       await Location.requestBackgroundPermissionsAsync();
-    if (backgroundStatus !== "granted") {
-      console.log(
-        "❌ Background location permission denied - tracking will only work when app is open",
-      );
-      // Continue anyway with foreground-only tracking
+    } catch (e) {
+      console.log("Bg permission request skipped/failed:", e.message);
     }
 
     // Store booking ID for the task
@@ -94,6 +92,9 @@ export const startBackgroundTracking = async (bookingId) => {
       console.log("ℹ️ Background tracking already running");
       return true;
     }
+
+    // 🕒 Small delay to ensure app is fully foregrounded after permission dialogs
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Start background location updates with minimal notification
     await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TASK, {
@@ -124,7 +125,13 @@ export const startBackgroundTracking = async (bookingId) => {
     console.log("✅ Background location tracking started");
     return true;
   } catch (error) {
-    console.error("❌ Failed to start background tracking:", error);
+    // ⚠️ Swallowing RedBox: "Foreground service cannot be started..."
+    // This happens if app is backgrounded during start. We just log a warning.
+    if (error.message && error.message.includes("Foreground service")) {
+      console.warn("⚠️ Could not start background tracking (App in background). Will retry later.");
+    } else {
+      console.log("❌ Failed to start background tracking:", error.message);
+    }
     return false;
   }
 };
