@@ -50,7 +50,8 @@ export default function EditCar() {
   // ============================================
   // 🔒 ORIGINAL LOGIC - COMPLETELY UNTOUCHED
   // ============================================
-  const { id } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const id = params.id;
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -67,6 +68,8 @@ export default function EditCar() {
     transmission: "",
     fuelType: "",
     address: "",
+    lat: 0,
+    lng: 0,
     description: "",
     availability: {
       daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
@@ -107,6 +110,8 @@ export default function EditCar() {
         transmission: car.transmission,
         fuelType: car.fuelType,
         address: car.location?.address || "",
+        lat: car.location?.lat || 0,
+        lng: car.location?.lng || 0,
         description: car.description || "",
         availability: {
           daysOfWeek: car.availability?.daysOfWeek || [0, 1, 2, 3, 4, 5, 6],
@@ -136,6 +141,18 @@ export default function EditCar() {
     }
   };
 
+  // If returning from location picker, update form with new location
+  useEffect(() => {
+    if (params.address) {
+      setForm((prev) => ({
+        ...prev,
+        address: params.address,
+        lat: parseFloat(params.lat) || 0,
+        lng: parseFloat(params.lng) || 0,
+      }));
+    }
+  }, [params.address]);
+
   const handleInputChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -159,8 +176,8 @@ export default function EditCar() {
         description: form.description,
         location: {
           address: form.address,
-          lat: 0,
-          lng: 0,
+          lat: form.lat,
+          lng: form.lng,
         },
         availability: {
           daysOfWeek: form.availability.daysOfWeek,
@@ -680,12 +697,44 @@ export default function EditCar() {
               </View>
             </View>
 
-            <Input
-              label="Location Address"
-              value={form.address}
-              onChangeText={(t) => handleInputChange("address", t)}
-              icon="location-outline"
-            />
+            <Text style={styles.label}>Location</Text>
+
+            <TouchableOpacity
+              style={styles.locationInputBtn}
+              onPress={() => {
+                router.push({
+                  pathname: '/(host)/car/location-picker',
+                  params: {
+                    formState: JSON.stringify(form),
+                    // Not passing images since edit doesn't handle them the same way as create right now
+                  },
+                });
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.locationInputContent}>
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color={COLORS.gray[400]}
+                />
+                <Text
+                  style={[
+                    styles.locationInputText,
+                    !form.address && styles.locationPlaceholder,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {form.address || 'Select Vehicle Location'}
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={COLORS.gray[400]}
+                style={styles.locationActionIcon}
+              />
+            </TouchableOpacity>
             <Input
               label="Description"
               value={form.description}
@@ -1043,5 +1092,37 @@ const styles = StyleSheet.create({
     color: COLORS.navy[900],
     fontSize: 16,
     fontWeight: "700",
+  },
+
+  // Location Button
+  locationInputBtn: {
+    backgroundColor: COLORS.navy[700],
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  locationInputContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  locationInputText: {
+    fontSize: 15,
+    color: COLORS.white,
+    fontWeight: '500',
+    flex: 1,
+  },
+  locationPlaceholder: {
+    color: COLORS.gray[400],
+  },
+  locationActionIcon: {
+    marginLeft: 8,
   },
 });
