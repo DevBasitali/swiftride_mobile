@@ -22,7 +22,7 @@ export default ({ config }) => {
     splash: {
       image: "./assets/images/splash-logo.png",
       resizeMode: "contain",
-      backgroundColor: "#0A1628",
+      backgroundColor: "#040B16",
     },
     ios: {
       supportsTablet: true,

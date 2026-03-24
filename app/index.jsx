@@ -1,13 +1,12 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 
-// Same colors as splash screen
 const COLORS = {
-  background: '#0A1628',
-  cardDark: '#0F2137',
+  background: '#040B16',
+  cardDark: '#0A1628',
   gold: '#F59E0B',
   white: '#FFFFFF',
   gray: '#94A3B8',
@@ -17,17 +16,25 @@ export default function Index() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    // Show same design as splash screen while loading
+    // Exact same static final state as the splash screen
     return (
       <View style={styles.container}>
         <StatusBar style="light" />
         <LinearGradient
-          colors={[COLORS.background, COLORS.cardDark]}
+          colors={[COLORS.background, COLORS.cardDark, '#020617']}
           style={StyleSheet.absoluteFill}
         />
-        <Text style={styles.brandText}>
-          SWIFT<Text style={styles.brandAccent}>RIDE</Text>
-        </Text>
+        <View style={styles.content}>
+           <Image 
+             source={require('../assets/images/splash-logo.png')} 
+             style={styles.logo}
+             resizeMode="contain"
+           />
+          <Text style={styles.brandText}>
+            SWIFT<Text style={styles.brandAccent}>RIDE</Text>
+          </Text>
+          <Text style={styles.tagline}>PREMIUM LUXURY RENTALS</Text>
+        </View>
       </View>
     );
   }
@@ -50,13 +57,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.background,
   },
+  content: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 140,
+    height: 140,
+    marginBottom: 24,
+  },
   brandText: {
-    fontSize: 48,
-    fontWeight: '800',
+    fontSize: 42,
+    fontWeight: '900',
     color: COLORS.white,
-    letterSpacing: 4,
+    letterSpacing: 6,
+    marginBottom: 12,
   },
   brandAccent: {
     color: COLORS.gold,
+  },
+  tagline: {
+    color: COLORS.gray,
+    fontSize: 12,
+    letterSpacing: 4,
+    fontWeight: '600',
   },
 });
