@@ -32,7 +32,7 @@ const ActiveTripCard = ({ booking }) => {
   return (
     <TouchableOpacity 
       activeOpacity={0.9} 
-      onPress={() => router.push(`/(customer)/bookings/${booking._id}`)}
+      onPress={() => router.push(`/(customer)/bookings/${booking.id || booking._id}`)}
       style={styles.container}
     >
       <LinearGradient
@@ -75,7 +75,7 @@ const ActiveTripCard = ({ booking }) => {
         {/* Action Button */}
         <TouchableOpacity 
             style={styles.actionBtn}
-            onPress={() => router.push(`/(customer)/bookings/${booking._id}`)}
+            onPress={() => router.push(`/(customer)/bookings/${booking.id || booking._id}`)}
         >
             <Text style={styles.actionBtnText}>View Trip Details</Text>
             <Ionicons name="arrow-forward" size={16} color={COLORS.navy[800]} />
