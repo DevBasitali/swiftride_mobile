@@ -186,37 +186,30 @@ export default function HostWallet() {
           <View style={styles.circle2} />
         </LinearGradient>
 
-        {/* ⚡ QUICK ACTIONS */}
-        <View style={styles.actionsContainer}>
-          <ActionButton icon="arrow-down-circle-outline" label="Withdraw" onPress={() => setShowWithdrawModal(true)} />
-          <ActionButton
-            icon="document-text-outline"
-            label="Statement"
-            onPress={() => showAlert({
-              title: 'Statement',
-              message: 'Detailed statement export is coming soon!',
-              type: 'info',
-            })}
-          />
-          <ActionButton
-            icon="card-outline"
-            label="Cards"
-            onPress={() => showAlert({
-              title: 'Cards',
-              message: 'Card management is coming soon!',
-              type: 'info',
-            })}
-          />
-          <ActionButton
-            icon="settings-outline"
-            label="Settings"
-            onPress={() => showAlert({
-              title: 'Wallet Settings',
-              message: 'Wallet settings are coming soon!',
-              type: 'info',
-            })}
-          />
-        </View>
+        {/* ⚡ WITHDRAWAL ACTION */}
+        <TouchableOpacity 
+          style={styles.mainWithdrawBtn} 
+          onPress={() => setShowWithdrawModal(true)}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={[COLORS.card, '#152A46']}
+            style={styles.withdrawGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.withdrawBtnLeft}>
+              <View style={styles.withdrawIconBox}>
+                <Ionicons name="arrow-down-outline" size={24} color={COLORS.gold} />
+              </View>
+              <View>
+                <Text style={styles.withdrawBtnTitle}>Request Withdrawal</Text>
+                <Text style={styles.withdrawBtnSub}>Transfer funds to your bank</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+          </LinearGradient>
+        </TouchableOpacity>
 
         {/* 📝 RECENT TRANSACTIONS */}
         <View style={styles.sectionHeader}>
@@ -294,15 +287,7 @@ export default function HostWallet() {
   );
 }
 
-// Helper Component for Buttons
-const ActionButton = ({ icon, label, onPress }) => (
-  <TouchableOpacity style={styles.actionBtn} onPress={onPress}>
-    <View style={styles.actionIconBox}>
-      <Ionicons name={icon} size={24} color={COLORS.gold} />
-    </View>
-    <Text style={styles.actionLabel}>{label}</Text>
-  </TouchableOpacity>
-);
+
 
 const styles = StyleSheet.create({
   container: {
@@ -415,30 +400,47 @@ const styles = StyleSheet.create({
   },
 
   // Actions
-  actionsContainer: {
+  mainWithdrawBtn: {
+    marginBottom: 30,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  withdrawGradient: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
-  },
-  actionBtn: {
     alignItems: 'center',
-    width: '22%',
-  },
-  actionIconBox: {
-    width: 56,
-    height: 56,
-    backgroundColor: COLORS.card,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
+    padding: 18,
     borderWidth: 1,
     borderColor: COLORS.border,
+    borderRadius: 20,
   },
-  actionLabel: {
+  withdrawBtnLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  withdrawIconBox: {
+    width: 48,
+    height: 48,
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  withdrawBtnTitle: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  withdrawBtnSub: {
     color: COLORS.gray,
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 13,
   },
 
   // Transactions

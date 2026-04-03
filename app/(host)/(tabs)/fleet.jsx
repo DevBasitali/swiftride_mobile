@@ -102,141 +102,64 @@ export default function HostFleet() {
 
   const renderCarItem = ({ item }) => (
     <TouchableOpacity
-      activeOpacity={0.9}
+      activeOpacity={0.7}
       onPress={() => router.push(`/(host)/car/${item._id}`)}
-      style={styles.cardContainer}
+      style={styles.compactCard}
     >
-      <View style={styles.card}>
-        {/* Image Section */}
-        <View style={styles.imageWrapper}>
-          <Image
-            source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
-            style={styles.carImage}
-            resizeMode="cover"
-          />
+      {/* Thumbnail */}
+      <View style={styles.thumbnailWrapper}>
+        <Image
+          source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
+          style={styles.compactImage}
+          resizeMode="cover"
+        />
+      </View>
 
-          {/* Gradient Overlay */}
-          <LinearGradient
-            colors={["transparent", "rgba(10, 22, 40, 0.95)"]}
-            style={styles.gradientOverlay}
-          />
+      {/* Info Container */}
+      <View style={styles.compactInfo}>
+        <View style={styles.infoTop}>
+          <View style={styles.titleWrapper}>
+            <Text style={styles.compactTitle} numberOfLines={1}>
+              {item.make} {item.model}
+            </Text>
+          </View>
+          <View style={styles.priceWrapper}>
+            <Text style={styles.compactPrice}>Rs. {item.pricePerDay}</Text>
+            <Text style={styles.compactPriceUnit}>/d</Text>
+          </View>
+        </View>
 
-          {/* Price Tag */}
-          <View style={styles.priceContainer}>
-            <LinearGradient
-              colors={[COLORS.gold[500], COLORS.gold[600]]}
-              style={styles.priceGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text style={styles.priceSymbol}>Rs.</Text>
-              <Text style={styles.priceValue}>{item.pricePerDay}</Text>
-              <Text style={styles.priceUnit}>/day</Text>
-            </LinearGradient>
+        <View style={styles.infoMiddle}>
+          <View style={styles.plateWrapper}>
+            <Ionicons name="car" size={12} color={COLORS.gray[400]} />
+            <Text style={styles.compactPlate}>{item.plateNumber}</Text>
           </View>
 
-          {/* Status Badge */}
-          <View style={styles.statusBadgeContainer}>
+          <View style={styles.statusPillWrapper}>
             {item.approvalStatus === 'pending' ? (
-              <View style={[styles.statusBadge, styles.statusPending]}>
-                <Ionicons name="time-outline" size={12} color={COLORS.gold[500]} />
-                <Text style={[styles.statusText, { color: COLORS.gold[500] }]}>PENDING</Text>
-              </View>
+              <View style={[styles.compactPill, styles.pillPending]}><Text style={[styles.pillText, { color: COLORS.gold[500] }]}>Pending</Text></View>
             ) : item.approvalStatus === 'rejected' ? (
-              <View style={[styles.statusBadge, styles.statusRejected]}>
-                <Ionicons name="close-circle-outline" size={12} color="#EF4444" />
-                <Text style={[styles.statusText, { color: '#EF4444' }]}>REJECTED</Text>
-              </View>
+              <View style={[styles.compactPill, styles.pillRejected]}><Text style={[styles.pillText, { color: '#EF4444' }]}>Rejected</Text></View>
             ) : item.approvalStatus === 'suspended' ? (
-              <View style={[styles.statusBadge, styles.statusSuspended]}>
-                <Ionicons name="ban-outline" size={12} color="#F97316" />
-                <Text style={[styles.statusText, { color: '#F97316' }]}>SUSPENDED</Text>
-              </View>
+              <View style={[styles.compactPill, styles.pillSuspended]}><Text style={[styles.pillText, { color: '#F97316' }]}>Suspended</Text></View>
             ) : item.isActive ? (
-              <LinearGradient
-                colors={[COLORS.emerald[400], COLORS.emerald[500]]}
-                style={styles.statusBadge}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                <View style={styles.statusDot} />
-                <Text style={styles.statusText}>LIVE</Text>
-              </LinearGradient>
+              <View style={[styles.compactPill, styles.pillLive]}><Text style={[styles.pillText, { color: COLORS.emerald[400] }]}>Live</Text></View>
             ) : (
-              <View style={[styles.statusBadge, styles.statusInactive]}>
-                <View style={[styles.statusDot, styles.statusDotInactive]} />
-                <Text style={styles.statusText}>HIDDEN</Text>
-              </View>
+              <View style={[styles.compactPill, styles.pillHidden]}><Text style={[styles.pillText, { color: COLORS.gray[400] }]}>Hidden</Text></View>
             )}
           </View>
         </View>
 
-        {/* Details Section */}
-        <View style={styles.cardBottom}>
-          <View style={styles.titleRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.carTitle} numberOfLines={1}>
-                {item.make} {item.model}
-              </Text>
-              <Text style={styles.carYear}>{item.year}</Text>
-            </View>
-          </View>
+        {item.approvalStatus === 'rejected' && item.rejectionReason && (
+          <Text style={styles.compactRejectionText} numberOfLines={1}>
+            Failed: {item.rejectionReason}
+          </Text>
+        )}
+      </View>
 
-          {/* Rejection Reason Banner */}
-          {item.approvalStatus === 'rejected' && item.rejectionReason && (
-            <View style={styles.rejectionBanner}>
-              <Ionicons name="alert-circle" size={16} color="#EF4444" />
-              <Text style={styles.rejectionText} numberOfLines={2}>{item.rejectionReason}</Text>
-            </View>
-          )}
-
-          {/* Specs Row */}
-          <View style={styles.specsRow}>
-            <View style={styles.specItem}>
-              <MaterialCommunityIcons
-                name="car-shift-pattern"
-                size={16}
-                color={COLORS.gray[400]}
-              />
-              <Text style={styles.specText}>{item.transmission || "Auto"}</Text>
-            </View>
-            <View style={styles.specDivider} />
-            <View style={styles.specItem}>
-              <MaterialCommunityIcons
-                name="gas-station"
-                size={16}
-                color={COLORS.gray[400]}
-              />
-              <Text style={styles.specText}>{item.fuelType || "Petrol"}</Text>
-            </View>
-            <View style={styles.specDivider} />
-            <View style={styles.specItem}>
-              <MaterialCommunityIcons
-                name="car-seat"
-                size={16}
-                color={COLORS.gray[400]}
-              />
-              <Text style={styles.specText}>{item.seats || 4}</Text>
-            </View>
-          </View>
-
-          {/* Footer Row */}
-          <View style={styles.footerRow}>
-            <View style={styles.plateBox}>
-              <Ionicons name="car" size={12} color={COLORS.gray[400]} />
-              <Text style={styles.plateText}>{item.plateNumber}</Text>
-            </View>
-
-            <View style={styles.actionContainer}>
-              <Text style={styles.manageText}>Manage</Text>
-              <Ionicons
-                name="arrow-forward-circle"
-                size={24}
-                color={COLORS.gold[500]}
-              />
-            </View>
-          </View>
-        </View>
+      {/* Right chevron */}
+      <View style={styles.chevronWrapper}>
+        <Ionicons name="chevron-forward" size={18} color={COLORS.gray[500]} />
       </View>
     </TouchableOpacity>
   );
@@ -428,229 +351,140 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
 
-  // Card Design
-  cardContainer: {
-    marginBottom: 20,
-  },
-  card: {
+  // Card Design - COMPACT List
+  compactCard: {
+    flexDirection: "row",
     backgroundColor: COLORS.navy[800],
-    borderRadius: 20,
-    overflow: "hidden",
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: COLORS.navy[700],
-    shadowColor: COLORS.gold[500],
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    borderColor: "rgba(255,255,255,0.05)",
   },
-
-  // Image Section
-  imageWrapper: {
-    height: 200,
-    position: "relative",
+  thumbnailWrapper: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
     backgroundColor: COLORS.navy[700],
+    marginRight: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  carImage: {
+  compactImage: {
     width: "100%",
     height: "100%",
-  },
-  gradientOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 100,
-  },
-
-  // Price Tag
-  priceContainer: {
-    position: "absolute",
-    bottom: 14,
-    left: 14,
     borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: COLORS.gold[500],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 5,
   },
-  priceGradient: {
+  compactInfo: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  infoTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  titleWrapper: {
     flexDirection: "row",
     alignItems: "baseline",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  priceSymbol: {
-    color: COLORS.navy[900],
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  priceValue: {
-    color: COLORS.navy[900],
-    fontSize: 24,
-    fontWeight: "800",
-    marginLeft: 2,
-  },
-  priceUnit: {
-    color: COLORS.navy[900],
-    fontSize: 12,
-    marginLeft: 4,
-    fontWeight: "600",
-    opacity: 0.8,
-  },
-
-  // Status Badge
-  statusBadgeContainer: {
-    position: "absolute",
-    top: 14,
-    right: 14,
-  },
-  statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    gap: 6,
-  },
-  statusInactive: {
-    backgroundColor: COLORS.navy[600],
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.white,
-  },
-  statusDotInactive: {
-    backgroundColor: COLORS.gray[400],
-  },
-  statusText: {
-    color: COLORS.white,
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 1,
-  },
-  statusPending: {
-    backgroundColor: COLORS.gold[500] + '20',
-    borderWidth: 1,
-    borderColor: COLORS.gold[500],
-  },
-  statusRejected: {
-    backgroundColor: '#EF444420',
-    borderWidth: 1,
-    borderColor: '#EF4444',
-  },
-  statusSuspended: {
-    backgroundColor: '#F9731620',
-    borderWidth: 1,
-    borderColor: '#F97316',
-  },
-  rejectionBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EF444415',
-    borderWidth: 1,
-    borderColor: '#EF444440',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 12,
-    gap: 8,
-  },
-  rejectionText: {
     flex: 1,
-    fontSize: 12,
-    color: '#EF4444',
-    fontWeight: '500',
-    lineHeight: 16,
+    marginRight: 8,
   },
-
-  // Bottom Content
-  cardBottom: {
-    padding: 16,
-  },
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  carTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: COLORS.white,
-    marginBottom: 4,
-  },
-  carYear: {
-    fontSize: 13,
-    color: COLORS.gray[400],
-    fontWeight: "600",
-  },
-
-  // Specs Row
-  specsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: COLORS.navy[700],
-    borderRadius: 12,
-  },
-  specItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  specText: {
-    fontSize: 13,
-    color: COLORS.gray[400],
-    fontWeight: "600",
-  },
-  specDivider: {
-    width: 1,
-    height: 14,
-    backgroundColor: COLORS.navy[600],
-    marginHorizontal: 12,
-  },
-
-  // Footer Row
-  footerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.navy[700],
-  },
-  plateBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: COLORS.navy[700],
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  plateText: {
-    fontSize: 12,
+  compactTitle: {
+    fontSize: 16,
     fontWeight: "700",
+    color: COLORS.white,
+    marginRight: 6,
+  },
+  compactYear: {
+    fontSize: 12,
     color: COLORS.gray[400],
-    letterSpacing: 1,
-    textTransform: "uppercase",
+    fontWeight: "500",
   },
-
-  actionContainer: {
+  priceWrapper: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    alignItems: "baseline",
   },
-  manageText: {
-    fontSize: 13,
+  compactPrice: {
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.gold[500],
+  },
+  compactPriceUnit: {
+    fontSize: 11,
+    color: COLORS.gray[400],
+    marginLeft: 2,
+    fontWeight: "500",
+  },
+  infoMiddle: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  plateWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.navy[700],
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  compactPlate: {
+    fontSize: 10,
+    color: COLORS.gray[400],
+    fontWeight: "700",
+    textTransform: "uppercase",
+    marginLeft: 4,
+  },
+  statusPillWrapper: {
+  },
+  compactPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  pillText: {
+    fontSize: 9,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  pillLive: {
+    backgroundColor: COLORS.emerald[500] + '15',
+    borderColor: COLORS.emerald[400] + '30',
+  },
+  pillPending: {
+    backgroundColor: COLORS.gold[500] + '15',
+    borderColor: COLORS.gold[500] + '30',
+  },
+  pillRejected: {
+    backgroundColor: '#EF444415',
+    borderColor: '#EF444430',
+  },
+  pillSuspended: {
+    backgroundColor: '#F9731615',
+    borderColor: '#F9731630',
+  },
+  pillHidden: {
+    backgroundColor: COLORS.navy[700],
+    borderColor: COLORS.navy[600],
+  },
+  compactRejectionText: {
+    fontSize: 11,
+    color: '#EF4444',
+    marginTop: 6,
+    fontWeight: "500",
+  },
+  chevronWrapper: {
+    marginLeft: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   // Empty State
