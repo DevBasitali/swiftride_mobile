@@ -16,8 +16,10 @@ const SocketContext = createContext();
 
 // Get socket URL - strip /api from API_URL
 const getSocketUrl = () => {
-  const apiUrl = Config.API_URL || "http://192.168.1.11:5000/api";
-  const socketUrl = apiUrl.replace("/api", "");
+  if (!Config.API_URL) {
+    throw new Error("API_URL is not defined in Config");
+  }
+  const socketUrl = Config.API_URL.replace("/api", "");
   console.log("🔌 Socket URL:", socketUrl);
   return socketUrl;
 };

@@ -266,9 +266,10 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const userRes = await authService.getCurrentUser();
-      if (userRes && userRes.user) {
-        const freshUser = userRes.user;
+      const freshUser = userRes.data?.user || userRes.data;
+      if (freshUser) {
         setUser(freshUser);
+        await SecureStore.setItemAsync("userSession", JSON.stringify(freshUser));
         if (freshUser.kycStatus) setKycStatus(freshUser.kycStatus);
       }
     } catch (error) {

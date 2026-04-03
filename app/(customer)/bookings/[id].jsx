@@ -9,6 +9,7 @@ import {
   Image,
   StatusBar,
   Linking,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -176,36 +177,67 @@ export default function CustomerBookingDetail() {
     // Determine which URL to use
     const urlToOpen = pdfUrl || `${api.defaults.baseURL}${apiEndpoint}`;
 
-    showAlert({
-      title: "Download Invoice",
-      message: "Open invoice PDF in browser?",
-      type: "info",
-      buttons: [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Open",
-          onPress: async () => {
-            try {
-              // Open PDF in browser
-              const canOpen = await Linking.canOpenURL(urlToOpen);
-              if (canOpen) {
-                await Linking.openURL(urlToOpen);
-              } else {
-                // Fallback - try opening without canOpenURL check
-                await Linking.openURL(urlToOpen);
-              }
-            } catch (error) {
-              console.error("Open PDF error:", error);
-              showAlert({
-                title: "Error",
-                message: "Could not open invoice. Please try again.",
-                type: "error",
-              });
-            }
-          },
-        },
-      ],
-    });
+    try {
+      setDownloading(true);
+      
+      const fileUri = `${FileSystem.documentDirectory}Invoice_${booking.invoiceNumber || booking.id}.pdf`;
+      
+      const downloadResult = await FileSystem.downloadAsync(
+        urlToOpen,
+        fileUri
+      );
+      
+      if (downloadResult.status !== 200) {
+        throw new Error("Failed to download invoice");
+      }
+
+      if (Platform.OS === "android") {
+        const permissions =
+          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (permissions.granted) {
+          const base64 = await FileSystem.readAsStringAsync(
+            downloadResult.uri,
+            { encoding: FileSystem.EncodingType.Base64 }
+          );
+          const uri = await FileSystem.StorageAccessFramework.createFileAsync(
+            permissions.directoryUri,
+            `Invoice_${booking.invoiceNumber || booking.id}.pdf`,
+            "application/pdf"
+          );
+          await FileSystem.writeAsStringAsync(uri, base64, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          showAlert({
+            title: "Download Complete",
+            message: "Invoice successfully saved to your selected folder.",
+            type: "success",
+          });
+        }
+      } else {
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(downloadResult.uri, {
+            mimeType: "application/pdf",
+            dialogTitle: "Download Invoice",
+            UTI: "com.adobe.pdf",
+          });
+        } else {
+          showAlert({
+            title: "Download Complete",
+            message: "Invoice downloaded successfully.",
+            type: "success",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Download PDF error:", error);
+      showAlert({
+        title: "Error",
+        message: "Could not download invoice. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleContactHost = () => {
