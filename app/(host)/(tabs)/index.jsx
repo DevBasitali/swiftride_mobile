@@ -177,6 +177,15 @@ export default function HostDashboard() {
             thisMonthEarnings: dData.quickStats.thisMonthEarnings || 0,
           }));
         }
+        if (dData.trends) {
+          setStats((prev) => ({
+            ...prev,
+            activeBookingsTrend: dData.trends.activeBookingsTrend,
+            pendingRequestsTrend: dData.trends.pendingRequestsTrend,
+            totalCarsTrend: dData.trends.totalCarsTrend,
+            totalBookingsTrend: dData.trends.totalBookingsTrend,
+          }));
+        }
         if (dData.charts?.bookingStatus) setBookingStatus(dData.charts.bookingStatus);
         if (dData.recentActivity) setRecentActivity(dData.recentActivity);
       }
@@ -449,35 +458,39 @@ export default function HostDashboard() {
 
               {/* ━━━━ LIVE STATS ━━━━ */}
               <Animated.View entering={FadeInDown.delay(200).springify()}>
-                <Text style={styles.sectionTitle}>Live Overview</Text>
+                <Text style={styles.sectionTitle}>Performance Hub</Text>
                 <View style={styles.statsGrid}>
                   <StatTile
                     label="Active Trips"
                     value={stats.activeBookings}
                     icon="flash"
                     iconColor={COLORS.emerald[500]}
-                    gradient={["#064E3B", "#065F46"]}
+                    trendText={stats.activeBookingsTrend || ""}
+                    trendColor={COLORS.emerald[500]}
                   />
                   <StatTile
                     label="Pending"
-                    value={stats.pendingRequests}
+                    value={stats.pendingRequests < 10 && stats.pendingRequests > 0 ? `0${stats.pendingRequests}` : stats.pendingRequests}
                     icon="time"
                     iconColor={COLORS.orange[500]}
-                    gradient={["#7C2D12", "#9A3412"]}
+                    trendText={stats.pendingRequestsTrend || ""}
+                    trendColor={COLORS.orange[500]}
                   />
                   <StatTile
                     label="Total Fleet"
                     value={stats.totalCars}
                     icon="car-sport"
-                    iconColor={COLORS.blue[400]}
-                    gradient={["#1E3A5F", "#1E40AF"]}
+                    iconColor={COLORS.blue[500]}
+                    trendText={stats.totalCarsTrend || ""}
+                    trendColor={COLORS.blue[500]}
                   />
                   <StatTile
                     label="All Trips"
                     value={stats.totalBookings}
                     icon="globe"
-                    iconColor={COLORS.gold[400]}
-                    gradient={["#78350F", "#92400E"]}
+                    iconColor={COLORS.violet[500]}
+                    trendText={stats.totalBookingsTrend || ""}
+                    trendColor={COLORS.violet[500]}
                   />
                 </View>
               </Animated.View>
@@ -654,21 +667,20 @@ const QuickAction = ({ icon, label, color, onPress, badge }) => (
   </TouchableOpacity>
 );
 
-const StatTile = ({ label, value, icon, iconColor, gradient }) => (
-  <LinearGradient
-    colors={gradient}
-    style={styles.statTile}
-    start={{ x: 0, y: 0 }}
-    end={{ x: 1, y: 1 }}
-  >
-    <View style={styles.statTileTop}>
-      <View style={[styles.statTileIcon, { backgroundColor: iconColor + "25" }]}>
-        <Ionicons name={icon} size={18} color={iconColor} />
-      </View>
+const StatTile = ({ label, value, icon, iconColor, trendText, trendColor }) => (
+  <View style={styles.statTile}>
+    <Ionicons
+      name={icon}
+      size={90}
+      color={iconColor}
+      style={styles.statTileWatermark}
+    />
+    <View style={styles.statTileContent}>
+      <Text style={[styles.statTileLabel, { color: iconColor }]}>{label.toUpperCase()}</Text>
+      <Text style={styles.statTileValue}>{value}</Text>
+      <Text style={[styles.statTileTrend, { color: trendColor }]}>{trendText}</Text>
     </View>
-    <Text style={styles.statTileValue}>{value}</Text>
-    <Text style={styles.statTileLabel}>{label}</Text>
-  </LinearGradient>
+  </View>
 );
 
 const TipCard = ({ icon, color, title, desc }) => (
@@ -1008,40 +1020,45 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 12,
     marginBottom: 24,
   },
   statTile: {
-    width: (width - 50) / 2,
+    width: (width - 52) / 2,
     padding: 16,
-    borderRadius: 18,
-    height: 110,
-    justifyContent: "space-between",
+    borderRadius: 16,
+    height: 125,
+    backgroundColor: COLORS.navy[900],
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: COLORS.navy[700],
+    overflow: "hidden",
   },
-  statTileTop: {
-    flexDirection: "row",
+  statTileWatermark: {
+    position: "absolute",
+    right: -20,
+    bottom: -20,
+    opacity: 0.15,
+  },
+  statTileContent: {
+    flex: 1,
     justifyContent: "space-between",
-    alignItems: "center",
-  },
-  statTileIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  statTileValue: {
-    fontSize: 26,
-    fontWeight: "800",
-    color: COLORS.white,
-    letterSpacing: -0.5,
   },
   statTileLabel: {
-    color: COLORS.gray[400],
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+  },
+  statTileValue: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: COLORS.white,
+    letterSpacing: -1,
+    marginTop: 4,
+  },
+  statTileTrend: {
+    fontSize: 11,
+    fontWeight: "600",
+    marginTop: "auto",
   },
 
   // Chart

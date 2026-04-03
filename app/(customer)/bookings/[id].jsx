@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system/legacy"; // ✅ FIXED: Use legacy import
 import * as Sharing from "expo-sharing";
+import * as IntentLauncher from "expo-intent-launcher";
 import bookingService from "../../../services/bookingService";
 import carService from "../../../services/carService";
 import api from "../../../services/api";
@@ -191,43 +192,40 @@ export default function CustomerBookingDetail() {
         throw new Error("Failed to download invoice");
       }
 
-      if (Platform.OS === "android") {
-        const permissions =
-          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (permissions.granted) {
-          const base64 = await FileSystem.readAsStringAsync(
-            downloadResult.uri,
-            { encoding: FileSystem.EncodingType.Base64 }
-          );
-          const uri = await FileSystem.StorageAccessFramework.createFileAsync(
-            permissions.directoryUri,
-            `Invoice_${booking.invoiceNumber || booking.id}.pdf`,
-            "application/pdf"
-          );
-          await FileSystem.writeAsStringAsync(uri, base64, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          showAlert({
-            title: "Download Complete",
-            message: "Invoice successfully saved to your selected folder.",
-            type: "success",
-          });
-        }
-      } else {
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(downloadResult.uri, {
-            mimeType: "application/pdf",
-            dialogTitle: "Download Invoice",
-            UTI: "com.adobe.pdf",
-          });
-        } else {
-          showAlert({
-            title: "Download Complete",
-            message: "Invoice downloaded successfully.",
-            type: "success",
-          });
-        }
-      }
+      showAlert({
+        title: "Download Complete",
+        message: "Invoice downloaded successfully. Would you like to open it?",
+        type: "success",
+        buttons: [
+          { text: "Close", style: "cancel" },
+          {
+            text: "Open",
+            onPress: async () => {
+              if (Platform.OS === "android") {
+                try {
+                  const contentUri = await FileSystem.getContentUriAsync(downloadResult.uri);
+                  await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+                    data: contentUri,
+                    flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+                    type: "application/pdf",
+                  });
+                } catch (e) {
+                  console.error("Open PDF Error:", e);
+                  showAlert({ title: "Error", message: "No app found to open PDF files.", type: "error" });
+                }
+              } else {
+                if (await Sharing.isAvailableAsync()) {
+                  await Sharing.shareAsync(downloadResult.uri, {
+                    mimeType: "application/pdf",
+                    dialogTitle: "Open Invoice",
+                    UTI: "com.adobe.pdf",
+                  });
+                }
+              }
+            }
+          }
+        ]
+      });
     } catch (error) {
       console.error("Download PDF error:", error);
       showAlert({
