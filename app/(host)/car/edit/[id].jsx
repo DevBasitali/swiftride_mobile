@@ -12,11 +12,13 @@ import {
   Platform,
   Keyboard,
   StatusBar,
+  Image,
 } from "react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
 import carService, { DAYS_OF_WEEK } from "../../../../services/carService";
 import { useAlert } from "../../../../context/AlertContext";
 
@@ -55,6 +57,8 @@ export default function EditCar() {
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  // Images: mixed array of { uri, isExisting, remoteUrl }
+  const [images, setImages] = useState([]);
 
   const [form, setForm] = useState({
     make: "",
@@ -129,6 +133,17 @@ export default function EditCar() {
         insuranceExpiryDate: car.insuranceDetails?.expiryDate?.split('T')[0] || "",
         features: car.features || [],
       });
+
+      // Load existing photos
+      if (car.photos && Array.isArray(car.photos)) {
+        setImages(
+          car.photos.map((url) => ({
+            uri: url,
+            isExisting: true,
+            remoteUrl: url,
+          }))
+        );
+      }
     } catch (error) {
       showAlert({
         title: "Error",
@@ -157,45 +172,110 @@ export default function EditCar() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Image picker
+  const pickImages = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsMultipleSelection: true,
+        selectionLimit: 5 - images.length,
+        quality: 0.7,
+      });
+
+      if (!result.canceled) {
+        const MAX_SIZE = 5 * 1024 * 1024;
+        const validImages = result.assets.filter((asset) => {
+          const size = asset.fileSize || 0;
+          return size <= MAX_SIZE;
+        });
+
+        if (validImages.length < result.assets.length) {
+          showAlert({
+            title: "File Too Large",
+            message: "Some images were skipped because they exceed the 5MB limit.",
+            type: "warning",
+          });
+        }
+
+        const newImgs = validImages.map((asset) => ({
+          uri: asset.uri,
+          isExisting: false,
+          remoteUrl: null,
+        }));
+        setImages((prev) => [...prev, ...newImgs]);
+      }
+    } catch (error) {
+      showAlert({ title: "Error", message: "Could not open gallery.", type: "error" });
+    }
+  };
+
+  const removeImage = (index) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async () => {
     Keyboard.dismiss();
     setSubmitting(true);
 
     try {
-      const payload = {
-        make: form.make,
-        model: form.model,
-        year: Number(form.year),
-        color: form.color,
-        plateNumber: form.plateNumber,
-        pricePerDay: Number(form.pricePerDay),
-        pricePerHour: Number(form.pricePerHour),
-        seats: Number(form.seats),
-        transmission: form.transmission,
-        fuelType: form.fuelType,
-        description: form.description,
-        location: {
-          address: form.address,
-          lat: form.lat,
-          lng: form.lng,
-        },
-        availability: {
-          daysOfWeek: form.availability.daysOfWeek,
-          startTime: form.availability.startTime,
-          endTime: form.availability.endTime,
-          isAvailable: form.availability.isAvailable,
-        },
-        insuranceDetails: {
-          provider: form.insuranceProvider,
-          policyNumber: form.insurancePolicyNumber,
-          type: form.insuranceType,
-          startDate: form.insuranceStartDate,
-          expiryDate: form.insuranceExpiryDate,
-        },
-        features: form.features,
-      };
+      const formData = new FormData();
 
-      await carService.updateCar(id, payload);
+      // Text fields
+      formData.append("make", form.make);
+      formData.append("model", form.model);
+      formData.append("year", form.year);
+      formData.append("color", form.color);
+      formData.append("plateNumber", form.plateNumber);
+      formData.append("pricePerDay", form.pricePerDay);
+      formData.append("pricePerHour", form.pricePerHour);
+      formData.append("seats", form.seats);
+      formData.append("transmission", form.transmission);
+      formData.append("fuelType", form.fuelType);
+      if (form.description) formData.append("description", form.description);
+
+      // Location
+      formData.append("locationAddress", form.address);
+      formData.append("locationLat", String(form.lat));
+      formData.append("locationLng", String(form.lng));
+
+      // Availability
+      formData.append("availabilityStartTime", form.availability.startTime);
+      formData.append("availabilityEndTime", form.availability.endTime);
+      formData.append("availabilityIsAvailable", String(form.availability.isAvailable));
+      formData.append("availabilityDaysOfWeek", JSON.stringify(form.availability.daysOfWeek));
+
+      // Insurance
+      if (form.insuranceProvider) formData.append("insuranceProvider", form.insuranceProvider);
+      if (form.insurancePolicyNumber) formData.append("insurancePolicyNumber", form.insurancePolicyNumber);
+      if (form.insuranceType) formData.append("insuranceType", form.insuranceType);
+      if (form.insuranceStartDate) formData.append("insuranceStartDate", form.insuranceStartDate);
+      if (form.insuranceExpiryDate) formData.append("insuranceExpiryDate", form.insuranceExpiryDate);
+
+      // Features
+      if (form.features.length > 0) {
+        formData.append("features", form.features.join(","));
+      }
+
+      // Photos: separate existing URLs from new file picks
+      const existingUrls = images
+        .filter((img) => img.isExisting)
+        .map((img) => img.remoteUrl);
+      formData.append("existingPhotos", JSON.stringify(existingUrls));
+
+      // Newly picked local images
+      images
+        .filter((img) => !img.isExisting)
+        .forEach((img, index) => {
+          const uriParts = img.uri.split(".");
+          const fileType = uriParts[uriParts.length - 1];
+          formData.append("photos", {
+            uri: img.uri,
+            name: `photo_${index}.${fileType}`,
+            type: `image/${fileType === "jpg" ? "jpeg" : fileType}`,
+          });
+        });
+
+      await carService.updateCar(id, formData);
 
       showAlert({
         title: "Success",
@@ -209,7 +289,7 @@ export default function EditCar() {
       console.log("Update Error:", error);
       showAlert({
         title: "Error",
-        message: "Failed to update car.",
+        message: error?.response?.data?.message || "Failed to update car.",
         type: "error",
       });
     } finally {
@@ -266,6 +346,62 @@ export default function EditCar() {
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
+          {/* 📸 Car Photos */}
+          <View style={styles.formCard}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconContainer}>
+                <LinearGradient
+                  colors={[COLORS.gold[500], COLORS.gold[600]]}
+                  style={styles.sectionIconGradient}
+                >
+                  <Ionicons name="images" size={20} color={COLORS.navy[900]} />
+                </LinearGradient>
+              </View>
+              <View>
+                <Text style={styles.sectionTitle}>Car Photos</Text>
+                <Text style={styles.sectionSubtitle}>
+                  {images.length}/5 photos · tap ✕ to remove
+                </Text>
+              </View>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.photoRow}
+            >
+              {images.length < 5 && (
+                <TouchableOpacity style={styles.addPhotoBtn} onPress={pickImages}>
+                  <LinearGradient
+                    colors={[COLORS.navy[700], COLORS.navy[600]]}
+                    style={styles.addPhotoGradient}
+                  >
+                    <Ionicons name="camera" size={32} color={COLORS.gold[500]} />
+                    <Text style={styles.addPhotoText}>Add Photos</Text>
+                    <Text style={styles.addPhotoSubtext}>Up to 5 images</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
+
+              {images.map((img, index) => (
+                <View key={index} style={styles.thumbContainer}>
+                  <Image source={{ uri: img.uri }} style={styles.thumb} />
+                  <TouchableOpacity
+                    style={styles.removeBtn}
+                    onPress={() => removeImage(index)}
+                  >
+                    <Ionicons name="close-circle" size={24} color="#EF4444" />
+                  </TouchableOpacity>
+                  {index === 0 && (
+                    <View style={styles.primaryBadge}>
+                      <Text style={styles.primaryBadgeText}>Primary</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
           {/* Basic Info */}
           <View style={styles.formCard}>
             <View style={styles.sectionHeader}>
@@ -1124,5 +1260,74 @@ const styles = StyleSheet.create({
   },
   locationActionIcon: {
     marginLeft: 8,
+  },
+
+  // Photos
+  photoRow: {
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  addPhotoBtn: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginRight: 12,
+  },
+  addPhotoGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: COLORS.navy[600],
+    borderStyle: "dashed",
+    borderRadius: 16,
+  },
+  addPhotoText: {
+    color: COLORS.gold[500],
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 6,
+  },
+  addPhotoSubtext: {
+    color: COLORS.gray[500],
+    fontSize: 10,
+    marginTop: 2,
+  },
+  thumbContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    marginRight: 12,
+    position: "relative",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: COLORS.navy[600],
+  },
+  thumb: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+  },
+  removeBtn: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 12,
+  },
+  primaryBadge: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.gold[500],
+    paddingVertical: 3,
+    alignItems: "center",
+  },
+  primaryBadgeText: {
+    color: COLORS.navy[900],
+    fontSize: 10,
+    fontWeight: "700",
   },
 });

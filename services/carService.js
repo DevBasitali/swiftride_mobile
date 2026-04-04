@@ -139,36 +139,16 @@ export const createCar = async (formData) => {
 /**
  * 6. HOST: Update Car
  */
-export const updateCar = async (carId, carData) => {
+export const updateCar = async (carId, formData) => {
   try {
-    const updatePayload = {
-      make: carData.make,
-      model: carData.model,
-      year: carData.year,
-      color: carData.color,
-      plateNumber: carData.plateNumber,
-      pricePerHour: carData.pricePerHour,
-      pricePerDay: carData.pricePerDay,
-      seats: carData.seats,
-      transmission: carData.transmission,
-      fuelType: carData.fuelType,
-      location: carData.location,
-      availability: carData.availability,
-      features: carData.features,
-      isActive: carData.isActive,
-      description: carData.description,
-      insuranceDetails: carData.insuranceDetails,
-    };
-
-    Object.keys(updatePayload).forEach(key => {
-      if (updatePayload[key] === undefined) {
-        delete updatePayload[key];
-      }
+    const response = await api.patch(`/cars/${carId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
-
-    const response = await api.patch(`/cars/${carId}`, updatePayload);
     return response.data;
   } catch (error) {
+    console.error('Update Car Error:', error);
     throw error;
   }
 };
