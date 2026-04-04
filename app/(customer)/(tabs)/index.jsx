@@ -320,84 +320,77 @@ export default function CustomerHome() {
     </View>
   );
 
-  const renderCarItem = ({ item }) => {
+  const renderGridItem = ({ item }) => {
     const isFavorite = favorites.includes(item._id);
 
     return (
       <TouchableOpacity
-        activeOpacity={0.95}
+        activeOpacity={0.92}
         onPress={() => {
           if (item?._id) {
             router.push(`/(customer)/car/${item._id}`);
           }
         }}
-        style={styles.card}
+        style={styles.gridCard}
       >
-        {/* Full Background Image */}
-        <Image
-          source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
-          style={styles.cardBg}
-          resizeMode="cover"
-        />
+        {/* Image */}
+        <View style={styles.gridImageBox}>
+          <Image
+            source={{ uri: carService.getImageUrl(item.photos?.[0]) }}
+            style={styles.gridImage}
+            resizeMode="cover"
+          />
+          <LinearGradient
+            colors={["transparent", "rgba(10, 22, 40, 0.7)"]}
+            style={styles.gridImageOverlay}
+          />
 
-        {/* Dark Overlay for Text Readability */}
-        <LinearGradient
-          colors={["transparent", "rgba(10, 22, 40, 0.4)", "rgba(10, 22, 40, 0.95)"]}
-          locations={[0, 0.5, 1]}
-          style={styles.cardOverlay}
-        />
+          {/* Favorite */}
+          <TouchableOpacity
+            style={styles.gridFavBtn}
+            onPress={(e) => {
+              e.stopPropagation();
+              toggleFavorite(item._id);
+            }}
+          >
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={16}
+              color={isFavorite ? COLORS.red[500] : COLORS.white}
+            />
+          </TouchableOpacity>
 
-        {/* Top Badges */}
-        <View style={styles.topBadges}>
-          {item.isActive ? (
-            <View style={styles.statusBadge}>
-              <View style={styles.dot} />
-              <Text style={styles.statusText}>AVAILABLE</Text>
-            </View>
-          ) : (
-            <View style={[styles.statusBadge, { backgroundColor: COLORS.red[500] }]}>
-              <Text style={styles.statusText}>UNAVAILABLE</Text>
-            </View>
-          )}
-
-          {/* ACTION BUTTONS ROW */}
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TouchableOpacity
-              style={styles.iconBtn}
-              onPress={(e) => {
-                e.stopPropagation();
-                toggleFavorite(item._id);
-              }}
-            >
-              <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={20}
-                color={isFavorite ? COLORS.red[500] : COLORS.white}
-              />
-            </TouchableOpacity>
-
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={12} color={COLORS.gold[500]} />
-              <Text style={styles.ratingText}>5.0</Text>
-            </View>
+          {/* Price Badge */}
+          <View style={styles.gridPriceBadge}>
+            <Text style={styles.gridPriceText}>Rs. {Number(item.pricePerDay).toLocaleString()}</Text>
+            <Text style={styles.gridPriceUnit}>/day</Text>
           </View>
         </View>
 
-        {/* Content Area */}
-        <View style={styles.cardContent}>
-          <View>
-            <Text style={styles.carName}>{item.make} {item.model}</Text>
-            <Text style={styles.carSub}>{item.year} • {item.transmission || "Auto"}</Text>
-          </View>
+        {/* Info */}
+        <View style={styles.gridInfo}>
+          <Text style={styles.gridTitle} numberOfLines={1}>
+            {item.make} {item.model}
+          </Text>
+          <Text style={styles.gridSubtitle} numberOfLines={1}>
+            {item.year} • {item.transmission || "Auto"} • {item.fuelType || "Petrol"}
+          </Text>
 
-          <View style={styles.priceContainer}>
-            <Text style={styles.currency}>PKR</Text>
-            <Text style={styles.price}>{item.pricePerDay}</Text>
-            <Text style={styles.perDay}>/day</Text>
+          <View style={styles.gridFooter}>
+            <View style={styles.gridRating}>
+              <Ionicons name="star" size={10} color={COLORS.gold[500]} />
+              <Text style={styles.gridRatingText}>5.0</Text>
+            </View>
+            <View style={styles.gridLocation}>
+              <Ionicons name="location-outline" size={10} color={COLORS.gray[400]} />
+              <Text style={styles.gridLocationText} numberOfLines={1}>
+                {item.location?.address?.split(",")[0] || "City"}
+              </Text>
+            </View>
           </View>
         </View>
       </TouchableOpacity>
-    )
+    );
   };
 
 
@@ -525,7 +518,9 @@ export default function CustomerHome() {
               <FlatList
                 data={filteredList}
                 keyExtractor={(item) => item._id}
-                renderItem={renderCarItem}
+                renderItem={renderGridItem}
+                numColumns={2}
+                columnWrapperStyle={styles.gridRow}
                 ListHeaderComponent={renderHeader}
                 contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
                 showsVerticalScrollIndicator={false}
@@ -658,134 +653,120 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  // New Car Card
-  card: {
-    height: 240,
-    borderRadius: 24,
-    marginBottom: 24,
-    overflow: "hidden",
-    position: "relative",
-    backgroundColor: COLORS.navy[800],
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+  // 2-Column Grid Card
+  gridRow: {
+    justifyContent: "space-between",
+    marginBottom: 14,
   },
-  cardBg: {
+  gridCard: {
+    width: (width - 54) / 2,
+    backgroundColor: COLORS.navy[800],
+    borderRadius: 18,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+  },
+  gridImageBox: {
+    height: 120,
+    width: "100%",
+    position: "relative",
+  },
+  gridImage: {
     width: "100%",
     height: "100%",
-    position: "absolute",
   },
-  cardOverlay: {
+  gridImageOverlay: {
     position: "absolute",
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
+    height: 50,
   },
-  topBadges: {
+  gridFavBtn: {
     position: "absolute",
-    top: 16,
-    left: 16,
-    right: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  statusBadge: {
-    backgroundColor: "rgba(16, 185, 129, 0.9)", // Emerald
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backdropFilter: "blur(10px)",
-  },
-  iconBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(15, 33, 55, 0.6)",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(10, 22, 40, 0.55)",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    backdropFilter: "blur(4px)",
+    borderColor: "rgba(255,255,255,0.15)",
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "white",
-    shadowColor: "white",
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  statusText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  ratingBadge: {
-    backgroundColor: "rgba(15, 33, 55, 0.8)", // Navy 800
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  gridPriceBadge: {
+    position: "absolute",
+    bottom: 8,
+    left: 8,
+    backgroundColor: "rgba(10, 22, 40, 0.85)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 8,
     flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+    alignItems: "baseline",
+    gap: 2,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(255,255,255,0.08)",
   },
-  ratingText: {
+  gridPriceText: {
     color: COLORS.white,
-    fontWeight: "700",
     fontSize: 12,
+    fontWeight: "800",
   },
-  cardContent: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 20,
+  gridPriceUnit: {
+    color: COLORS.gray[400],
+    fontSize: 9,
+    fontWeight: "600",
+  },
+  gridInfo: {
+    padding: 10,
+    paddingTop: 8,
+  },
+  gridTitle: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  gridSubtitle: {
+    color: COLORS.gray[400],
+    fontSize: 11,
+    marginBottom: 8,
+  },
+  gridFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
+    alignItems: "center",
   },
-  carName: {
-    color: "white",
-    fontSize: 22,
-    fontWeight: "800",
-    marginBottom: 4,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+  gridRating: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "rgba(245, 158, 11, 0.1)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
-  carSub: {
-    color: COLORS.gray[300],
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  priceContainer: {
-    alignItems: "flex-end",
-  },
-  currency: {
+  gridRatingText: {
     color: COLORS.gold[500],
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "700",
-    marginBottom: -2,
   },
-  price: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "800",
+  gridLocation: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    maxWidth: "55%",
   },
-  perDay: {
+  gridLocationText: {
     color: COLORS.gray[400],
-    fontSize: 12,
+    fontSize: 9,
     fontWeight: "500",
   },
 

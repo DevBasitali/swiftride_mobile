@@ -91,10 +91,19 @@ const GoogleLoginBtn = ({ role }) => { // Removed default
         }
       }
     } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      if (
+        error.code === statusCodes.SIGN_IN_CANCELLED ||
+        error.message?.includes("getTokens requires") ||
+        error.message?.includes("Sign in action cancelled")
+      ) {
+        // User backed out of the Google account picker — not an error
         console.log("User cancelled login");
       } else {
-        showAlert({ title: "Google Login Error", message: error.message, type: "error" });
+        showAlert({
+          title: "Login Failed",
+          message: "Something went wrong while signing in with Google. Please try again.",
+          type: "error",
+        });
       }
     } finally {
       setLoading(false);
