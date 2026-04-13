@@ -42,7 +42,7 @@ export const SocketProvider = ({ children }) => {
     console.log("🔌 Connecting to socket:", socketUrl);
 
     socketRef.current = io(socketUrl, {
-      transports: ["websocket"],
+      transports: ["polling", "websocket"],
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: maxReconnectAttempts,

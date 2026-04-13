@@ -22,7 +22,7 @@ export const connectSocket = () => {
     console.log("Connecting to socket:", socketUrl);
 
     socket = io(socketUrl, {
-        transports: ["websocket"],
+        transports: ["polling", "websocket"],
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: 5,
