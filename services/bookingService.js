@@ -49,6 +49,11 @@ export const initSafepayPayment = async (bookingId) => {
   return response.data;
 };
 
+export const initLateFeePayment = async (bookingId) => {
+  const response = await api.post(`/payments/booking/${bookingId}/late-fee/safepay/init?platform=mobile`);
+  return response.data;
+};
+
 export const downloadInvoice = async (bookingId) => {
   try {
     // Get the base URL from your api config
@@ -102,8 +107,8 @@ export default {
   getHostBookings,
   updateBookingStatus,
   getBookingDetails,
-  getBookingDetails,
   downloadInvoice,
   initSafepayPayment,
+  initLateFeePayment,
   cancelBooking,
 };

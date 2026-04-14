@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router"; // ✅ Added router
 import bookingService from "../../../services/bookingService";
+import { useAlert } from "../../../context/AlertContext";
 
 // ============================================
 // 🎨 INLINE THEME COLORS
@@ -52,6 +53,8 @@ export default function Bookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [lateFeeLoading, setLateFeeLoading] = useState(null); // bookingId of in-flight request
+  const { showAlert } = useAlert();
 
   useFocusEffect(
     useCallback(() => {
@@ -106,29 +109,64 @@ export default function Bookings() {
     router.push(`/(customer)/bookings/${bookingId}`);
   };
 
+  const handlePayLateFee = async (bookingId, lateFeeAmount, carName) => {
+    setLateFeeLoading(bookingId);
+    try {
+      const response = await bookingService.initLateFeePayment(bookingId);
+      const checkoutUrl = response?.data?.url;
+      if (!checkoutUrl) throw new Error("Failed to get checkout URL");
+
+      router.push({
+        pathname: "/(customer)/bookings/safepay-checkout",
+        params: { checkoutUrl, bookingId, amount: lateFeeAmount, carName },
+      });
+    } catch (error) {
+      showAlert({
+        title: "Payment Error",
+        message: error?.message || "Could not initiate late fee payment.",
+        type: "error",
+      });
+    } finally {
+      setLateFeeLoading(null);
+    }
+  };
+
   const renderBookingItem = ({ item }) => {
     const statusColor = getStatusColor(item.status);
     const startDate = new Date(item.startDateTime).toLocaleDateString();
     const endDate = new Date(item.endDateTime).toLocaleDateString();
     const bookingId = item.id || item._id;
+    const carName = `${item.car?.make} ${item.car?.model}`;
+
+    const isActive = item.status === "ongoing" || item.status === "confirmed";
+    const isOverdue = isActive && new Date() > new Date(item.endDateTime);
+    const hasUnpaidLateFee = item.lateFeeAmount > 0 && !item.isLateFeePaid;
+    const isPaying = lateFeeLoading === bookingId;
 
     return (
-      // ✅ ENTIRE CARD IS NOW CLICKABLE
       <TouchableOpacity
         style={styles.card}
         onPress={() => handleViewBooking(bookingId)}
         activeOpacity={0.7}
       >
         {/* Status Line */}
-        <View style={[styles.statusLine, { backgroundColor: statusColor }]} />
+        <View style={[styles.statusLine, { backgroundColor: isOverdue ? COLORS.red[500] : statusColor }]} />
 
         <View style={styles.cardContent}>
+          {/* Overdue Banner */}
+          {isOverdue && (
+            <View style={styles.overdueBanner}>
+              <Ionicons name="warning" size={15} color={COLORS.white} />
+              <Text style={styles.overdueText}>
+                WARNING: Your trip is overdue! Late fees are accumulating.
+              </Text>
+            </View>
+          )}
+
           {/* Header */}
           <View style={styles.cardHeader}>
             <View>
-              <Text style={styles.carName}>
-                {item.car?.make} {item.car?.model}
-              </Text>
+              <Text style={styles.carName}>{carName}</Text>
               <Text style={styles.carYear}>{item.car?.year}</Text>
             </View>
             <View
@@ -146,35 +184,40 @@ export default function Bookings() {
           {/* Details */}
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <Ionicons
-                name="calendar-outline"
-                size={16}
-                color={COLORS.gray[400]}
-              />
+              <Ionicons name="calendar-outline" size={16} color={COLORS.gray[400]} />
               <Text style={styles.detailText}>
                 {startDate} - {endDate}
               </Text>
             </View>
             <View style={styles.detailRow}>
-              <Ionicons
-                name="pricetag-outline"
-                size={16}
-                color={COLORS.gray[400]}
-              />
-              <Text style={styles.detailText}>
-                Total: PKR {item.totalPrice}
-              </Text>
+              <Ionicons name="pricetag-outline" size={16} color={COLORS.gray[400]} />
+              <Text style={styles.detailText}>Total: PKR {item.totalPrice}</Text>
             </View>
           </View>
+
+          {/* Pay Late Fee Button */}
+          {hasUnpaidLateFee && (
+            <TouchableOpacity
+              style={styles.lateFeeBtn}
+              onPress={() => handlePayLateFee(bookingId, item.lateFeeAmount, carName)}
+              disabled={isPaying}
+              activeOpacity={0.8}
+            >
+              {isPaying ? (
+                <ActivityIndicator size="small" color={COLORS.white} />
+              ) : (
+                <Ionicons name="alert-circle" size={16} color={COLORS.white} />
+              )}
+              <Text style={styles.lateFeeBtnText}>
+                {isPaying ? "Processing..." : `Pay Late Fee — PKR ${item.lateFeeAmount}`}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           {/* Action Arrow */}
           <View style={styles.actionBtn}>
             <Text style={styles.actionText}>View Details</Text>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={COLORS.gold[500]}
-            />
+            <Ionicons name="chevron-forward" size={18} color={COLORS.gold[500]} />
           </View>
         </View>
       </TouchableOpacity>
@@ -296,4 +339,39 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   emptySub: { fontSize: 14, color: COLORS.gray[400], marginTop: 4 },
+
+  overdueBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: COLORS.red[500],
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    marginBottom: 12,
+  },
+  overdueText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.white,
+    lineHeight: 16,
+  },
+
+  lateFeeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: COLORS.red[500],
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+  },
+  lateFeeBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: COLORS.white,
+  },
 });
