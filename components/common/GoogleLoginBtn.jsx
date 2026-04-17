@@ -17,8 +17,7 @@ import { useRouter } from "expo-router";
 import { useAlert } from "../../context/AlertContext";
 
 GoogleSignin.configure({
-  webClientId:
-    "400619671340-ndjjdcr3fs8bsalutjb9ldqs1egma49v.apps.googleusercontent.com",
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
   offlineAccess: true,
   scopes: ["profile", "email"],
 });
