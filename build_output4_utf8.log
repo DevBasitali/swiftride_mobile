@@ -1,0 +1,776 @@
+﻿
+> my-car-rental-app@1.0.0 android
+> expo run:android
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_SERVER_IP EXPO_PUBLIC_SERVER_PORT EXPO_PUBLIC_GOOGLE_MAPS_API_KEY EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID EXPO_PUBLIC_LOCATION_INTERVAL_MS EXPO_PUBLIC_LOCATION_DISTANCE_M
+ΓÇ║ Building app...
+Configuration on demand is an incubating feature.
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-module-gradle-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:jar UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-module-gradle-plugin:classes UP-TO-DATE
+> Task :expo-module-gradle-plugin:jar UP-TO-DATE
+
+> Configure project :
+[32m[ExpoRootProject][0m Using the following versions:
+  - buildTools:  [32m36.0.0[0m
+  - minSdk:      [32m24[0m
+  - compileSdk:  [32m36[0m
+  - targetSdk:   [32m36[0m
+  - ndk:         [32m26.1.10909125[0m
+  - kotlin:      [32m2.1.20[0m
+  - ksp:         [32m2.1.20-2.0.1[0m
+
+> Configure project :expo
+
+Using expo modules
+  - [32mexpo-constants[0m (18.0.13)
+  - [32mexpo-modules-core[0m (3.0.29)
+  - [33m[?][0m [32mexpo-asset[0m (12.0.12)
+  - [33m[?][0m [32mexpo-blur[0m (15.0.8)
+  - [33m[?][0m [32mexpo-camera[0m (17.0.10)
+  - [33m[?][0m [32mexpo-file-system[0m (19.0.21)
+  - [33m[?][0m [32mexpo-font[0m (14.0.11)
+  - [33m[?][0m [32mexpo-haptics[0m (15.0.8)
+  - [33m[?][0m [32mexpo-image-loader[0m (6.0.0)
+  - [33m[?][0m [32mexpo-image-picker[0m (17.0.10)
+  - [33m[?][0m [32mexpo-intent-launcher[0m (13.0.8)
+  - [33m[?][0m [32mexpo-keep-awake[0m (15.0.8)
+  - [33m[?][0m [32mexpo-linear-gradient[0m (15.0.8)
+  - [33m[?][0m [32mexpo-linking[0m (8.0.11)
+  - [33m[?][0m [32mexpo-location[0m (19.0.8)
+  - [33m[?][0m [32mexpo-secure-store[0m (15.0.8)
+  - [33m[?][0m [32mexpo-sharing[0m (14.0.8)
+  - [33m[?][0m [32mexpo-splash-screen[0m (31.0.13)
+  - [33m[?][0m [32mexpo-task-manager[0m (14.0.9)
+  - [33m[?][0m [32mexpo-web-browser[0m (15.0.10)
+  - [33m[?][0m [32munimodules-app-loader[0m (6.0.8)
+
+
+> Task :expo-modules-core:preBuild UP-TO-DATE
+> Task :react-native-maps:preBuild UP-TO-DATE
+> Task :react-native-maps:preDebugBuild UP-TO-DATE
+> Task :expo-modules-core:preDebugBuild UP-TO-DATE
+> Task :react-native-maps:writeDebugAarMetadata
+> Task :expo-modules-core:writeDebugAarMetadata
+> Task :expo-modules-core:generateDebugResValues FROM-CACHE
+> Task :expo-modules-core:generateDebugResources FROM-CACHE
+> Task :expo-modules-core:packageDebugResources FROM-CACHE
+> Task :react-native-maps:generateDebugResValues FROM-CACHE
+> Task :react-native-maps:generateDebugResources FROM-CACHE
+> Task :react-native-maps:packageDebugResources FROM-CACHE
+> Task :expo-modules-core:extractDeepLinksDebug FROM-CACHE
+> Task :app:generateAutolinkingNewArchitectureFiles
+> Task :expo-modules-core:processDebugManifest FROM-CACHE
+> Task :react-native-maps:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-maps:processDebugManifest FROM-CACHE
+> Task :expo-modules-core:compileDebugLibraryResources FROM-CACHE
+> Task :app:generateAutolinkingPackageList
+> Task :app:generateCodegenSchemaFromJavaScript SKIPPED
+> Task :app:generateCodegenArtifactsFromSchema SKIPPED
+> Task :expo-modules-core:parseDebugLocalResources FROM-CACHE
+> Task :expo-modules-core:generateDebugRFile FROM-CACHE
+> Task :react-native-maps:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-maps:parseDebugLocalResources FROM-CACHE
+> Task :react-native-maps:generateDebugRFile FROM-CACHE
+> Task :expo-modules-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-modules-core:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-reanimated:assertMinimalReactNativeVersionTask
+> Task :react-native-reanimated:assertNewArchitectureEnabledTask SKIPPED
+> Task :app:generateReactNativeEntryPoint
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :react-native-worklets:assertMinimalReactNativeVersionTask
+> Task :react-native-worklets:assertNewArchitectureEnabledTask SKIPPED
+> Task :app:processDebugGoogleServices FROM-CACHE
+> Task :app:generateDebugResources FROM-CACHE
+> Task :react-native-reanimated:assertWorkletsVersionTask
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-maps:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-safe-area-context:generateCodegenSchemaFromJavaScript
+> Task :react-native-maps:javaPreCompileDebug FROM-CACHE
+> Task :expo-constants:createExpoConfig
+> Task :expo-constants:preBuild
+> Task :expo-constants:preDebugBuild
+> Task :react-native-screens:generateCodegenSchemaFromJavaScript
+> Task :expo-constants:writeDebugAarMetadata
+> Task :expo-constants:generateDebugResValues FROM-CACHE
+> Task :react-native-webview:generateCodegenSchemaFromJavaScript
+> Task :expo-constants:generateDebugResources FROM-CACHE
+> Task :react-native-svg:generateCodegenSchemaFromJavaScript
+> Task :react-native-google-signin_google-signin:generateCodegenSchemaFromJavaScript
+> Task :expo-constants:packageDebugResources FROM-CACHE
+> Task :expo-constants:extractDeepLinksDebug FROM-CACHE
+> Task :expo-constants:processDebugManifest FROM-CACHE
+> Task :expo-constants:compileDebugLibraryResources FROM-CACHE
+> Task :expo-constants:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_datetimepicker:generateCodegenSchemaFromJavaScript
+> Task :expo-constants:generateDebugRFile FROM-CACHE
+> Task :expo-constants:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-constants:generateDebugBuildConfig FROM-CACHE
+> Task :expo-constants:javaPreCompileDebug FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :expo-constants:mergeDebugShaders
+> Task :expo-constants:compileDebugShaders NO-SOURCE
+> Task :expo-constants:generateDebugAssets UP-TO-DATE
+> Task :expo-constants:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :react-native-worklets:generateCodegenSchemaFromJavaScript
+> Task :react-native-maps:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-reanimated:generateCodegenSchemaFromJavaScript
+> Task :react-native-google-signin_google-signin:generateCodegenArtifactsFromSchema
+> Task :react-native-google-signin_google-signin:preBuild
+> Task :react-native-google-signin_google-signin:preDebugBuild
+> Task :react-native-webview:generateCodegenArtifactsFromSchema
+> Task :react-native-webview:preBuild
+> Task :react-native-webview:preDebugBuild
+> Task :react-native-google-signin_google-signin:writeDebugAarMetadata
+> Task :react-native-webview:writeDebugAarMetadata
+> Task :react-native-google-signin_google-signin:generateDebugResValues FROM-CACHE
+> Task :react-native-webview:generateDebugResValues FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugResources FROM-CACHE
+> Task :react-native-webview:generateDebugResources FROM-CACHE
+> Task :expo:generatePackagesList
+> Task :expo:preBuild
+> Task :expo:preDebugBuild
+> Task :expo:writeDebugAarMetadata
+> Task :react-native-safe-area-context:generateCodegenArtifactsFromSchema
+> Task :react-native-safe-area-context:preBuild
+> Task :react-native-community_datetimepicker:generateCodegenArtifactsFromSchema
+> Task :react-native-community_datetimepicker:preBuild
+> Task :react-native-safe-area-context:preDebugBuild
+> Task :expo:generateDebugResValues FROM-CACHE
+> Task :react-native-community_datetimepicker:preDebugBuild
+> Task :react-native-screens:generateCodegenArtifactsFromSchema
+> Task :react-native-screens:preBuild
+> Task :react-native-screens:preDebugBuild
+> Task :react-native-google-signin_google-signin:packageDebugResources FROM-CACHE
+> Task :react-native-webview:packageDebugResources FROM-CACHE
+> Task :react-native-community_datetimepicker:writeDebugAarMetadata
+> Task :react-native-safe-area-context:writeDebugAarMetadata
+> Task :react-native-google-signin_google-signin:extractDeepLinksDebug FROM-CACHE
+> Task :expo:generateDebugResources FROM-CACHE
+> Task :react-native-screens:generateDebugResValues FROM-CACHE
+> Task :react-native-screens:writeDebugAarMetadata
+> Task :react-native-community_datetimepicker:generateDebugResValues FROM-CACHE
+> Task :react-native-webview:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-community_datetimepicker:generateDebugResources FROM-CACHE
+> Task :react-native-screens:generateDebugResources FROM-CACHE
+> Task :expo:packageDebugResources FROM-CACHE
+> Task :react-native-worklets:generateCodegenArtifactsFromSchema
+> Task :expo:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-community_datetimepicker:packageDebugResources FROM-CACHE
+> Task :react-native-webview:processDebugManifest FROM-CACHE
+> Task :expo:processDebugManifest FROM-CACHE
+> Task :react-native-svg:generateCodegenArtifactsFromSchema
+> Task :react-native-svg:preBuild
+> Task :react-native-svg:preDebugBuild
+> Task :react-native-community_datetimepicker:extractDeepLinksDebug FROM-CACHE
+> Task :expo:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-svg:writeDebugAarMetadata
+> Task :react-native-webview:compileDebugLibraryResources FROM-CACHE
+> Task :expo:parseDebugLocalResources FROM-CACHE
+> Task :react-native-svg:generateDebugResValues FROM-CACHE
+> Task :react-native-screens:packageDebugResources FROM-CACHE
+> Task :react-native-webview:parseDebugLocalResources FROM-CACHE
+> Task :react-native-svg:generateDebugResources FROM-CACHE
+> Task :react-native-screens:extractDeepLinksDebug FROM-CACHE
+> Task :expo:generateDebugRFile FROM-CACHE
+> Task :expo:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-webview:generateDebugRFile FROM-CACHE
+> Task :react-native-webview:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-svg:packageDebugResources FROM-CACHE
+> Task :react-native-webview:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-maps:bundleLibCompileToJarDebug
+> Task :react-native-screens:processDebugManifest FROM-CACHE
+> Task :react-native-svg:extractDeepLinksDebug FROM-CACHE
+> Task :expo:javaPreCompileDebug FROM-CACHE
+> Task :react-native-maps:mergeDebugShaders
+> Task :expo:mergeDebugShaders
+> Task :expo:compileDebugShaders NO-SOURCE
+> Task :react-native-maps:compileDebugShaders NO-SOURCE
+> Task :expo:generateDebugAssets UP-TO-DATE
+> Task :react-native-maps:generateDebugAssets UP-TO-DATE
+> Task :expo:mergeDebugAssets
+> Task :react-native-maps:mergeDebugAssets
+> Task :react-native-svg:processDebugManifest FROM-CACHE
+> Task :react-native-svg:compileDebugLibraryResources FROM-CACHE
+> Task :app:mergeDebugJniLibFolders
+> Task :react-native-screens:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-maps:processDebugJavaRes NO-SOURCE
+> Task :react-native-svg:parseDebugLocalResources FROM-CACHE
+> Task :react-native-screens:parseDebugLocalResources FROM-CACHE
+> Task :react-native-svg:generateDebugRFile FROM-CACHE
+> Task :react-native-svg:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-screens:generateDebugRFile FROM-CACHE
+> Task :react-native-screens:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-svg:javaPreCompileDebug FROM-CACHE
+> Task :react-native-reanimated:generateCodegenArtifactsFromSchema
+> Task :react-native-safe-area-context:generateDebugResValues FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugResources FROM-CACHE
+> Task :react-native-community_datetimepicker:processDebugManifest FROM-CACHE
+> Task :react-native-google-signin_google-signin:processDebugManifest FROM-CACHE
+> Task :react-native-community_datetimepicker:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-maps:bundleLibRuntimeToJarDebug
+> Task :react-native-google-signin_google-signin:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_datetimepicker:parseDebugLocalResources FROM-CACHE
+> Task :react-native-safe-area-context:packageDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-community_datetimepicker:generateDebugRFile FROM-CACHE
+> Task :react-native-community_datetimepicker:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-community_datetimepicker:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-safe-area-context:processDebugManifest FROM-CACHE
+> Task :react-native-safe-area-context:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-safe-area-context:parseDebugLocalResources FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugRFile FROM-CACHE
+> Task :react-native-safe-area-context:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-safe-area-context:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-maps:bundleLibRuntimeToDirDebug
+> Task :app:checkDebugDuplicateClasses
+> Task :react-native-svg:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-community_datetimepicker:compileDebugKotlin FROM-CACHE
+> Task :react-native-community_datetimepicker:javaPreCompileDebug FROM-CACHE
+> Task :expo-modules-core:compileDebugKotlin FROM-CACHE
+> Task :expo-modules-core:javaPreCompileDebug FROM-CACHE
+> Task :react-native-safe-area-context:compileDebugKotlin FROM-CACHE
+> Task :react-native-safe-area-context:javaPreCompileDebug FROM-CACHE
+> Task :react-native-safe-area-context:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-community_datetimepicker:compileDebugJavaWithJavac FROM-CACHE
+> Task :expo-modules-core:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-community_datetimepicker:bundleLibCompileToJarDebug
+> Task :expo-modules-core:mergeDebugShaders
+> Task :expo-modules-core:compileDebugShaders NO-SOURCE
+> Task :expo-modules-core:generateDebugAssets UP-TO-DATE
+> Task :expo-modules-core:mergeDebugAssets
+> Task :react-native-svg:bundleLibCompileToJarDebug
+> Task :react-native-svg:mergeDebugShaders
+> Task :react-native-svg:compileDebugShaders NO-SOURCE
+> Task :react-native-svg:generateDebugAssets UP-TO-DATE
+> Task :react-native-worklets:prepareWorkletsHeadersForPrefabs
+> Task :react-native-worklets:preBuild
+> Task :react-native-worklets:preDebugBuild
+> Task :expo:mergeDebugJniLibFolders
+> Task :react-native-community_datetimepicker:mergeDebugShaders
+> Task :react-native-svg:mergeDebugAssets
+> Task :react-native-worklets:writeDebugAarMetadata
+> Task :react-native-community_datetimepicker:compileDebugShaders NO-SOURCE
+> Task :react-native-community_datetimepicker:generateDebugAssets UP-TO-DATE
+> Task :react-native-worklets:generateDebugResValues FROM-CACHE
+> Task :react-native-worklets:generateDebugResources FROM-CACHE
+> Task :react-native-community_datetimepicker:mergeDebugAssets
+> Task :react-native-screens:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugRFile FROM-CACHE
+> Task :react-native-google-signin_google-signin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-worklets:packageDebugResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-worklets:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-worklets:processDebugManifest FROM-CACHE
+> Task :react-native-community_datetimepicker:bundleLibRuntimeToJarDebug
+> Task :react-native-worklets:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-worklets:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_datetimepicker:processDebugJavaRes
+> Task :expo-modules-core:processDebugJavaRes
+> Task :react-native-worklets:generateDebugRFile FROM-CACHE
+> Task :react-native-worklets:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-worklets:javaPreCompileDebug FROM-CACHE
+> Task :react-native-worklets:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-webview:compileDebugKotlin FROM-CACHE
+> Task :react-native-webview:javaPreCompileDebug FROM-CACHE
+> Task :react-native-community_datetimepicker:bundleLibRuntimeToDirDebug
+> Task :react-native-google-signin_google-signin:compileDebugKotlin FROM-CACHE
+> Task :react-native-worklets:mergeDebugShaders
+> Task :react-native-worklets:compileDebugShaders NO-SOURCE
+> Task :react-native-worklets:generateDebugAssets UP-TO-DATE
+> Task :react-native-google-signin_google-signin:javaPreCompileDebug FROM-CACHE
+> Task :react-native-worklets:bundleLibCompileToJarDebug
+> Task :react-native-worklets:mergeDebugAssets
+> Task :react-native-worklets:bundleLibRuntimeToJarDebug
+> Task :react-native-google-signin_google-signin:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-webview:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-webview:mergeDebugShaders
+> Task :react-native-webview:compileDebugShaders NO-SOURCE
+> Task :react-native-webview:generateDebugAssets UP-TO-DATE
+> Task :react-native-webview:mergeDebugAssets
+> Task :react-native-google-signin_google-signin:bundleLibCompileToJarDebug
+> Task :react-native-webview:bundleLibCompileToJarDebug
+> Task :react-native-worklets:processDebugJavaRes NO-SOURCE
+> Task :react-native-webview:processDebugJavaRes
+> Task :react-native-webview:bundleLibRuntimeToJarDebug
+> Task :react-native-worklets:bundleLibRuntimeToDirDebug
+> Task :expo:mergeDebugNativeLibs NO-SOURCE
+> Task :expo:copyDebugJniLibsProjectOnly
+> Task :expo-constants:mergeDebugJniLibFolders
+> Task :expo-constants:mergeDebugNativeLibs NO-SOURCE
+> Task :expo-constants:copyDebugJniLibsProjectOnly
+> Task :react-native-screens:compileDebugKotlin FROM-CACHE
+> Task :react-native-screens:javaPreCompileDebug FROM-CACHE
+> Task :react-native-webview:bundleLibRuntimeToDirDebug
+> Task :react-native-screens:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-screens:mergeDebugShaders
+> Task :react-native-screens:compileDebugShaders NO-SOURCE
+> Task :react-native-screens:generateDebugAssets UP-TO-DATE
+> Task :react-native-screens:mergeDebugAssets
+> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :react-native-screens:processDebugJavaRes
+> Task :react-native-screens:bundleLibCompileToJarDebug
+> Task :react-native-community_datetimepicker:mergeDebugJniLibFolders
+> Task :react-native-community_datetimepicker:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-community_datetimepicker:copyDebugJniLibsProjectOnly
+> Task :react-native-maps:mergeDebugJniLibFolders
+> Task :react-native-maps:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-maps:copyDebugJniLibsProjectOnly
+> Task :react-native-screens:bundleLibRuntimeToJarDebug
+> Task :expo-modules-core:bundleLibCompileToJarDebug
+> Task :react-native-webview:mergeDebugJniLibFolders
+> Task :react-native-webview:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-webview:copyDebugJniLibsProjectOnly
+> Task :expo-modules-core:bundleLibRuntimeToJarDebug
+> Task :react-native-reanimated:prepareReanimatedHeadersForPrefabs
+> Task :react-native-reanimated:preBuild
+> Task :react-native-reanimated:preDebugBuild
+> Task :app:validateSigningDebug
+> Task :react-native-svg:processDebugJavaRes NO-SOURCE
+> Task :react-native-safe-area-context:mergeDebugShaders
+> Task :react-native-google-signin_google-signin:mergeDebugShaders
+> Task :react-native-google-signin_google-signin:compileDebugShaders NO-SOURCE
+> Task :react-native-google-signin_google-signin:generateDebugAssets UP-TO-DATE
+> Task :react-native-safe-area-context:compileDebugShaders NO-SOURCE
+> Task :react-native-safe-area-context:generateDebugAssets UP-TO-DATE
+> Task :react-native-reanimated:writeDebugAarMetadata
+> Task :react-native-svg:mergeDebugJniLibFolders
+> Task :react-native-reanimated:generateDebugResValues FROM-CACHE
+> Task :react-native-google-signin_google-signin:mergeDebugAssets
+> Task :react-native-safe-area-context:mergeDebugAssets
+> Task :react-native-screens:bundleLibRuntimeToDirDebug
+> Task :react-native-svg:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-reanimated:generateDebugResources FROM-CACHE
+> Task :react-native-reanimated:packageDebugResources FROM-CACHE
+> Task :react-native-reanimated:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-safe-area-context:bundleLibCompileToJarDebug
+> Task :react-native-reanimated:processDebugManifest FROM-CACHE
+> Task :react-native-safe-area-context:bundleLibRuntimeToJarDebug
+> Task :react-native-google-signin_google-signin:processDebugJavaRes
+> Task :react-native-reanimated:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-reanimated:parseDebugLocalResources FROM-CACHE
+> Task :react-native-safe-area-context:processDebugJavaRes
+> Task :react-native-reanimated:generateDebugRFile FROM-CACHE
+> Task :react-native-reanimated:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-reanimated:javaPreCompileDebug FROM-CACHE
+> Task :react-native-google-signin_google-signin:bundleLibRuntimeToJarDebug
+> Task :react-native-reanimated:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-reanimated:mergeDebugShaders
+> Task :react-native-reanimated:compileDebugShaders NO-SOURCE
+> Task :react-native-reanimated:generateDebugAssets UP-TO-DATE
+> Task :react-native-google-signin_google-signin:bundleLibRuntimeToDirDebug
+> Task :react-native-svg:copyDebugJniLibsProjectOnly
+> Task :react-native-reanimated:mergeDebugAssets
+> Task :react-native-safe-area-context:bundleLibRuntimeToDirDebug
+> Task :react-native-reanimated:processDebugJavaRes NO-SOURCE
+> Task :react-native-reanimated:bundleLibCompileToJarDebug
+> Task :react-native-svg:bundleLibRuntimeToJarDebug
+> Task :react-native-reanimated:bundleLibRuntimeToJarDebug
+> Task :react-native-safe-area-context:mergeDebugJniLibFolders
+> Task :react-native-safe-area-context:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-safe-area-context:copyDebugJniLibsProjectOnly
+> Task :react-native-reanimated:mergeDebugJniLibFolders
+> Task :react-native-google-signin_google-signin:mergeDebugJniLibFolders
+> Task :react-native-google-signin_google-signin:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-google-signin_google-signin:copyDebugJniLibsProjectOnly
+> Task :react-native-reanimated:bundleLibRuntimeToDirDebug
+> Task :app:mapDebugSourceSetPaths
+> Task :app:checkDebugAarMetadata
+> Task :react-native-svg:bundleLibRuntimeToDirDebug
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :expo-modules-core:bundleLibRuntimeToDirDebug
+> Task :app:processDebugResources FROM-CACHE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+
+> Task :react-native-worklets:configureCMakeDebug[arm64-v8a]
+C/C++: CMake Warning:
+C/C++:   Manually-specified variables were not used by the project:
+C/C++:     ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES
+
+> Task :react-native-screens:configureCMakeDebug[arm64-v8a]
+C/C++: CMake Warning:
+C/C++:   Manually-specified variables were not used by the project:
+C/C++:     ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES
+
+> Task :expo-modules-core:configureCMakeDebug[arm64-v8a]
+C/C++: CMake Warning:
+C/C++:   Manually-specified variables were not used by the project:
+C/C++:     ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES
+
+> Task :expo-constants:compileDebugKotlin FROM-CACHE
+> Task :expo-constants:compileDebugJavaWithJavac FROM-CACHE
+> Task :expo-constants:processDebugJavaRes
+> Task :expo-constants:bundleLibRuntimeToDirDebug
+> Task :expo-constants:bundleLibRuntimeToJarDebug
+> Task :expo-constants:bundleLibCompileToJarDebug
+> Task :expo:compileDebugKotlin FROM-CACHE
+> Task :expo:compileDebugJavaWithJavac FROM-CACHE
+> Task :expo:processDebugJavaRes
+> Task :expo:bundleLibCompileToJarDebug
+> Task :expo:bundleLibRuntimeToJarDebug
+> Task :expo:bundleLibRuntimeToDirDebug
+> Task :app:compileDebugKotlin FROM-CACHE
+> Task :app:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:dexBuilderDebug FROM-CACHE
+> Task :app:mergeDebugGlobalSynthetics FROM-CACHE
+> Task :app:processDebugJavaRes
+> Task :app:mergeProjectDexDebug FROM-CACHE
+> Task :app:mergeLibDexDebug FROM-CACHE
+
+> Task :expo-modules-core:buildCMakeDebug[arm64-v8a]
+C/C++: ninja: Entering directory `D:\Projects\Swiftride\android\node_modules\expo-modules-core\android\.cxx\Debug\3661e352\arm64-v8a'
+C/C++: In file included from D:/Projects/Swiftride/android/node_modules/expo-modules-core/common/cpp/fabric/ExpoViewProps.cpp:4:
+C/C++: In file included from D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/propsConversions.h:15:
+C/C++: D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h:80:14: error: no member named 'format' in namespace 'std'; did you mean 'folly::format'?
+C/C++:       return std::format("{}%", dimension.value);
+C/C++:              ^~~~~~~~~~~
+C/C++:              folly::format
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/Format.h:291:1: note: 'folly::format' declared here
+C/C++: format(StringPiece fmt, Args&&... args) {
+C/C++: ^
+C/C++: In file included from D:/Projects/Swiftride/android/node_modules/expo-modules-core/common/cpp/fabric/ExpoViewProps.cpp:4:
+C/C++: In file included from D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/propsConversions.h:15:
+C/C++: D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h:80:14: error: no viable conversion from returned value of type 'Formatter<false, const float &>' to function return type 'folly::dynamic'
+C/C++:       return std::format("{}%", dimension.value);
+C/C++:              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:238:18: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'const ObjectMaker &' for 1st argument
+C/C++:   /* implicit */ dynamic(ObjectMaker const&) = delete;
+C/C++:                  ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:289:3: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'const dynamic &' for 1st argument
+C/C++:   dynamic(dynamic const&);
+C/C++:   ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:290:3: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'dynamic &&' for 1st argument
+C/C++:   dynamic(dynamic&&) noexcept;
+C/C++:   ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:321:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'std::nullptr_t' for 1st argument
+C/C++: inline dynamic::dynamic(std::nullptr_t) : type_(NULLT) {}
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:323:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'void (*)(EmptyArrayTag)' for 1st argument
+C/C++: inline dynamic::dynamic(void (*)(EmptyArrayTag)) : type_(ARRAY) {
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:327:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'ObjectMaker (*)()' for 1st argument
+C/C++: inline dynamic::dynamic(ObjectMaker (*)()) : type_(OBJECT) {
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:331:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'const char *' for 1st argument
+C/C++: inline dynamic::dynamic(char const* s) : type_(STRING) {
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:335:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'std::string' (aka 'basic_string<char>') for 1st argument
+C/C++: inline dynamic::dynamic(std::string s) : type_(STRING) {
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:344:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'ObjectMaker &&' for 1st argument
+C/C++: inline dynamic::dynamic(ObjectMaker&& maker) : type_(OBJECT) {
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:376:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'std::vector<bool>::reference' (aka '__bit_reference<vector<bool, allocator<bool>>>') for 1st argument
+C/C++: inline dynamic::dynamic(std::vector<bool>::reference b)
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:378:17: note: candidate constructor not viable: no known conversion from 'Formatter<false, const float &>' to 'VectorBoolConstRefCtorType' (aka 'std::__bit_const_reference<std::vector<bool>>') for 1st argument
+C/C++: inline dynamic::dynamic(VectorBoolConstRefCtorType b)
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:340:17: note: candidate template ignored: requirement 'is_detected_v<folly::dynamic_detail::detect_construct_string, folly::Formatter<false, const float &>>' was not satisfied [with Stringish = Formatter<false, const float &>]
+C/C++: inline dynamic::dynamic(Stringish&& s) : type_(STRING) {
+C/C++:                 ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:384:10: note: candidate template ignored: substitution failure [with T = Formatter<false, const float &>]: implicit instantiation of undefined template 'folly::dynamic::NumericTypeHelper<folly::Formatter<false, const float &>>'
+C/C++: dynamic::dynamic(T t) {
+C/C++:          ^
+C/C++: C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:1115:12: note: explicit constructor is not a candidate
+C/C++:   explicit dynamic(Array&& r);
+C/C++:            ^
+C/C++: 2 errors generated.
+
+> Task :react-native-screens:buildCMakeDebug[arm64-v8a]
+> Task :react-native-worklets:buildCMakeDebug[arm64-v8a][worklets]
+> Task :app:mergeDebugJavaResource
+
+> Task :react-native-screens:configureCMakeDebug[armeabi-v7a]
+C/C++: CMake Warning:
+C/C++:   Manually-specified variables were not used by the project:
+C/C++:     ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES
+
+> Task :expo-modules-core:buildCMakeDebug[arm64-v8a] FAILED
+> Task :react-native-screens:buildCMakeDebug[armeabi-v7a]
+
+[Incubating] Problems report is available at: file:///D:/Projects/Swiftride/android/android/build/reports/problems/problems-report.html
+node.exe : 
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':expo-modules-core:buildCMakeDebug[arm64-v8a]'.
+> com.android.ide.common.process.ProcessException: ninja: Entering directory 
+`D:\Projects\Swiftride\android\node_modules\expo-modules-core\android\.cxx\Debug\3661e352\arm64-v8a'
+  [1/49] Building CXX object src/fabric/CMakeFiles/fabric.dir/cmake_pch.hxx.pch
+  [2/49] Building CXX object CMakeFiles/expo-modules-core.dir/cmake_pch.hxx.pch
+  [3/49] Building CXX object CMakeFiles/expo-modules-core.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-c
+ore/common/cpp/NativeModule.cpp.o
+  [4/49] Building CXX object CMakeFiles/expo-modules-core.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-c
+ore/common/cpp/ObjectDeallocator.cpp.o
+  [5/49] Building CXX object CMakeFiles/expo-modules-core.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-c
+ore/common/cpp/SharedRef.cpp.o
+  [6/49] Building CXX object CMakeFiles/expo-modules-core.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-c
+ore/common/cpp/SharedObject.cpp.o
+  [7/49] Building CXX object CMakeFiles/expo-modules-core.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-c
+ore/common/cpp/TypedArray.cpp.o
+  [8/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/Exceptions.cpp.o
+  [9/49] Building CXX object src/fabric/CMakeFiles/fabric.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-c
+ore/common/cpp/fabric/ExpoViewEventEmitter.cpp.o
+  [10/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JNIDeallocator.cpp.o
+  [11/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JNIFunctionBody.cpp.o
+  [12/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JNIInjector.cpp.o
+  [13/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JSharedObject.cpp.o
+  [14/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JSReferencesCache.cpp.o
+  [15/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/ExpoModulesHostObject.cpp.o
+  [16/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaReferencesCache.cpp.o
+  [17/49] Building CXX object src/fabric/CMakeFiles/fabric.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-
+core/common/cpp/fabric/ExpoViewProps.cpp.o
+  FAILED: src/fabric/CMakeFiles/fabric.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-core/common/cpp/fabr
+ic/ExpoViewProps.cpp.o 
+  C:\Users\BASITA~1\AppData\Local\Android\Sdk\ndk\261~1.109\TOOLCH~1\llvm\prebuilt\WINDOW~1\bin\CLANG_~1.EXE 
+--target=aarch64-none-linux-android24 --sysroot="C:/Users/Basit 
+Ali/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/sysroot"  
+-ID:/Projects/Swiftride/android/node_modules/react-native/ReactCommon 
+-ID:/Projects/Swiftride/android/node_modules/expo-modules-core/android/../common/cpp/fabric -I"C:/Users/Basit Ali/.grad
+le/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/reac
+tnative/include/react/fabric" -isystem "C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/1d9b33ce555da17de0d2d1933ef
+9bfa3/transformed/fbjni-0.7.0/prefab/modules/fbjni/include" -isystem "C:/Users/Basit Ali/.gradle/caches/8.14.3/transfor
+ms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-debug/prefab/modules/jsi/include" -isystem 
+"C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5-
+debug/prefab/modules/reactnative/include" -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables 
+-fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   
+-DREACT_NATIVE_TARGET_VERSION=81 -fno-limit-debug-info  -fPIC -std=c++20 -DFOLLY_NO_CONFIG=1 
+-DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 
+-DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -O2 -frtti -fexceptions -Wall -fstack-protector-all 
+-DUSE_HERMES=0 -DUNIT_TEST=0 -DIS_NEW_ARCHITECTURE_ENABLED=1 -DRN_FABRIC_ENABLED=1 -DRN_SERIALIZABLE_STATE=1 
+-std=gnu++20 -Winvalid-pch -Xclang -include-pch -Xclang D:/Projects/Swiftride/android/node_modules/expo-modules-core/an
+droid/.cxx/Debug/3661e352/arm64-v8a/src/fabric/CMakeFiles/fabric.dir/cmake_pch.hxx.pch -Xclang -include -Xclang D:/Proj
+ects/Swiftride/android/node_modules/expo-modules-core/android/.cxx/Debug/3661e352/arm64-v8a/src/fabric/CMakeFiles/fabri
+c.dir/cmake_pch.hxx -MD -MT src/fabric/CMakeFiles/fabric.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-co
+re/common/cpp/fabric/ExpoViewProps.cpp.o -MF src\fabric\CMakeFiles\fabric.dir\D_\Projects\Swiftride\android\node_module
+s\expo-modules-core\common\cpp\fabric\ExpoViewProps.cpp.o.d -o src/fabric/CMakeFiles/fabric.dir/D_/Projects/Swiftride/a
+ndroid/node_modules/expo-modules-core/common/cpp/fabric/ExpoViewProps.cpp.o -c 
+D:/Projects/Swiftride/android/node_modules/expo-modules-core/common/cpp/fabric/ExpoViewProps.cpp
+  In file included from 
+D:/Projects/Swiftride/android/node_modules/expo-modules-core/common/cpp/fabric/ExpoViewProps.cpp:4:
+  In file included from 
+D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/propsConversions.h:15:
+  D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h:80:14: 
+error: no member named 'format' in namespace 'std'; did you mean 'folly::format'?
+        return std::format("{}%", dimension.value);
+               ^~~~~~~~~~~
+               folly::format
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/Format.h:291:1: note: 'folly::format' declared here
+  format(StringPiece fmt, Args&&... args) {
+  ^
+  In file included from 
+D:/Projects/Swiftride/android/node_modules/expo-modules-core/common/cpp/fabric/ExpoViewProps.cpp:4:
+  In file included from 
+D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/propsConversions.h:15:
+  D:/Projects/Swiftride/android/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h:80:14: 
+error: no viable conversion from returned value of type 'Formatter<false, const float &>' to function return type 
+'folly::dynamic'
+        return std::format("{}%", dimension.value);
+               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:238:18: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'const ObjectMaker &' for 1st argument
+    /* implicit */ dynamic(ObjectMaker const&) = delete;
+                   ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:289:3: note: candidate constructor not viable: no known 
+conversion from 'Formatter<false, const float &>' to 'const dynamic &' for 1st argument
+    dynamic(dynamic const&);
+    ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:290:3: note: candidate constructor not viable: no known 
+conversion from 'Formatter<false, const float &>' to 'dynamic &&' for 1st argument
+    dynamic(dynamic&&) noexcept;
+    ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:321:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'std::nullptr_t' for 1st argument
+  inline dynamic::dynamic(std::nullptr_t) : type_(NULLT) {}
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:323:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'void (*)(EmptyArrayTag)' for 1st argument
+  inline dynamic::dynamic(void (*)(EmptyArrayTag)) : type_(ARRAY) {
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:327:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'ObjectMaker (*)()' for 1st argument
+  inline dynamic::dynamic(ObjectMaker (*)()) : type_(OBJECT) {
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:331:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'const char *' for 1st argument
+  inline dynamic::dynamic(char const* s) : type_(STRING) {
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:335:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'std::string' (aka 'basic_string<char>') for 1st argument
+  inline dynamic::dynamic(std::string s) : type_(STRING) {
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:344:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'ObjectMaker &&' for 1st argument
+  inline dynamic::dynamic(ObjectMaker&& maker) : type_(OBJECT) {
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:376:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'std::vector<bool>::reference' (aka 
+'__bit_reference<vector<bool, allocator<bool>>>') for 1st argument
+  inline dynamic::dynamic(std::vector<bool>::reference b)
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:378:17: note: candidate constructor not viable: no 
+known conversion from 'Formatter<false, const float &>' to 'VectorBoolConstRefCtorType' (aka 
+'std::__bit_const_reference<std::vector<bool>>') for 1st argument
+  inline dynamic::dynamic(VectorBoolConstRefCtorType b)
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:340:17: note: candidate template ignored: 
+requirement 'is_detected_v<folly::dynamic_detail::detect_construct_string, folly::Formatter<false, const float &>>' 
+was not satisfied [with Stringish = Formatter<false, const float &>]
+  inline dynamic::dynamic(Stringish&& s) : type_(STRING) {
+                  ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic-inl.h:384:10: note: candidate template ignored: 
+substitution failure [with T = Formatter<false, const float &>]: implicit instantiation of undefined template 
+'folly::dynamic::NumericTypeHelper<folly::Formatter<false, const float &>>'
+  dynamic::dynamic(T t) {
+           ^
+  C:/Users/Basit Ali/.gradle/caches/8.14.3/transforms/cde4f30671f0a7da4501bd6540651233/transformed/react-android-0.81.5
+-debug/prefab/modules/reactnative/include/folly/json/dynamic.h:1115:12: note: explicit constructor is not a candidate
+    explicit dynamic(Array&& r);
+             ^
+  2 errors generated.
+  [18/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaScriptModuleObject.cpp.o
+  [19/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaScriptRuntime.cpp.o
+  [20/49] Building CXX object src/fabric/CMakeFiles/fabric.dir/FabricComponentsRegistry.cpp.o
+  [21/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaScriptFunction.cpp.o
+  [22/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaScriptWeakObject.cpp.o
+  [23/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaScriptTypedArray.cpp.o
+  [24/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JSIContext.cpp.o
+  [25/49] Building CXX object src/fabric/CMakeFiles/fabric.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-
+core/common/cpp/fabric/ExpoViewShadowNode.cpp.o
+  [26/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaScriptValue.cpp.o
+  [27/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaScriptObject.cpp.o
+  [28/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JNIUtils.cpp.o
+  [29/49] Building CXX object src/fabric/CMakeFiles/fabric.dir/D_/Projects/Swiftride/android/node_modules/expo-modules-
+core/common/cpp/fabric/ExpoViewComponentDescriptor.cpp.o
+  [30/49] Building CXX object CMakeFiles/expo-modules-core.dir/src/main/cpp/JavaCallback.cpp.o
+  ninja: build stopped: subcommand failed.
+  
+  C++ build system [build] failed while executing:
+      @echo off
+      "C:\\Users\\Basit Ali\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe" ^
+        -C ^
+        "D:\\Projects\\Swiftride\\android\\node_modules\\expo-modules-core\\android\\.cxx\\Debug\\3661e352\\arm64-v8a" 
+^
+        expo-modules-core
+    from D:\Projects\Swiftride\android\node_modules\expo-modules-core\android
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+BUILD FAILED in 55s
+329 actionable tasks: 143 executed, 162 from cache, 24 up-to-date
+Error: D:\Projects\Swiftride\android\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand 
+--build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a exited with non-zero 
+code: 1
+Error: D:\Projects\Swiftride\android\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand 
+--build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a exited with non-zero 
+code: 1
+    at ChildProcess.completionListener 
+(D:\Projects\Swiftride\android\node_modules\@expo\spawn-async\src\spawnAsync.ts:67:13)
+    at Object.onceWrapper (node:events:631:12)
+    at ChildProcess.emit (node:events:509:20)
+    at ChildProcess.cp.emit (D:\Projects\Swiftride\android\node_modules\cross-spawn\lib\enoent.js:34:29)
+    at maybeClose (node:internal/child_process:1108:16)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:305:5)
+    ...
+    at spawnAsync (D:\Projects\Swiftride\android\node_modules\@expo\spawn-async\src\spawnAsync.ts:28:21)
+    at spawnGradleAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:134:28)
+    at assembleAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:83:16)
+    at runAndroidAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\run\android\runAndroidAsync.ts:62:24)

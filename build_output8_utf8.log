@@ -1,0 +1,588 @@
+﻿
+> my-car-rental-app@1.0.0 android
+> expo run:android
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_SERVER_IP EXPO_PUBLIC_SERVER_PORT EXPO_PUBLIC_GOOGLE_MAPS_API_KEY EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID EXPO_PUBLIC_LOCATION_INTERVAL_MS EXPO_PUBLIC_LOCATION_DISTANCE_M
+ΓÇ║ Building app...
+Configuration on demand is an incubating feature.
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-module-gradle-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:jar UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-module-gradle-plugin:classes UP-TO-DATE
+> Task :expo-module-gradle-plugin:jar UP-TO-DATE
+
+> Configure project :
+[32m[ExpoRootProject][0m Using the following versions:
+  - buildTools:  [32m36.0.0[0m
+  - minSdk:      [32m24[0m
+  - compileSdk:  [32m36[0m
+  - targetSdk:   [32m36[0m
+  - ndk:         [32m27.1.12297006[0m
+  - kotlin:      [32m2.1.20[0m
+  - ksp:         [32m2.1.20-2.0.1[0m
+
+> Configure project :expo
+
+Using expo modules
+  - [32mexpo-constants[0m (18.0.13)
+  - [32mexpo-modules-core[0m (3.0.29)
+  - [33m[?][0m [32mexpo-asset[0m (12.0.12)
+  - [33m[?][0m [32mexpo-blur[0m (15.0.8)
+  - [33m[?][0m [32mexpo-camera[0m (17.0.10)
+  - [33m[?][0m [32mexpo-file-system[0m (19.0.21)
+  - [33m[?][0m [32mexpo-font[0m (14.0.11)
+  - [33m[?][0m [32mexpo-haptics[0m (15.0.8)
+  - [33m[?][0m [32mexpo-image-loader[0m (6.0.0)
+  - [33m[?][0m [32mexpo-image-picker[0m (17.0.10)
+  - [33m[?][0m [32mexpo-intent-launcher[0m (13.0.8)
+  - [33m[?][0m [32mexpo-keep-awake[0m (15.0.8)
+  - [33m[?][0m [32mexpo-linear-gradient[0m (15.0.8)
+  - [33m[?][0m [32mexpo-linking[0m (8.0.11)
+  - [33m[?][0m [32mexpo-location[0m (19.0.8)
+  - [33m[?][0m [32mexpo-secure-store[0m (15.0.8)
+  - [33m[?][0m [32mexpo-sharing[0m (14.0.8)
+  - [33m[?][0m [32mexpo-splash-screen[0m (31.0.13)
+  - [33m[?][0m [32mexpo-task-manager[0m (14.0.9)
+  - [33m[?][0m [32mexpo-web-browser[0m (15.0.10)
+  - [33m[?][0m [32munimodules-app-loader[0m (6.0.8)
+
+
+> Task :react-native-maps:preBuild UP-TO-DATE
+> Task :expo-modules-core:preBuild UP-TO-DATE
+> Task :react-native-maps:preDebugBuild UP-TO-DATE
+> Task :expo-modules-core:preDebugBuild UP-TO-DATE
+> Task :react-native-maps:writeDebugAarMetadata
+> Task :expo-modules-core:writeDebugAarMetadata
+> Task :expo-modules-core:generateDebugResValues FROM-CACHE
+> Task :expo-modules-core:generateDebugResources FROM-CACHE
+> Task :app:generateAutolinkingNewArchitectureFiles
+> Task :expo-modules-core:packageDebugResources FROM-CACHE
+> Task :app:generateAutolinkingPackageList
+> Task :app:generateCodegenSchemaFromJavaScript SKIPPED
+> Task :react-native-maps:generateDebugResValues FROM-CACHE
+> Task :app:generateCodegenArtifactsFromSchema SKIPPED
+> Task :app:generateReactNativeEntryPoint
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-maps:generateDebugResources FROM-CACHE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :react-native-maps:packageDebugResources FROM-CACHE
+> Task :app:processDebugGoogleServices FROM-CACHE
+> Task :expo-modules-core:extractDeepLinksDebug FROM-CACHE
+> Task :app:generateDebugResources FROM-CACHE
+> Task :expo-modules-core:processDebugManifest FROM-CACHE
+> Task :react-native-maps:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-reanimated:assertMinimalReactNativeVersionTask
+> Task :react-native-reanimated:assertNewArchitectureEnabledTask SKIPPED
+> Task :react-native-maps:processDebugManifest FROM-CACHE
+> Task :expo-modules-core:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-worklets:assertMinimalReactNativeVersionTask
+> Task :react-native-worklets:assertNewArchitectureEnabledTask SKIPPED
+> Task :app:packageDebugResources FROM-CACHE
+> Task :react-native-reanimated:assertWorkletsVersionTask
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :expo-modules-core:parseDebugLocalResources FROM-CACHE
+> Task :expo-constants:createExpoConfig
+> Task :expo-constants:preBuild
+> Task :expo-constants:preDebugBuild
+> Task :app:createDebugCompatibleScreenManifests
+> Task :expo-constants:writeDebugAarMetadata
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-safe-area-context:generateCodegenSchemaFromJavaScript
+> Task :expo-modules-core:generateDebugRFile FROM-CACHE
+> Task :expo-modules-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-constants:generateDebugResValues FROM-CACHE
+> Task :expo-constants:generateDebugResources FROM-CACHE
+> Task :expo-modules-core:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-maps:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateCodegenSchemaFromJavaScript
+> Task :expo-constants:packageDebugResources FROM-CACHE
+> Task :expo-constants:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-maps:parseDebugLocalResources FROM-CACHE
+> Task :expo-constants:processDebugManifest FROM-CACHE
+> Task :react-native-maps:generateDebugRFile FROM-CACHE
+> Task :react-native-webview:generateCodegenSchemaFromJavaScript
+> Task :expo-constants:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-maps:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-maps:javaPreCompileDebug FROM-CACHE
+> Task :react-native-screens:generateCodegenSchemaFromJavaScript
+> Task :expo-constants:parseDebugLocalResources FROM-CACHE
+> Task :expo-constants:generateDebugRFile FROM-CACHE
+> Task :expo-constants:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-constants:generateDebugBuildConfig FROM-CACHE
+> Task :expo-constants:javaPreCompileDebug FROM-CACHE
+> Task :react-native-svg:generateCodegenSchemaFromJavaScript
+> Task :react-native-community_datetimepicker:generateCodegenSchemaFromJavaScript
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :expo-constants:mergeDebugShaders
+> Task :expo-constants:compileDebugShaders NO-SOURCE
+> Task :expo-constants:generateDebugAssets UP-TO-DATE
+> Task :expo-constants:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :react-native-worklets:generateCodegenSchemaFromJavaScript
+> Task :react-native-maps:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-maps:bundleLibCompileToJarDebug
+> Task :react-native-maps:mergeDebugShaders
+> Task :react-native-maps:compileDebugShaders NO-SOURCE
+> Task :react-native-maps:generateDebugAssets UP-TO-DATE
+> Task :react-native-maps:mergeDebugAssets
+> Task :react-native-reanimated:generateCodegenSchemaFromJavaScript
+> Task :react-native-maps:bundleLibRuntimeToJarDebug
+> Task :react-native-maps:processDebugJavaRes NO-SOURCE
+> Task :app:checkDebugDuplicateClasses
+> Task :expo:generatePackagesList
+> Task :expo:preBuild
+> Task :expo:preDebugBuild
+> Task :expo:writeDebugAarMetadata
+> Task :expo:generateDebugResValues FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateCodegenArtifactsFromSchema
+> Task :react-native-google-signin_google-signin:preBuild
+> Task :react-native-google-signin_google-signin:preDebugBuild
+> Task :react-native-google-signin_google-signin:writeDebugAarMetadata
+> Task :react-native-maps:bundleLibRuntimeToDirDebug
+> Task :react-native-google-signin_google-signin:generateDebugResValues FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:generateCodegenArtifactsFromSchema
+> Task :react-native-safe-area-context:preBuild
+> Task :react-native-safe-area-context:preDebugBuild
+> Task :react-native-safe-area-context:writeDebugAarMetadata
+> Task :react-native-google-signin_google-signin:packageDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugResValues FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugResources FROM-CACHE
+> Task :react-native-webview:generateCodegenArtifactsFromSchema
+> Task :react-native-worklets:generateCodegenArtifactsFromSchema
+> Task :react-native-webview:preBuild
+> Task :react-native-webview:preDebugBuild
+> Task :expo:generateDebugResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-webview:writeDebugAarMetadata
+> Task :react-native-screens:generateCodegenArtifactsFromSchema
+> Task :react-native-webview:generateDebugResValues FROM-CACHE
+> Task :react-native-screens:preBuild
+> Task :react-native-screens:preDebugBuild
+> Task :react-native-webview:generateDebugResources FROM-CACHE
+> Task :react-native-screens:writeDebugAarMetadata
+> Task :react-native-screens:generateDebugResValues FROM-CACHE
+> Task :react-native-safe-area-context:packageDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-screens:generateDebugResources FROM-CACHE
+> Task :react-native-webview:packageDebugResources FROM-CACHE
+> Task :expo:packageDebugResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:processDebugManifest FROM-CACHE
+> Task :react-native-webview:extractDeepLinksDebug FROM-CACHE
+> Task :expo:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-community_datetimepicker:generateCodegenArtifactsFromSchema
+> Task :react-native-community_datetimepicker:preBuild
+> Task :react-native-community_datetimepicker:preDebugBuild
+> Task :react-native-google-signin_google-signin:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-community_datetimepicker:writeDebugAarMetadata
+> Task :react-native-community_datetimepicker:generateDebugResValues FROM-CACHE
+> Task :expo:processDebugManifest FROM-CACHE
+> Task :react-native-webview:processDebugManifest FROM-CACHE
+> Task :react-native-google-signin_google-signin:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_datetimepicker:generateDebugResources FROM-CACHE
+> Task :react-native-screens:packageDebugResources FROM-CACHE
+> Task :react-native-screens:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-webview:compileDebugLibraryResources FROM-CACHE
+> Task :expo:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-webview:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_datetimepicker:packageDebugResources FROM-CACHE
+> Task :react-native-community_datetimepicker:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-screens:processDebugManifest FROM-CACHE
+> Task :expo:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_datetimepicker:processDebugManifest FROM-CACHE
+> Task :expo-constants:mergeDebugJniLibFolders
+> Task :expo-constants:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-community_datetimepicker:compileDebugLibraryResources FROM-CACHE
+> Task :expo:generateDebugRFile FROM-CACHE
+> Task :expo-constants:copyDebugJniLibsProjectOnly
+> Task :expo:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-community_datetimepicker:parseDebugLocalResources FROM-CACHE
+> Task :expo:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-maps:mergeDebugJniLibFolders
+> Task :react-native-screens:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-maps:mergeDebugNativeLibs NO-SOURCE
+> Task :expo:javaPreCompileDebug FROM-CACHE
+> Task :react-native-community_datetimepicker:generateDebugRFile FROM-CACHE
+> Task :react-native-community_datetimepicker:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo:mergeDebugShaders
+> Task :expo:compileDebugShaders NO-SOURCE
+> Task :react-native-screens:parseDebugLocalResources FROM-CACHE
+> Task :expo:generateDebugAssets UP-TO-DATE
+> Task :react-native-community_datetimepicker:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-svg:generateCodegenArtifactsFromSchema
+> Task :react-native-svg:preBuild
+> Task :react-native-svg:preDebugBuild
+> Task :expo:mergeDebugAssets
+> Task :react-native-screens:generateDebugRFile FROM-CACHE
+> Task :react-native-screens:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-svg:writeDebugAarMetadata
+> Task :react-native-svg:generateDebugResValues FROM-CACHE
+> Task :react-native-webview:generateDebugRFile FROM-CACHE
+> Task :react-native-webview:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-svg:generateDebugResources FROM-CACHE
+> Task :react-native-maps:copyDebugJniLibsProjectOnly
+> Task :react-native-webview:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-safe-area-context:processDebugManifest FROM-CACHE
+> Task :react-native-svg:packageDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-svg:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-safe-area-context:parseDebugLocalResources FROM-CACHE
+> Task :react-native-svg:processDebugManifest FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugRFile FROM-CACHE
+> Task :react-native-safe-area-context:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-svg:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-svg:parseDebugLocalResources FROM-CACHE
+> Task :react-native-svg:generateDebugRFile FROM-CACHE
+> Task :react-native-svg:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-svg:javaPreCompileDebug FROM-CACHE
+> Task :react-native-reanimated:generateCodegenArtifactsFromSchema
+> Task :expo-modules-core:compileDebugKotlin FROM-CACHE
+> Task :expo-modules-core:javaPreCompileDebug FROM-CACHE
+> Task :react-native-safe-area-context:compileDebugKotlin FROM-CACHE
+> Task :react-native-safe-area-context:javaPreCompileDebug FROM-CACHE
+> Task :react-native-safe-area-context:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-safe-area-context:mergeDebugShaders
+> Task :react-native-safe-area-context:compileDebugShaders NO-SOURCE
+> Task :react-native-safe-area-context:generateDebugAssets UP-TO-DATE
+> Task :react-native-safe-area-context:mergeDebugAssets
+> Task :react-native-community_datetimepicker:compileDebugKotlin FROM-CACHE
+> Task :react-native-community_datetimepicker:javaPreCompileDebug FROM-CACHE
+> Task :react-native-worklets:prepareWorkletsHeadersForPrefabs
+> Task :expo-modules-core:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-worklets:preBuild
+> Task :react-native-worklets:preDebugBuild
+> Task :react-native-safe-area-context:bundleLibCompileToJarDebug
+> Task :react-native-safe-area-context:bundleLibRuntimeToJarDebug
+> Task :react-native-screens:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-worklets:writeDebugAarMetadata
+> Task :expo:mergeDebugJniLibFolders
+> Task :expo:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-worklets:generateDebugResValues FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugRFile FROM-CACHE
+> Task :react-native-google-signin_google-signin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo:copyDebugJniLibsProjectOnly
+> Task :react-native-worklets:generateDebugResources FROM-CACHE
+> Task :react-native-svg:compileDebugJavaWithJavac FROM-CACHE
+> Task :expo-modules-core:mergeDebugShaders
+> Task :expo-modules-core:compileDebugShaders NO-SOURCE
+> Task :react-native-safe-area-context:processDebugJavaRes
+> Task :react-native-google-signin_google-signin:generateDebugBuildConfig FROM-CACHE
+> Task :expo-modules-core:generateDebugAssets UP-TO-DATE
+> Task :react-native-community_datetimepicker:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-svg:mergeDebugShaders
+> Task :expo-modules-core:mergeDebugAssets
+> Task :react-native-svg:compileDebugShaders NO-SOURCE
+> Task :react-native-svg:generateDebugAssets UP-TO-DATE
+> Task :react-native-worklets:packageDebugResources FROM-CACHE
+> Task :react-native-community_datetimepicker:mergeDebugShaders
+> Task :react-native-community_datetimepicker:compileDebugShaders NO-SOURCE
+> Task :react-native-community_datetimepicker:generateDebugAssets UP-TO-DATE
+> Task :react-native-worklets:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-community_datetimepicker:mergeDebugAssets
+> Task :react-native-svg:mergeDebugAssets
+> Task :react-native-worklets:processDebugManifest FROM-CACHE
+> Task :react-native-worklets:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-worklets:parseDebugLocalResources FROM-CACHE
+> Task :react-native-worklets:generateDebugRFile FROM-CACHE
+> Task :react-native-worklets:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-worklets:javaPreCompileDebug FROM-CACHE
+> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :react-native-webview:compileDebugKotlin FROM-CACHE
+> Task :react-native-community_datetimepicker:bundleLibRuntimeToJarDebug
+> Task :react-native-webview:javaPreCompileDebug FROM-CACHE
+> Task :react-native-worklets:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-community_datetimepicker:bundleLibCompileToJarDebug
+> Task :react-native-community_datetimepicker:processDebugJavaRes
+> Task :react-native-google-signin_google-signin:compileDebugKotlin FROM-CACHE
+> Task :react-native-worklets:mergeDebugShaders
+> Task :react-native-google-signin_google-signin:javaPreCompileDebug FROM-CACHE
+> Task :react-native-worklets:compileDebugShaders NO-SOURCE
+> Task :react-native-worklets:generateDebugAssets UP-TO-DATE
+> Task :react-native-worklets:mergeDebugAssets
+> Task :react-native-worklets:bundleLibCompileToJarDebug
+> Task :react-native-worklets:processDebugJavaRes NO-SOURCE
+> Task :react-native-webview:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-google-signin_google-signin:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-worklets:bundleLibRuntimeToJarDebug
+> Task :react-native-safe-area-context:bundleLibRuntimeToDirDebug
+> Task :react-native-webview:mergeDebugShaders
+> Task :react-native-webview:compileDebugShaders NO-SOURCE
+> Task :react-native-webview:generateDebugAssets UP-TO-DATE
+> Task :expo-modules-core:processDebugJavaRes
+> Task :react-native-webview:mergeDebugAssets
+> Task :react-native-community_datetimepicker:bundleLibRuntimeToDirDebug
+> Task :react-native-webview:processDebugJavaRes
+> Task :react-native-webview:bundleLibCompileToJarDebug
+> Task :react-native-google-signin_google-signin:bundleLibCompileToJarDebug
+> Task :react-native-worklets:bundleLibRuntimeToDirDebug
+> Task :react-native-svg:bundleLibCompileToJarDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :react-native-webview:bundleLibRuntimeToJarDebug
+> Task :react-native-community_datetimepicker:mergeDebugJniLibFolders
+> Task :react-native-safe-area-context:mergeDebugJniLibFolders
+> Task :react-native-community_datetimepicker:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-safe-area-context:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-safe-area-context:copyDebugJniLibsProjectOnly
+> Task :react-native-community_datetimepicker:copyDebugJniLibsProjectOnly
+> Task :react-native-webview:mergeDebugJniLibFolders
+> Task :react-native-webview:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-webview:copyDebugJniLibsProjectOnly
+> Task :react-native-webview:bundleLibRuntimeToDirDebug
+> Task :react-native-screens:compileDebugKotlin FROM-CACHE
+> Task :react-native-screens:javaPreCompileDebug FROM-CACHE
+> Task :react-native-screens:compileDebugJavaWithJavac FROM-CACHE
+> Task :react-native-screens:mergeDebugShaders
+> Task :react-native-screens:compileDebugShaders NO-SOURCE
+> Task :react-native-screens:generateDebugAssets UP-TO-DATE
+> Task :react-native-screens:mergeDebugAssets
+> Task :react-native-screens:processDebugJavaRes
+> Task :react-native-screens:bundleLibCompileToJarDebug
+> Task :react-native-screens:bundleLibRuntimeToJarDebug
+> Task :expo-modules-core:bundleLibRuntimeToJarDebug
+> Task :react-native-reanimated:prepareReanimatedHeadersForPrefabs
+> Task :react-native-reanimated:preBuild
+> Task :react-native-reanimated:preDebugBuild
+> Task :app:validateSigningDebug
+> Task :react-native-google-signin_google-signin:mergeDebugShaders
+> Task :react-native-google-signin_google-signin:compileDebugShaders NO-SOURCE
+> Task :react-native-google-signin_google-signin:generateDebugAssets UP-TO-DATE
+> Task :react-native-svg:processDebugJavaRes NO-SOURCE
+> Task :react-native-reanimated:generateDebugResValues FROM-CACHE
+> Task :react-native-reanimated:writeDebugAarMetadata
+> Task :app:writeDebugAppMetadata
+> Task :react-native-google-signin_google-signin:mergeDebugAssets
+> Task :react-native-reanimated:generateDebugResources FROM-CACHE
+> Task :app:writeDebugSigningConfigVersions
+> Task :react-native-svg:mergeDebugJniLibFolders
+> Task :react-native-reanimated:packageDebugResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:processDebugJavaRes
+> Task :react-native-reanimated:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-google-signin_google-signin:bundleLibRuntimeToJarDebug
+> Task :react-native-reanimated:processDebugManifest FROM-CACHE
+> Task :react-native-reanimated:compileDebugLibraryResources FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :react-native-reanimated:parseDebugLocalResources FROM-CACHE
+> Task :react-native-reanimated:generateDebugRFile FROM-CACHE
+> Task :react-native-reanimated:generateDebugBuildConfig FROM-CACHE
+> Task :react-native-reanimated:javaPreCompileDebug FROM-CACHE
+> Task :react-native-reanimated:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :react-native-reanimated:mergeDebugShaders
+> Task :react-native-reanimated:compileDebugShaders NO-SOURCE
+> Task :react-native-reanimated:generateDebugAssets UP-TO-DATE
+> Task :react-native-reanimated:mergeDebugAssets
+> Task :react-native-reanimated:bundleLibCompileToJarDebug
+> Task :react-native-reanimated:processDebugJavaRes NO-SOURCE
+> Task :react-native-reanimated:bundleLibRuntimeToJarDebug
+> Task :react-native-google-signin_google-signin:bundleLibRuntimeToDirDebug
+> Task :react-native-svg:bundleLibRuntimeToJarDebug
+> Task :react-native-google-signin_google-signin:mergeDebugJniLibFolders
+> Task :react-native-google-signin_google-signin:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-google-signin_google-signin:copyDebugJniLibsProjectOnly
+> Task :react-native-svg:mergeDebugNativeLibs NO-SOURCE
+> Task :react-native-screens:bundleLibRuntimeToDirDebug
+> Task :react-native-reanimated:mergeDebugJniLibFolders
+> Task :react-native-reanimated:bundleLibRuntimeToDirDebug
+> Task :expo-modules-core:bundleLibCompileToJarDebug
+> Task :react-native-svg:bundleLibRuntimeToDirDebug
+> Task :react-native-svg:copyDebugJniLibsProjectOnly
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :expo-modules-core:bundleLibRuntimeToDirDebug
+> Task :react-native-worklets:configureCMakeDebug[arm64-v8a]
+> Task :react-native-screens:configureCMakeDebug[arm64-v8a]
+> Task :expo-modules-core:configureCMakeDebug[arm64-v8a]
+> Task :expo-constants:compileDebugKotlin FROM-CACHE
+> Task :expo-constants:compileDebugJavaWithJavac FROM-CACHE
+> Task :expo-constants:processDebugJavaRes
+> Task :expo-constants:bundleLibRuntimeToDirDebug
+> Task :expo-constants:bundleLibRuntimeToJarDebug
+> Task :expo-constants:bundleLibCompileToJarDebug
+> Task :expo:compileDebugKotlin FROM-CACHE
+> Task :expo:compileDebugJavaWithJavac FROM-CACHE
+> Task :expo:processDebugJavaRes
+> Task :expo:bundleLibRuntimeToJarDebug
+> Task :expo:bundleLibCompileToJarDebug
+> Task :expo:bundleLibRuntimeToDirDebug
+> Task :app:compileDebugKotlin FROM-CACHE
+> Task :app:compileDebugJavaWithJavac FROM-CACHE
+> Task :app:dexBuilderDebug FROM-CACHE
+> Task :app:mergeDebugGlobalSynthetics FROM-CACHE
+> Task :app:processDebugJavaRes
+> Task :app:mergeProjectDexDebug FROM-CACHE
+> Task :app:mergeLibDexDebug FROM-CACHE
+> Task :react-native-worklets:configureCMakeDebug[armeabi-v7a]
+> Task :react-native-worklets:generateJsonModelDebug
+> Task :react-native-worklets:prefabDebugConfigurePackage
+> Task :react-native-screens:buildCMakeDebug[arm64-v8a]
+> Task :app:mergeDebugJavaResource
+> Task :expo-modules-core:buildCMakeDebug[arm64-v8a]
+> Task :react-native-screens:configureCMakeDebug[armeabi-v7a]
+> Task :react-native-worklets:buildCMakeDebug[arm64-v8a][worklets]
+> Task :react-native-reanimated:configureCMakeDebug[arm64-v8a]
+> Task :expo-modules-core:configureCMakeDebug[armeabi-v7a]
+> Task :react-native-screens:buildCMakeDebug[armeabi-v7a]
+> Task :react-native-screens:mergeDebugJniLibFolders
+> Task :react-native-screens:mergeDebugNativeLibs
+> Task :react-native-screens:copyDebugJniLibsProjectOnly
+> Task :expo-modules-core:buildCMakeDebug[armeabi-v7a]
+> Task :expo-modules-core:mergeDebugJniLibFolders
+> Task :expo-modules-core:mergeDebugNativeLibs
+> Task :expo-modules-core:copyDebugJniLibsProjectOnly
+> Task :react-native-worklets:buildCMakeDebug[armeabi-v7a][worklets]
+> Task :react-native-worklets:externalNativeBuildDebug
+> Task :react-native-worklets:prefabDebugPackage
+> Task :react-native-worklets:mergeDebugJniLibFolders
+> Task :react-native-worklets:mergeDebugNativeLibs
+> Task :react-native-worklets:copyDebugJniLibsProjectOnly
+> Task :react-native-reanimated:configureCMakeDebug[armeabi-v7a]
+> Task :react-native-reanimated:generateJsonModelDebug
+> Task :react-native-reanimated:prefabDebugConfigurePackage
+> Task :app:configureCMakeDebug[arm64-v8a]
+> Task :react-native-reanimated:buildCMakeDebug[arm64-v8a][reanimated]
+> Task :react-native-reanimated:buildCMakeDebug[armeabi-v7a][reanimated]
+> Task :react-native-reanimated:externalNativeBuildDebug
+> Task :react-native-reanimated:prefabDebugPackage
+> Task :react-native-reanimated:mergeDebugNativeLibs
+> Task :react-native-reanimated:copyDebugJniLibsProjectOnly
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:configureCMakeDebug[armeabi-v7a]
+> Task :app:buildCMakeDebug[armeabi-v7a]
+> Task :app:mergeDebugNativeLibs
+> Task :app:stripDebugDebugSymbols
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+
+[Incubating] Problems report is available at: file:///D:/Projects/Swiftride/android/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 6m 2s
+362 actionable tasks: 176 executed, 162 from cache, 24 up-to-date
+Starting Metro Bundler
+Waiting on http://localhost:8081
+ΓÇ║ Installing D:\Projects\Swiftride\android\android\app\build\outputs\apk\debug\app-debug.apk
+ΓÇ║ Opening swiftride://expo-development-client/?url=http%3A%2F%2F192.168.1.9%3A8081 on Infinix_X6817
+
+ΓÇ║ Logs for your project will appear below.
+Android node_modules\expo-router\entry.js ΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæ  0.0% (0/1)
+Android node_modules\expo-router\entry.js ΓûôΓûôΓûôΓûôΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæ 29.0% (248/464)
+Android node_modules\expo-router\entry.js ΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûæΓûæΓûæΓûæΓûæΓûæ 63.6% (709/891)
+Android node_modules\expo-router\entry.js ΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûæΓûæΓûæΓûæ 77.9% (1242/1414)
+Android node_modules\expo-router\entry.js ΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûôΓûæ 96.5% (1871/1905)
+Android Bundled 16098ms node_modules\expo-router\entry.js (2012 modules)
+ LOG  ≡ƒöù Connecting to: https://swiftride-server-w3pv.onrender.com/api
+ LOG  ≡ƒöî Socket URL: https://swiftride-server-w3pv.onrender.com
+ LOG  ≡ƒöî Connecting to socket: https://swiftride-server-w3pv.onrender.com
+ LOG  ≡ƒô▒ App active, reconnecting socket...
+ LOG  ≡ƒöî Socket URL: https://swiftride-server-w3pv.onrender.com
+ LOG  ≡ƒöî Connecting to socket: https://swiftride-server-w3pv.onrender.com
+ ERROR  ≡ƒö┤ Socket connection error: timeout 
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  socketRef.current.on$argument_1 (context\SocketContext.js)
+  apply (<native>)
+  Emitter.prototype.emit (node_modules\@socket.io\component-emitter\lib\cjs\index.js)
+  Socket#onerror (node_modules\socket.io-client\build\esm\socket.js)
+  apply (<native>)
+  Emitter.prototype.emit (node_modules\@socket.io\component-emitter\lib\cjs\index.js)
+  onError (node_modules\socket.io-client\build\esm\manager.js)
+  setTimeoutFn$argument_0 (node_modules\socket.io-client\build\esm\manager.js)
+ ERROR  ≡ƒö┤ Socket connection error: timeout 
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  socketRef.current.on$argument_1 (context\SocketContext.js)
+  apply (<native>)
+  Emitter.prototype.emit (node_modules\@socket.io\component-emitter\lib\cjs\index.js)
+  Socket#onerror (node_modules\socket.io-client\build\esm\socket.js)
+  apply (<native>)
+  Emitter.prototype.emit (node_modules\@socket.io\component-emitter\lib\cjs\index.js)
+  onError (node_modules\socket.io-client\build\esm\manager.js)
+  setTimeoutFn$argument_0 (node_modules\socket.io-client\build\esm\manager.js)
+ LOG  Γ£à Socket connected: undefined
+ LOG  Γ£à Socket connected: h2DbVJQxze5zzlkUAAAF
+ LOG  ≡ƒöì Checking for ongoing bookings...
+ LOG  ≡ƒ¢æ Stopping location tracking...
+ LOG  Γ£à Location tracking stopped
+ LOG  Γä╣∩╕Å No ongoing booking found

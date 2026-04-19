@@ -1,0 +1,335 @@
+﻿
+> my-car-rental-app@1.0.0 android
+> expo run:android
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_SERVER_IP EXPO_PUBLIC_SERVER_PORT EXPO_PUBLIC_GOOGLE_MAPS_API_KEY EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID EXPO_PUBLIC_LOCATION_INTERVAL_MS EXPO_PUBLIC_LOCATION_DISTANCE_M
+ΓÇ║ Building app...
+Configuration on demand is an incubating feature.
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-module-gradle-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:jar UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-module-gradle-plugin:classes UP-TO-DATE
+> Task :expo-module-gradle-plugin:jar UP-TO-DATE
+
+> Configure project :
+[32m[ExpoRootProject][0m Using the following versions:
+  - buildTools:  [32m36.0.0[0m
+  - minSdk:      [32m24[0m
+  - compileSdk:  [32m36[0m
+  - targetSdk:   [32m36[0m
+  - ndk:         [32m26.1.10909125[0m
+  - kotlin:      [32m2.1.20[0m
+  - ksp:         [32m2.1.20-2.0.1[0m
+
+> Configure project :expo
+
+Using expo modules
+  - [32mexpo-constants[0m (18.0.13)
+  - [32mexpo-modules-core[0m (3.0.29)
+  - [33m[?][0m [32mexpo-asset[0m (12.0.12)
+  - [33m[?][0m [32mexpo-blur[0m (15.0.8)
+  - [33m[?][0m [32mexpo-camera[0m (17.0.10)
+  - [33m[?][0m [32mexpo-file-system[0m (19.0.21)
+  - [33m[?][0m [32mexpo-font[0m (14.0.11)
+  - [33m[?][0m [32mexpo-haptics[0m (15.0.8)
+  - [33m[?][0m [32mexpo-image-loader[0m (6.0.0)
+  - [33m[?][0m [32mexpo-image-picker[0m (17.0.10)
+  - [33m[?][0m [32mexpo-intent-launcher[0m (13.0.8)
+  - [33m[?][0m [32mexpo-keep-awake[0m (15.0.8)
+  - [33m[?][0m [32mexpo-linear-gradient[0m (15.0.8)
+  - [33m[?][0m [32mexpo-linking[0m (8.0.11)
+  - [33m[?][0m [32mexpo-location[0m (19.0.8)
+  - [33m[?][0m [32mexpo-secure-store[0m (15.0.8)
+  - [33m[?][0m [32mexpo-sharing[0m (14.0.8)
+  - [33m[?][0m [32mexpo-splash-screen[0m (31.0.13)
+  - [33m[?][0m [32mexpo-task-manager[0m (14.0.9)
+  - [33m[?][0m [32mexpo-web-browser[0m (15.0.10)
+  - [33m[?][0m [32munimodules-app-loader[0m (6.0.8)
+
+
+> Task :react-native-safe-area-context:preBuild UP-TO-DATE
+> Task :expo-modules-core:preBuild UP-TO-DATE
+> Task :react-native-screens:preBuild UP-TO-DATE
+> Task :react-native-svg:preBuild UP-TO-DATE
+> Task :react-native-maps:preBuild UP-TO-DATE
+> Task :react-native-safe-area-context:preDebugBuild UP-TO-DATE
+> Task :expo-modules-core:preDebugBuild UP-TO-DATE
+> Task :react-native-google-signin_google-signin:preBuild UP-TO-DATE
+> Task :react-native-svg:preDebugBuild UP-TO-DATE
+> Task :react-native-screens:preDebugBuild UP-TO-DATE
+> Task :react-native-webview:preBuild UP-TO-DATE
+> Task :react-native-google-signin_google-signin:preDebugBuild UP-TO-DATE
+> Task :react-native-webview:preDebugBuild UP-TO-DATE
+> Task :react-native-community_datetimepicker:preBuild UP-TO-DATE
+> Task :react-native-community_datetimepicker:preDebugBuild UP-TO-DATE
+> Task :react-native-maps:preDebugBuild UP-TO-DATE
+> Task :react-native-safe-area-context:writeDebugAarMetadata
+> Task :react-native-webview:writeDebugAarMetadata
+> Task :react-native-screens:writeDebugAarMetadata
+> Task :expo-modules-core:writeDebugAarMetadata
+> Task :react-native-community_datetimepicker:writeDebugAarMetadata
+> Task :react-native-maps:writeDebugAarMetadata
+> Task :react-native-svg:writeDebugAarMetadata
+> Task :expo-modules-core:generateDebugResValues FROM-CACHE
+> Task :react-native-google-signin_google-signin:writeDebugAarMetadata
+> Task :expo-modules-core:generateDebugResources FROM-CACHE
+> Task :react-native-community_datetimepicker:generateDebugResValues FROM-CACHE
+> Task :react-native-maps:generateDebugResValues FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugResValues FROM-CACHE
+> Task :react-native-community_datetimepicker:generateDebugResources FROM-CACHE
+> Task :react-native-maps:generateDebugResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugResValues FROM-CACHE
+> Task :react-native-svg:generateDebugResValues FROM-CACHE
+> Task :react-native-screens:generateDebugResValues FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugResources FROM-CACHE
+> Task :react-native-svg:generateDebugResources FROM-CACHE
+> Task :app:generateAutolinkingPackageList
+> Task :expo-modules-core:packageDebugResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:packageDebugResources FROM-CACHE
+> Task :app:generateCodegenSchemaFromJavaScript SKIPPED
+> Task :app:generateCodegenArtifactsFromSchema SKIPPED
+> Task :react-native-community_datetimepicker:packageDebugResources FROM-CACHE
+> Task :expo-modules-core:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-webview:generateDebugResValues FROM-CACHE
+> Task :react-native-community_datetimepicker:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-screens:generateDebugResources FROM-CACHE
+> Task :react-native-maps:packageDebugResources FROM-CACHE
+> Task :react-native-webview:generateDebugResources FROM-CACHE
+> Task :app:generateReactNativeEntryPoint
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-modules-core:processDebugManifest FROM-CACHE
+> Task :react-native-google-signin_google-signin:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-maps:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-safe-area-context:packageDebugResources FROM-CACHE
+> Task :react-native-community_datetimepicker:processDebugManifest FROM-CACHE
+> Task :react-native-webview:packageDebugResources FROM-CACHE
+> Task :react-native-svg:packageDebugResources FROM-CACHE
+> Task :react-native-maps:processDebugManifest FROM-CACHE
+> Task :react-native-safe-area-context:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-webview:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-svg:extractDeepLinksDebug FROM-CACHE
+> Task :react-native-google-signin_google-signin:processDebugManifest FROM-CACHE
+> Task :expo-modules-core:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-community_datetimepicker:compileDebugLibraryResources FROM-CACHE
+> Task :expo-modules-core:parseDebugLocalResources FROM-CACHE
+> Task :react-native-community_datetimepicker:parseDebugLocalResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-svg:processDebugManifest FROM-CACHE
+> Task :react-native-webview:processDebugManifest FROM-CACHE
+> Task :react-native-community_datetimepicker:generateDebugRFile FROM-CACHE
+> Task :react-native-maps:compileDebugLibraryResources FROM-CACHE
+> Task :expo-modules-core:generateDebugRFile FROM-CACHE
+> Task :expo-modules-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-svg:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-webview:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-google-signin_google-signin:parseDebugLocalResources FROM-CACHE
+> Task :react-native-webview:parseDebugLocalResources FROM-CACHE
+> Task :react-native-svg:parseDebugLocalResources FROM-CACHE
+> Task :react-native-maps:parseDebugLocalResources FROM-CACHE
+> Task :react-native-safe-area-context:processDebugManifest FROM-CACHE
+> Task :react-native-svg:generateDebugRFile FROM-CACHE
+> Task :react-native-maps:generateDebugRFile FROM-CACHE
+> Task :react-native-google-signin_google-signin:generateDebugRFile FROM-CACHE
+> Task :react-native-community_datetimepicker:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-google-signin_google-signin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-screens:packageDebugResources FROM-CACHE
+> Task :react-native-webview:generateDebugRFile FROM-CACHE
+> Task :react-native-safe-area-context:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-screens:extractDeepLinksDebug FROM-CACHE
+> Task :app:generateDebugBuildConfig
+> Task :react-native-maps:generateDebugBuildConfig
+> Task :react-native-community_datetimepicker:generateDebugBuildConfig
+> Task :react-native-safe-area-context:parseDebugLocalResources FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :react-native-screens:processDebugManifest FROM-CACHE
+> Task :expo-modules-core:generateDebugBuildConfig
+> Task :react-native-google-signin_google-signin:generateDebugBuildConfig
+> Task :react-native-maps:javaPreCompileDebug FROM-CACHE
+> Task :react-native-svg:generateDebugBuildConfig
+> Task :app:processDebugGoogleServices FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugRFile FROM-CACHE
+> Task :react-native-safe-area-context:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-svg:javaPreCompileDebug FROM-CACHE
+> Task :app:generateDebugResources FROM-CACHE
+> Task :react-native-reanimated:assertMinimalReactNativeVersionTask
+> Task :react-native-screens:compileDebugLibraryResources FROM-CACHE
+> Task :react-native-worklets:assertMinimalReactNativeVersionTask
+> Task :app:packageDebugResources FROM-CACHE
+> Task :react-native-safe-area-context:generateDebugBuildConfig
+> Task :react-native-reanimated:assertNewArchitectureEnabledTask FAILED
+> Task :react-native-worklets:assertNewArchitectureEnabledTask FAILED
+> Task :react-native-screens:parseDebugLocalResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :react-native-screens:generateDebugRFile FROM-CACHE
+> Task :expo-constants:createExpoConfig
+> Task :expo:generatePackagesList
+
+> Task :react-native-community_datetimepicker:compileDebugKotlin
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialDatePickerModule.kt:21:20 'val currentActivity: Activity?' is deprecated. Deprecated in 0.80.0. Use getReactApplicationContext.getCurrentActivity() instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialDatePickerModule.kt:21:20 This synthetic property is based on the getter function 'fun getCurrentActivity(): Activity?' from Kotlin. In the future, synthetic properties will be available only if the base getter function came from Java. Consider replacing this property access with a 'getCurrentActivity()' function call.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialDatePickerModule.kt:26:20 'val currentActivity: Activity?' is deprecated. Deprecated in 0.80.0. Use getReactApplicationContext.getCurrentActivity() instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialDatePickerModule.kt:26:20 This synthetic property is based on the getter function 'fun getCurrentActivity(): Activity?' from Kotlin. In the future, synthetic properties will be available only if the base getter function came from Java. Consider replacing this property access with a 'getCurrentActivity()' function call.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialTimePickerModule.kt:22:20 'val currentActivity: Activity?' is deprecated. Deprecated in 0.80.0. Use getReactApplicationContext.getCurrentActivity() instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialTimePickerModule.kt:22:20 This synthetic property is based on the getter function 'fun getCurrentActivity(): Activity?' from Kotlin. In the future, synthetic properties will be available only if the base getter function came from Java. Consider replacing this property access with a 'getCurrentActivity()' function call.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialTimePickerModule.kt:27:20 'val currentActivity: Activity?' is deprecated. Deprecated in 0.80.0. Use getReactApplicationContext.getCurrentActivity() instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-community/datetimepicker/android/src/main/java/com/reactcommunity/rndatetimepicker/MaterialTimePickerModule.kt:27:20 This synthetic property is based on the getter function 'fun getCurrentActivity(): Activity?' from Kotlin. In the future, synthetic properties will be available only if the base getter function came from Java. Consider replacing this property access with a 'getCurrentActivity()' function call.
+
+> Task :react-native-google-signin_google-signin:compileDebugKotlin
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-google-signin/google-signin/android/src/main/java/com/reactnativegooglesignin/ErrorDto.kt:3:8 'class GoogleSignInStatusCodes : CommonStatusCodes' is deprecated. Deprecated in Java.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-google-signin/google-signin/android/src/main/java/com/reactnativegooglesignin/ErrorDto.kt:23:31 Condition is always 'true'.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-google-signin/google-signin/android/src/main/java/com/reactnativegooglesignin/ErrorDto.kt:24:16 'class GoogleSignInStatusCodes : CommonStatusCodes' is deprecated. Deprecated in Java.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-google-signin/google-signin/android/src/main/java/com/reactnativegooglesignin/ErrorDto.kt:29:33 'class GoogleSignInStatusCodes : CommonStatusCodes' is deprecated. Deprecated in Java.
+w: file:///D:/Projects/Swiftride/android/node_modules/@react-native-google-signin/google-signin/android/src/main/java/com/reactnativegooglesignin/ErrorDto.kt:30:38 'class GoogleSignInStatusCodes : CommonStatusCodes' is deprecated. Deprecated in Java.
+
+> Task :react-native-maps:compileDebugJavaWithJavac
+node.exe : Note: Some input files use or override a deprecated API.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Note: Some inpu...deprecated API.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :react-native-safe-area-context:compileDebugKotlin
+w: file:///D:/Projects/Swiftride/android/node_modules/react-native-safe-area-context/android/src/main/java/com/th3rdwave/safeareacontext/SafeAreaView.kt:59:23 'val uiImplementation: UIImplementation!' is deprecated. Deprecated in Java.
+w: file:///D:/Projects/Swiftride/android/node_modules/react-native-safe-area-context/android/src/paper/java/com/th3rdwave/safeareacontext/InsetsChangeEvent.kt:19:16 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+
+> Task :react-native-svg:compileDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :expo-modules-core:compileDebugKotlin
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/adapters/react/apploader/RNHeadlessAppLoader.kt:48:87 'val reactNativeHost: ReactNativeHost' is deprecated. You should not use ReactNativeHost directly in the New Architecture. Use ReactHost instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/adapters/react/apploader/RNHeadlessAppLoader.kt:91:85 'val reactNativeHost: ReactNativeHost' is deprecated. You should not use ReactNativeHost directly in the New Architecture. Use ReactHost instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/adapters/react/apploader/RNHeadlessAppLoader.kt:120:83 'val reactNativeHost: ReactNativeHost' is deprecated. You should not use ReactNativeHost directly in the New Architecture. Use ReactHost instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/apploader/AppLoaderProvider.kt:34:52 Unchecked cast of 'Class<*>!' to 'Class<out HeadlessAppLoader>'.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/AppContext.kt:30:8 'typealias ErrorManagerModule = JSLoggerModule' is deprecated. Use JSLoggerModule instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/AppContext.kt:253:21 'typealias ErrorManagerModule = JSLoggerModule' is deprecated. Use JSLoggerModule instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/AppContext.kt:343:21 'val DEFAULT: Int' is deprecated. UIManagerType.DEFAULT will be deleted in the next release of React Native. Use [LEGACY] instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/defaultmodules/NativeModulesProxyModule.kt:16:5 'fun Constants(legacyConstantsProvider: () -> Map<String, Any?>): Unit' is deprecated. Use `Constant` or `Property` instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt:65:51 'val errorManager: JSLoggerModule?' is deprecated. Use AppContext.jsLogger instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt:69:22 'fun reportExceptionToLogBox(codedException: CodedException): Unit' is deprecated. Use appContext.jsLogger.error(...) instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewDefinitionBuilder.kt:464:16 'val errorManager: JSLoggerModule?' is deprecated. Use AppContext.jsLogger instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewDefinitionBuilder.kt:464:30 'fun reportExceptionToLogBox(codedException: CodedException): Unit' is deprecated. Use appContext.jsLogger.error(...) instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewManagerDefinition.kt:41:16 'val errorManager: JSLoggerModule?' is deprecated. Use AppContext.jsLogger instead.
+w: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-core/android/src/main/java/expo/modules/kotlin/views/ViewManagerDefinition.kt:41:30 'fun reportExceptionToLogBox(codedException: CodedException): Unit' is deprecated. Use appContext.jsLogger.error(...) instead.
+
+[Incubating] Problems report is available at: file:///D:/Projects/Swiftride/android/android/build/reports/problems/problems-report.html
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* Where:
+Build file 'D:\Projects\Swiftride\android\node_modules\react-native-worklets\android\build.gradle' line: 314
+
+* What went wrong:
+Execution failed for task ':react-native-worklets:assertNewArchitectureEnabledTask'.
+> [Worklets] Worklets require new architecture to be enabled. Please enable it by setting `newArchEnabled` to `true` 
+in `gradle.properties`.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* Where:
+Build file 'D:\Projects\Swiftride\android\node_modules\react-native-reanimated\android\build.gradle' line: 298
+
+* What went wrong:
+Execution failed for task ':react-native-reanimated:assertNewArchitectureEnabledTask'.
+> [Reanimated] Reanimated requires new architecture to be enabled. Please enable it by setting `newArchEnabled` to 
+`true` in `gradle.properties`.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+124 actionable tasks: 29 executed, 71 from cache, 24 up-to-date
+BUILD FAILED in 35s
+Error: D:\Projects\Swiftride\android\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand 
+--build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a exited with non-zero 
+code: 1
+Error: D:\Projects\Swiftride\android\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand 
+--build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a exited with non-zero 
+code: 1
+    at ChildProcess.completionListener 
+(D:\Projects\Swiftride\android\node_modules\@expo\spawn-async\src\spawnAsync.ts:67:13)
+    at Object.onceWrapper (node:events:631:12)
+    at ChildProcess.emit (node:events:509:20)
+    at ChildProcess.cp.emit (D:\Projects\Swiftride\android\node_modules\cross-spawn\lib\enoent.js:34:29)
+    at maybeClose (node:internal/child_process:1108:16)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:305:5)
+    ...
+    at spawnAsync (D:\Projects\Swiftride\android\node_modules\@expo\spawn-async\src\spawnAsync.ts:28:21)
+    at spawnGradleAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:134:28)
+    at assembleAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:83:16)
+    at runAndroidAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\run\android\runAndroidAsync.ts:62:24)

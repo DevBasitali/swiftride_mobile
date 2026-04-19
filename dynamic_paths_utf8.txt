@@ -1,0 +1,4 @@
+﻿C:\Users\Basit Ali\.gradle\caches\8.14.3\transforms\0ba7f924bb3c819e5cc03eb8784e5872\transformed\react-android-0.81.5-debug\prefab\modules\reactnative\include\folly\dynamic-inl.h
+C:\Users\Basit Ali\.gradle\caches\8.14.3\transforms\0ba7f924bb3c819e5cc03eb8784e5872\transformed\react-android-0.81.5-debug\prefab\modules\reactnative\include\folly\json\dynamic-inl.h
+C:\Users\Basit Ali\.gradle\caches\8.14.3\transforms\cde4f30671f0a7da4501bd6540651233\transformed\react-android-0.81.5-debug\prefab\modules\reactnative\include\folly\dynamic-inl.h
+C:\Users\Basit Ali\.gradle\caches\8.14.3\transforms\cde4f30671f0a7da4501bd6540651233\transformed\react-android-0.81.5-debug\prefab\modules\reactnative\include\folly\json\dynamic-inl.h

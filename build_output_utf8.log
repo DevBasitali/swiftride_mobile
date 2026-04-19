@@ -1,0 +1,81 @@
+﻿
+> my-car-rental-app@1.0.0 android
+> expo run:android
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_SERVER_IP EXPO_PUBLIC_SERVER_PORT EXPO_PUBLIC_GOOGLE_MAPS_API_KEY EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID EXPO_PUBLIC_LOCATION_INTERVAL_MS EXPO_PUBLIC_LOCATION_DISTANCE_M
+ΓÇ║ Building app...
+Configuration on demand is an incubating feature.
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin FAILED
+node.exe : e: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/ex
+po-autolinking-settings-plugin/src/main/kotlin/expo/modules/plugin/SettingsManager.kt:24:28 Unresolved reference 
+'extensions'.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (e: file:///D:/P...e 'extensions'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+e: file:///D:/Projects/Swiftride/android/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolink
+ing-settings-plugin/src/main/kotlin/expo/modules/plugin/SettingsManager.kt:112:15 Unresolved reference 'extra'.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin'.
+> A failure occurred while executing 
+org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 3s
+11 actionable tasks: 1 executed, 10 up-to-date
+Error: D:\Projects\Swiftride\android\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand 
+--build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a exited with non-zero 
+code: 1
+Error: D:\Projects\Swiftride\android\android\gradlew.bat app:assembleDebug -x lint -x test --configure-on-demand 
+--build-cache -PreactNativeDevServerPort=8081 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a exited with non-zero 
+code: 1
+    at ChildProcess.completionListener 
+(D:\Projects\Swiftride\android\node_modules\@expo\spawn-async\src\spawnAsync.ts:67:13)
+    at Object.onceWrapper (node:events:631:12)
+    at ChildProcess.emit (node:events:509:20)
+    at ChildProcess.cp.emit (D:\Projects\Swiftride\android\node_modules\cross-spawn\lib\enoent.js:34:29)
+    at maybeClose (node:internal/child_process:1108:16)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:305:5)
+    ...
+    at spawnAsync (D:\Projects\Swiftride\android\node_modules\@expo\spawn-async\src\spawnAsync.ts:28:21)
+    at spawnGradleAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:134:28)
+    at assembleAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\start\platforms\android\gradle.ts:83:16)
+    at runAndroidAsync 
+(D:\Projects\Swiftride\android\node_modules\expo\node_modules\@expo\cli\src\run\android\runAndroidAsync.ts:62:24)

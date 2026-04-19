@@ -80,6 +80,7 @@ export default ({ config }) => {
       "expo-router",
       "expo-secure-store",
       "@react-native-google-signin/google-signin",
+      "@react-native-community/datetimepicker",
       "./plugins/withCleartextTraffic",
       [
         "expo-location",
