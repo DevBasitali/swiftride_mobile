@@ -71,27 +71,23 @@ export default function ForgotPassword() {
 
   const handleSubmit = async () => {
     if (!email) {
-      if (!email) {
-        showAlert({
-          title: "Error",
-          message: "Please enter your email address",
-          type: "error",
-        });
-        return;
-      }
+      showAlert({
+        title: "Error",
+        message: "Please enter your email address",
+        type: "error",
+      });
+      return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      if (!emailRegex.test(email)) {
-        showAlert({
-          title: "Error",
-          message: "Please enter a valid email address",
-          type: "error",
-        });
-        return;
-      }
+      showAlert({
+        title: "Error",
+        message: "Please enter a valid email address",
+        type: "error",
+      });
+      return;
     }
 
     setIsSubmitting(true);
@@ -99,8 +95,11 @@ export default function ForgotPassword() {
       await authService.forgotPassword(email);
       setEmailSent(true);
     } catch (error) {
-      // Don't reveal if email exists or not for security
-      setEmailSent(true);
+      showAlert({
+        title: "Error",
+        message: error.message || "Failed to send reset link. Please try again.",
+        type: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
