@@ -51,14 +51,23 @@ const GoogleLoginBtn = ({ role }) => { // Removed default
           const response = await googleLoginRequest(idToken, role, accessToken);
           const data = response.data || response;
 
-          if (data.requiresSignup) {
+          // Check all possible "no account" scenarios
+          if (
+            data.success === false ||
+            data.code === 400 ||
+            data.requiresSignup ||
+            (!data.token && !data.accessToken && !data.user)
+          ) {
             showAlert({
-              title: "Account Not Found",
-              message: "Please select an account type to register.",
+              title: "No Account Found",
+              message: "You don't have an account yet. Please register first to continue.",
               type: "info",
               buttons: [
                 { text: "Cancel", style: "cancel" },
-                { text: "Select Role", onPress: () => router.push("/role-select") }
+                {
+                  text: "Register",
+                  onPress: () => router.replace("/(auth)/register")
+                }
               ]
             });
             return;
@@ -69,24 +78,21 @@ const GoogleLoginBtn = ({ role }) => { // Removed default
 
           if (token && user) {
             await handleGoogleLogin(token, user);
-          } else {
-            showAlert({ title: "Login Error", message: "Invalid response.", type: "error" });
           }
 
         } catch (apiError) {
-          if (apiError.response?.status === 404 && apiError.response.data?.requiresSignup) {
-             showAlert({
-              title: "Account Not Found",
-              message: "Please select an account type to register.",
-              type: "info",
-              buttons: [
-                { text: "Cancel", style: "cancel" },
-                { text: "Select Role", onPress: () => router.push("/role-select") }
-              ]
-            });
-            return;
-          }
-          throw apiError;
+          showAlert({
+            title: "No Account Found",
+            message: "You don't have an account yet. Please register first to continue.",
+            type: "info",
+            buttons: [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Register",
+                onPress: () => router.replace("/(auth)/register")
+              }
+            ]
+          });
         }
       }
     } catch (error) {
