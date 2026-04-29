@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "64519527429-0kudvua4ut2vtik256j97ukpac6lcgm7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.swiftride.app",
+            "certificate_hash": "f9fa2fa16fa71c2b5adef8e4ff1b58794821503b"
+          }
+        },
+        {
           "client_id": "64519527429-ncfho14oh5d0pb9kmqjr4tconcuot7tv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

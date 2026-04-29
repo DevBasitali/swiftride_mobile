@@ -104,6 +104,9 @@ const GoogleLoginBtn = ({ role }) => { // Removed default
         // User backed out of the Google account picker — not an error
         console.log("User cancelled login");
       } else {
+        console.error("FULL_ERROR:", JSON.stringify(error), 
+"CODE:", error.code, 
+"MSG:", error.message);
         showAlert({
           title: "Login Failed",
           message: "Something went wrong while signing in with Google. Please try again.",
