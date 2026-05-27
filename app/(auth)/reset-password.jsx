@@ -82,47 +82,39 @@ export default function ResetPassword() {
 
   const handleSubmit = async () => {
     if (!token) {
-      if (!token) {
-        showAlert({
-          title: "Error",
-          message: "Please enter the reset token from your email",
-          type: "error",
-        });
-        return;
-      }
+      showAlert({
+        title: "Error",
+        message: "Please enter the reset token from your email",
+        type: "error",
+      });
+      return;
     }
 
     if (!password) {
-      if (!password) {
-        showAlert({
-          title: "Error",
-          message: "Please enter a new password",
-          type: "error",
-        });
-        return;
-      }
+      showAlert({
+        title: "Error",
+        message: "Please enter a new password",
+        type: "error",
+      });
+      return;
     }
 
     if (password.length < 6) {
-      if (password.length < 6) {
-        showAlert({
-          title: "Error",
-          message: "Password must be at least 6 characters",
-          type: "error",
-        });
-        return;
-      }
+      showAlert({
+        title: "Error",
+        message: "Password must be at least 6 characters",
+        type: "error",
+      });
+      return;
     }
 
     if (password !== confirmPassword) {
-      if (password !== confirmPassword) {
-        showAlert({
-          title: "Error",
-          message: "Passwords do not match",
-          type: "error",
-        });
-        return;
-      }
+      showAlert({
+        title: "Error",
+        message: "Passwords do not match",
+        type: "error",
+      });
+      return;
     }
 
     setIsSubmitting(true);
@@ -274,7 +266,7 @@ export default function ResetPassword() {
                   ]}
                 >
                   <Ionicons
-                    name="keypair-outline"
+                    name="key-outline"
                     size={20}
                     color={
                       focusedInput === "token"

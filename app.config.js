@@ -7,7 +7,7 @@ try {
 
 export default ({ config }) => {
   // Safe fallback if env variable is missing during local dev
-  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCaEPPHig-6whefFn6_wSLffBIMReWs5gg";
+  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCAh-7TnycjuKdhPAEiDU44lMWYogeYdHw";
 
   return {
     ...config,
@@ -80,6 +80,7 @@ export default ({ config }) => {
       "expo-router",
       "expo-secure-store",
       "@react-native-google-signin/google-signin",
+      "@react-native-community/datetimepicker",
       "./plugins/withCleartextTraffic",
       [
         "expo-location",
